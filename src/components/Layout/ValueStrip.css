@@ -1,0 +1,64 @@
+/* src/components/Layout/ValueStrip.css */
+
+.value-strip {
+  display: flex;
+  flex-direction: column; /* Vertical stack for mobile-first */
+  padding: 40px 20px;
+  background: var(--cream-warm);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.strip-item {
+  text-align: center;
+  padding: 30px 0; /* Vertical spacing */
+  position: relative; /* Needed to position the line */
+}
+
+/* Add the horizontal line using ::after */
+.strip-item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 15%; /* Adjust width of the line */
+  right: 15%;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Responsive adjustment for laptop row */
+@media (min-width: 768px) {
+  .value-strip {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .strip-item {
+    flex: 1;
+    border-right: 1px solid var(--line); /* Vertical lines for laptop */
+    padding: 20px;
+  }
+  
+  .strip-item:last-child {
+    border-right: none;
+  }
+  
+  /* Remove the horizontal lines on laptop */
+  .strip-item::after {
+    display: none;
+  }
+}
+
+.strip-item h3 {
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.strip-item p {
+  font-size: 12px;
+  color: var(--olive-mid);
+  line-height: 1.5;
+}

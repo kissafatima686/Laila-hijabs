@@ -1,0 +1,120 @@
+.shop-hijab-section {
+  padding: 36px 40px;
+  background-color: var(--cream);
+  overflow: hidden;
+  position: relative;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.shop-hijab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1380px;
+  margin: 0 auto 24px;
+}
+
+.shop-hijab-section h2 {
+  font-family: var(--sans);
+  font-size: 16px;
+  letter-spacing: 3px;
+  font-weight: 600;
+  color: var(--olive-deep);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.slider-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.slider-controls .slider-arrow {
+  background: var(--cream-warm);
+  border: 1px solid var(--line);
+  color: var(--olive-deep);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slider-controls .slider-arrow:hover {
+  background: var(--olive-deep);
+  color: var(--cream-warm);
+  border-color: var(--olive-deep);
+}
+
+.shop-hijab-viewport {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.shop-hijab-track {
+  display: flex;
+  gap: 20px;
+  will-change: transform;
+}
+
+.hijab-slider-item {
+  flex: 0 0 230px;
+  width: 230px;
+}
+
+/* Single full-width card per slide on mobile screens (No side peeking) */
+@media (max-width: 768px) {
+  .shop-hijab-section {
+    padding: 24px 16px;
+  }
+  
+  .shop-hijab-header {
+    margin-bottom: 16px;
+  }
+
+  .slider-controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .slider-controls .slider-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+  }
+  
+  .shop-hijab-viewport {
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 10px;
+  }
+
+  .shop-hijab-viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .shop-hijab-track {
+    display: flex;
+    gap: 0;
+    width: 100%;
+  }
+
+  .hijab-slider-item {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+    padding: 0 4px;
+  }
+}

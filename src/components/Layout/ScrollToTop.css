@@ -1,0 +1,46 @@
+/* Scroll to top button styles */
+.scroll-to-top {
+  position: fixed;
+  bottom: 96px;
+  right: 26px;
+  background-color: var(--olive-deep, #3E4930);
+  color: var(--cream, #F6F1E3);
+  border: 1px solid var(--gold, #B8935B);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  z-index: 1999;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background-color 0.2s ease;
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-to-top:hover {
+  background-color: var(--olive-mid, #5C6B44);
+  transform: scale(1.08);
+}
+
+.scroll-to-top:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .scroll-to-top {
+    bottom: 85px; /* Moved up to sit above WhatsApp float (20px + 50px height + 15px gap) */
+    right: 20px;
+    width: 42px;
+    height: 42px;
+  }
+}
