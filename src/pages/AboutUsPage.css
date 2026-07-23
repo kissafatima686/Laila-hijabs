@@ -71,12 +71,12 @@
 
 /* Journey Timeline */
 .timeline { max-width: 760px; margin: 0 auto; position: relative; padding-left: 36px; }
-.timeline::before { content: ''; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px; background: rgba(42,42,34,0.14); }
-.t-item { position: relative; margin-bottom: 40px; }
-.t-item::before { content: ''; position: absolute; left: -36px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: #B8935B; }
-.t-item .eyebrow { margin-bottom: 6px; display: block; }
-.t-item h4 { font-family: 'Fraunces', serif; font-weight: 450; font-size: 17px; color: #3E4930; margin-bottom: 6px; }
-.t-item p { font-size: 13.5px; line-height: 1.7; color: #5a5947; max-width: 520px; margin: 0; }
+.timeline::before { content: ''; position: absolute; left: 6px; top: 28px; bottom: 45px; width: 1px; background: rgba(42,42,34,0.14); }
+.t-item { position: relative; margin-bottom: 40px; text-align: center; }
+.t-item::before { content: ''; position: absolute; left: -36px; top: 26px; width: 11px; height: 11px; border-radius: 50%; background: #B8935B; }
+.t-item .eyebrow { margin-bottom: 6px; display: block; text-align: center; }
+.t-item h4 { font-family: 'Fraunces', serif; font-weight: 450; font-size: 17px; color: #3E4930; margin-bottom: 6px; text-align: center; }
+.t-item p { font-size: 13.5px; line-height: 1.7; color: #5a5947; max-width: 520px; margin: 0 auto; text-align: center; }
 
 /* Shop Visit / Trust Band */
 .shop-band { background: #EFE4CC; }
