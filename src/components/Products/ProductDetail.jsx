@@ -285,6 +285,7 @@ const ProductDetail = () => {
   const [wishlistToast, setWishlistToast] = useState(false);
 
   React.useEffect(() => {
+    window.scrollTo(0, 0);
     if (product) {
       setActiveImage(product.image || product.mainImage || "/hero2.png");
       setSelectedColor(product.color || "Yellow");

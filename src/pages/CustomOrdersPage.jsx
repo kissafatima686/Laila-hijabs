@@ -10,8 +10,36 @@ const CustomOrdersPage = () => {
   const [phone, setPhone] = useState('');
   const [garmentType, setGarmentType] = useState('Abaya');
   const [size, setSize] = useState('M');
+  const [color, setColor] = useState('');
+  const [fabricType, setFabricType] = useState('Nida Crepe');
+  const [measurements, setMeasurements] = useState({
+    chest: '',
+    hips: '',
+    shoulders: '',
+    waist: '',
+    length: '',
+    width: ''
+  });
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
+
+  const fabricOptions = [
+    "Nida Crepe",
+    "Chiffon",
+    "Linen Blend",
+    "Silk Satin",
+    "Modal Jersey",
+    "Cotton Blend Poplin",
+    "Georgette",
+    "Velvet",
+    "Organza"
+  ];
+
+  const numberSizes = Array.from({ length: 41 }, (_, i) => i + 20); // 20 to 60
+
+  const handleMeasurementChange = (part, val) => {
+    setMeasurements(prev => ({ ...prev, [part]: val }));
+  };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -29,7 +57,22 @@ const CustomOrdersPage = () => {
     message += `*Customer:* ${name || 'N/A'}\n`;
     message += `*WhatsApp:* ${phone || 'N/A'}\n`;
     message += `*Garment Type:* ${garmentType}\n`;
-    message += `*Size:* ${size}\n`;
+    message += `*Fabric Type:* ${fabricType}\n`;
+    message += `*Color:* ${color || 'N/A'}\n`;
+    message += `*Standard Size:* ${size}\n\n`;
+    
+    const hasMeasurements = Object.values(measurements).some(val => val !== '');
+    if (hasMeasurements) {
+      message += `*CUSTOM MEASUREMENTS (in inches):*\n`;
+      if (measurements.chest) message += `▪ Chest: ${measurements.chest}"\n`;
+      if (measurements.hips) message += `▪ Hips: ${measurements.hips}"\n`;
+      if (measurements.shoulders) message += `▪ Shoulders: ${measurements.shoulders}"\n`;
+      if (measurements.waist) message += `▪ Waist: ${measurements.waist}"\n`;
+      if (measurements.length) message += `▪ Length: ${measurements.length}"\n`;
+      if (measurements.width) message += `▪ Width: ${measurements.width}"\n`;
+      message += `\n`;
+    }
+
     if (description) message += `*Description:* ${description}\n\n`;
     if (file) message += `*Reference Image:* ${file.name} (Ready to send)\n\n`;
     message += `Please let me know how to proceed. Thank you!`;
@@ -94,11 +137,21 @@ const CustomOrdersPage = () => {
           </div>
           <div className="steps">
             {steps.map((step, idx) => (
-              <div className="step-card" key={idx}>
-                <div className="step-num">{step.num}</div>
-                <h4>{step.title}</h4>
-                <p>{step.desc}</p>
-              </div>
+              <React.Fragment key={idx}>
+                <div className="step-card">
+                  <div className="step-num">{step.num}</div>
+                  <h4>{step.title}</h4>
+                  <p>{step.desc}</p>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div className="step-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
         </section>
@@ -128,8 +181,8 @@ const CustomOrdersPage = () => {
             <p>The more detail you share, the closer we get to your vision on the first try. Once submitted, you can also continue the conversation directly on WhatsApp.</p>
             <ul>
               <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> No design fee for the first consultation</li>
-              <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Available in sizes XS â€“ XXL</li>
-              <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Typical turnaround: 7â€“12 days</li>
+              <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Available in sizes XS – XXL</li>
+              <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> Typical turnaround: 7–12 days</li>
             </ul>
           </div>
 
@@ -179,6 +232,60 @@ const CustomOrdersPage = () => {
                 >
                   <option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>Fabric Type *</label>
+                <select 
+                  value={fabricType}
+                  onChange={(e) => setFabricType(e.target.value)}
+                  required
+                >
+                  {fabricOptions.map((fab, idx) => (
+                    <option key={idx} value={fab}>{fab}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Color *</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Olive Green, Dusty Rose, Black" 
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Custom Measurements Section */}
+            <div className="form-field measurements-section">
+              <label className="measurements-label">Custom Measurements (Optional in Inches)</label>
+              <div className="measurements-grid">
+                {[
+                  { key: 'chest', label: 'Chest' },
+                  { key: 'hips', label: 'Hips' },
+                  { key: 'shoulders', label: 'Shoulders' },
+                  { key: 'waist', label: 'Waist' },
+                  { key: 'length', label: 'Length' },
+                  { key: 'width', label: 'Width' }
+                ].map((item) => (
+                  <div key={item.key} className="measurement-btn-box">
+                    <span className="measurement-btn-label">{item.label}</span>
+                    <select 
+                      value={measurements[item.key]} 
+                      onChange={(e) => handleMeasurementChange(item.key, e.target.value)}
+                      className="measurement-select"
+                    >
+                      <option value="">Select</option>
+                      {numberSizes.map((num) => (
+                        <option key={num} value={num}>{num}"</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="form-field">

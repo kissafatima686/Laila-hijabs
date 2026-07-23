@@ -71,7 +71,7 @@ const WishlistPage = () => {
             ))}
           </div>
           <div className="wishlist-footer-actions" style={{ textAlign: 'center', marginTop: '40px', paddingBottom: '40px' }}>
-            <Link to="/categories" style={{ textDecoration: 'none' }}>
+            <Link to="/categories" style={{ textDecoration: 'none' }} onClick={() => window.scrollTo(0, 0)}>
               <button className="continue-shopping-btn-main" style={{ backgroundColor: '#3E4930', color: '#fff', border: 'none', padding: '14px 36px', fontSize: '13px', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '2px' }}>
                 CONTINUE SHOPPING
               </button>

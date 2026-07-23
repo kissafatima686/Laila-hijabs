@@ -147,7 +147,7 @@ const PaymentPage = () => {
         className="home-btn" 
         style={{ textDecoration: 'none', width: '100%', display: 'inline-block', textAlign: 'center', boxSizing: 'border-box' }}
       >
-        Return to Shop
+        Return to Home
       </Link>
     </div>
   </div>

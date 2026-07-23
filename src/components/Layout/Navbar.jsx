@@ -222,7 +222,7 @@ const Navbar = () => {
             <li><NavLink to="/custom-orders" className={({ isActive }) => isActive ? 'active' : ''}>Custom Design Orders</NavLink></li>
             <li><NavLink to="/blogs" className={({ isActive }) => isActive ? 'active' : ''}>Blogs</NavLink></li>
             <li><NavLink to="/affiliate" className={({ isActive }) => isActive ? 'active' : ''}>Affiliate Program</NavLink></li>
-             <li><NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''}>About Us</NavLink></li>
+            <li><NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''}>About Us</NavLink></li>
           </ul>
 
           {/* Right Action Icons */}
@@ -379,9 +379,9 @@ const Navbar = () => {
           </li>
           <li><NavLink to="/categories" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Categories</NavLink></li>
           <li><NavLink to="/custom-orders" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Custom Design Orders</NavLink></li>
-          <li><NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>About Us</NavLink></li>
           <li><NavLink to="/blogs" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Blogs</NavLink></li>
           <li><NavLink to="/affiliate" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Affiliate Program</NavLink></li>
+          <li><NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>About Us</NavLink></li>
         </ul>
       </div>
     </div>

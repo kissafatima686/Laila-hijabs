@@ -19,6 +19,13 @@
   padding-right: 40px;
 }
 
+.social-handling-title-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
 .social-handling-header h2 {
   font-family: 'Jost', sans-serif;
   font-size: 13px;
@@ -27,6 +34,26 @@
   color: #333;
   margin: 0;
   text-transform: uppercase;
+}
+
+.social-handling-header .social-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.social-handling-header .social-icons a {
+  color: #3E4930;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.social-handling-header .social-icons a:hover {
+  opacity: 0.75;
+  transform: translateY(-2px);
 }
 
 /* Container for positioning floating arrow */

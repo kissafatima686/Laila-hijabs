@@ -78,7 +78,7 @@ const CartPage = () => {
             ))}
             
             <div style={{ textAlign: 'left', marginTop: '20px' }}>
-              <Link to="/categories" style={{ textDecoration: 'none' }}>
+              <Link to="/categories" style={{ textDecoration: 'none' }} onClick={() => window.scrollTo(0, 0)}>
                 <button style={{ background: '#eae7dc', border: '1px solid #ccc', color: '#333', padding: '10px 20px', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '2px' }}>
                   ← CONTINUE SHOPPING
                 </button>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import './Footer.css';
 
 const Footer = () => {
@@ -19,9 +19,9 @@ const Footer = () => {
             <h4>Delivery & Returns</h4>
             <ul>
              <li><Link to="/free-shipping">Free shipping for orders over £120</Link></li>
-<li><Link to="/shipping-info">Shipping information</Link></li>
-<li><Link to="/delivery">Delivery</Link></li>
-<li><Link to="/returns-exchanges">Returns & Exchanges</Link></li>
+              <li><Link to="/shipping-info">Shipping information</Link></li>
+              <li><Link to="/delivery">Delivery</Link></li>
+              <li><Link to="/returns-exchanges">Returns & Exchanges</Link></li>
             </ul>
           </div>
 
@@ -70,6 +70,7 @@ const Footer = () => {
               <a href="https://www.facebook.com/thelailahijab/?rdid=bXKFISlW0hph3zh4" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebookF /></a>
               <a href="https://www.instagram.com/the_lailahijabs/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
               <a href="https://www.tiktok.com/@the_lailahijabs?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><FaTiktok /></a>
+              <a href="https://wa.me/923238399480" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Channel"><FaWhatsapp /></a>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import './CartDrawer.css';
 
@@ -35,9 +36,11 @@ const CartDrawer = () => {
             <div className="empty-cart-icon">🛍️</div>
             <p className="empty-cart-title">Your cart is empty</p>
             <p className="empty-cart-sub">Add some elegant hijabs to get started!</p>
-            <button className="shop-now-btn" onClick={() => setIsCartOpen(false)}>
-              Continue Shopping
-            </button>
+            <Link to="/categories" style={{ textDecoration: 'none' }} onClick={() => { setIsCartOpen(false); window.scrollTo(0, 0); }}>
+              <button className="shop-now-btn">
+                Continue Shopping
+              </button>
+            </Link>
           </div>
         ) : (
           <>

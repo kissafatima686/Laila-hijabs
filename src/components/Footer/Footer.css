@@ -59,6 +59,18 @@
 
 .follow-title { font-size: 12px; margin: 10px 0; letter-spacing: 0.1em; }
 .social-icons { display: flex; justify-content: center; gap: 15px; }
+.social-icons a {
+  color: #3E4930;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.social-icons a:hover {
+  opacity: 0.75;
+  transform: translateY(-2px);
+}
 
 /* Copyright Line */
 .footer-copyright {
@@ -81,11 +93,20 @@
 .footer-link:hover {
   text-decoration: underline;
 }
-/* Desktop: 5 Columns */
+/* Desktop: 5 Columns spaced out evenly */
 @media (min-width: 900px) {
   .footer-grid {
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
     text-align: left;
+  }
+  .footer-col {
+    flex: 0 1 auto;
+  }
+  .footer-col:last-child {
+    max-width: 280px;
   }
   .social-icons { justify-content: flex-start; }
 }
