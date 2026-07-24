@@ -127,11 +127,16 @@ a:hover,
 .location-hero-content,
 .journal-hero,
 .cats-header,
-.review-banner,
 .banner,
 .banner-copy,
 .banner-content {
   text-align: left !important;
+}
+
+/* Review Banner Center Alignment */
+.review-banner {
+  text-align: center !important;
+  justify-content: center !important;
 }
 
 /* Typography */

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import './ShopByCategory.css';
@@ -49,45 +49,49 @@ const collections = [
 ];
 
 const ShopByCategory = () => {
-  const viewportRef = useRef(null);
+  const displayCollections = [...collections, ...collections, ...collections];
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [noTransition, setNoTransition] = useState(false);
+
+  const totalOriginal = collections.length;
 
   const nextSlide = () => {
-    if (viewportRef.current) {
-      const cardItem = viewportRef.current.querySelector('.home-category-card-item');
-      const step = cardItem ? cardItem.offsetWidth + 24 : 320;
-      const maxScroll = viewportRef.current.scrollWidth - viewportRef.current.clientWidth;
-      
-      if (viewportRef.current.scrollLeft >= maxScroll - 10) {
-        viewportRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        viewportRef.current.scrollBy({ left: step, behavior: 'smooth' });
-      }
+    if (currentIndex >= totalOriginal) {
+      setNoTransition(true);
+      setCurrentIndex(0);
+      setTimeout(() => {
+        setNoTransition(false);
+        setCurrentIndex(1);
+      }, 20);
+    } else {
+      setNoTransition(false);
+      setCurrentIndex(prev => prev + 1);
     }
   };
 
   const prevSlide = () => {
-    if (viewportRef.current) {
-      const cardItem = viewportRef.current.querySelector('.home-category-card-item');
-      const step = cardItem ? cardItem.offsetWidth + 24 : 320;
-      
-      if (viewportRef.current.scrollLeft <= 5) {
-        viewportRef.current.scrollTo({ left: viewportRef.current.scrollWidth, behavior: 'smooth' });
-      } else {
-        viewportRef.current.scrollBy({ left: -step, behavior: 'smooth' });
-      }
+    if (currentIndex <= 0) {
+      setNoTransition(true);
+      setCurrentIndex(totalOriginal);
+      setTimeout(() => {
+        setNoTransition(false);
+        setCurrentIndex(totalOriginal - 1);
+      }, 20);
+    } else {
+      setNoTransition(false);
+      setCurrentIndex(prev => prev - 1);
     }
   };
 
-  // Auto-play self moving slider effect
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
       nextSlide();
-    }, 1000);
+    }, 2500);
 
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, currentIndex]);
 
   return (
     <section 
@@ -107,9 +111,15 @@ const ShopByCategory = () => {
         </div>
       </div>
 
-      <div className="home-category-viewport" ref={viewportRef}>
-        <div className="home-category-track">
-          {collections.concat(collections).map((cat, index) => (
+      <div className="home-category-viewport">
+        <div 
+          className="home-category-track"
+          style={{
+            transform: `translateX(-${currentIndex * 320}px)`,
+            transition: noTransition ? 'none' : 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+          }}
+        >
+          {displayCollections.map((cat, index) => (
             <div className="home-category-card-item" key={index}>
               <Link to={cat.path} className="home-cat-card">
                 <img src={cat.image} alt={cat.title} />

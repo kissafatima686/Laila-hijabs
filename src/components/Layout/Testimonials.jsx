@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './Testimonials.css';
 import { FaStar, FaCheckCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
@@ -32,41 +32,38 @@ const reviewsData = [
 ];
 
 const Testimonials = () => {
+  const displayReviews = [...reviewsData, ...reviewsData, ...reviewsData];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const viewportRef = useRef(null);
+  const [noTransition, setNoTransition] = useState(false);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const totalOriginal = reviewsData.length;
 
   const handleNext = () => {
-    if (viewportRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = viewportRef.current;
-      const scrollAmount = isMobile ? clientWidth : 340; // 320px card + 20px gap
-      if (scrollLeft + clientWidth >= scrollWidth - 10) {
-        viewportRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        viewportRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      }
+    if (currentIndex >= totalOriginal) {
+      setNoTransition(true);
+      setCurrentIndex(0);
+      setTimeout(() => {
+        setNoTransition(false);
+        setCurrentIndex(1);
+      }, 20);
+    } else {
+      setNoTransition(false);
+      setCurrentIndex(prev => prev + 1);
     }
   };
 
   const handlePrev = () => {
-    if (viewportRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = viewportRef.current;
-      const scrollAmount = isMobile ? clientWidth : 340;
-      if (scrollLeft <= 10) {
-        viewportRef.current.scrollTo({ left: scrollWidth, behavior: 'smooth' });
-      } else {
-        viewportRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-      }
+    if (currentIndex <= 0) {
+      setNoTransition(true);
+      setCurrentIndex(totalOriginal);
+      setTimeout(() => {
+        setNoTransition(false);
+        setCurrentIndex(totalOriginal - 1);
+      }, 20);
+    } else {
+      setNoTransition(false);
+      setCurrentIndex(prev => prev - 1);
     }
   };
 
@@ -74,10 +71,10 @@ const Testimonials = () => {
     if (isPaused) return;
     const interval = setInterval(() => {
       handleNext();
-    }, 1000);
+    }, 2500);
 
     return () => clearInterval(interval);
-  }, [isPaused, isMobile]);
+  }, [isPaused, currentIndex]);
 
   return (
     <section 
@@ -102,9 +99,15 @@ const Testimonials = () => {
             <FaChevronLeft />
           </button>
 
-          <div className="slider-viewport" ref={viewportRef}>
-            <div className="slider-track">
-              {reviewsData.concat(reviewsData).concat(reviewsData).map((r, i) => (
+          <div className="slider-viewport">
+            <div 
+              className="slider-track"
+              style={{
+                transform: `translateX(-${currentIndex * 340}px)`,
+                transition: noTransition ? 'none' : 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+              }}
+            >
+              {displayReviews.map((r, i) => (
                 <div key={i} className="testimonial-card">
                   <div className="testimonial-header">
                     <div>
@@ -126,9 +129,10 @@ const Testimonials = () => {
                         <img src={r.image} alt="Purchased item" />
                       </div>
                     )}
-                    <span className="testimonial-date">
-                      {r.location ? `${r.location}, ` : ''}{r.date}
-                    </span>
+                    <div className="review-meta">
+                      {r.location && <span className="reviewer-location">{r.location}</span>}
+                      <span className="review-date">{r.date}</span>
+                    </div>
                   </div>
                 </div>
               ))}

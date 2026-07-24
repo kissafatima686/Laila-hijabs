@@ -53,7 +53,15 @@
   width: 100%;
   max-width: 1380px;
   margin: 0 auto;
-  overflow: hidden;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 10px;
+}
+
+.trending-slider-viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .trending-slider-track {

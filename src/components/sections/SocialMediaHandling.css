@@ -22,8 +22,10 @@
 .social-handling-title-group {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 20px;
   flex-wrap: wrap;
+  text-align: left;
 }
 
 .social-handling-header h2 {
