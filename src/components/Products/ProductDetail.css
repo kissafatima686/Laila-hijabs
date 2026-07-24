@@ -1175,6 +1175,10 @@ background: #ffffff !important;
     gap: 32px;
   }
 
+  .right-info-column {
+    padding-left: 0 !important;
+  }
+
   .how-we-do-it-section {
     padding: 36px 0; /* Removing side padding for full-bleed slider */
   }

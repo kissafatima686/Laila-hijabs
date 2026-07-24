@@ -4,15 +4,15 @@
   position: fixed !important;
   bottom: 28px !important;
   right: 28px !important;
-  z-index: 999999 !important;
-  width: 58px !important;
-  height: 58px !important;
+  z-index: 9999999 !important;
+  width: 60px !important;
+  height: 60px !important;
   border-radius: 50% !important;
-  background: #25D366 !important; /* Official WhatsApp Green */
+  background: #25D366 !important; /* Official Bright WhatsApp Green */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35) !important;
   cursor: pointer !important;
   transition: transform 0.3s ease, background-color 0.3s ease !important;
   text-decoration: none !important;
@@ -20,14 +20,14 @@
 
 .global-wa-float:hover,
 .wa-float:hover {
-  transform: scale(1.1) translateY(-2px) !important;
+  transform: scale(1.12) translateY(-3px) !important;
   background: #128C7E !important;
 }
 
 .global-wa-float svg,
 .wa-float svg {
-  width: 32px !important;
-  height: 32px !important;
+  width: 34px !important;
+  height: 34px !important;
   fill: #ffffff !important;
 }
 
@@ -36,12 +36,12 @@
   .wa-float {
     bottom: 20px !important;
     right: 20px !important;
-    width: 52px !important;
-    height: 52px !important;
+    width: 54px !important;
+    height: 54px !important;
   }
   .global-wa-float svg,
   .wa-float svg {
-    width: 28px !important;
-    height: 28px !important;
+    width: 30px !important;
+    height: 30px !important;
   }
 }

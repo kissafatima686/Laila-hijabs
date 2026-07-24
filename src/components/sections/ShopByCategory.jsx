@@ -53,8 +53,16 @@ const ShopByCategory = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [noTransition, setNoTransition] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const totalOriginal = collections.length;
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const nextSlide = () => {
     if (currentIndex >= totalOriginal) {
@@ -115,7 +123,7 @@ const ShopByCategory = () => {
         <div 
           className="home-category-track"
           style={{
-            transform: `translateX(-${currentIndex * 320}px)`,
+            transform: isMobile ? `translateX(-${currentIndex * 100}%)` : `translateX(-${currentIndex * 320}px)`,
             transition: noTransition ? 'none' : 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
           }}
         >

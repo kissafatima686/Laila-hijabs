@@ -204,9 +204,23 @@
     font-size: 12px;
   }
 
+  .home-category-viewport {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .home-category-track {
+    display: flex;
+    gap: 0;
+    width: 100%;
+  }
+
   .home-category-card-item {
-    flex: 0 0 calc(100vw - 32px);
-    width: calc(100vw - 32px);
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
+    padding: 0 2px;
   }
 }

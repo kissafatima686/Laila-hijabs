@@ -98,15 +98,7 @@
   
   .trending-slider-viewport {
     width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding-bottom: 10px;
-  }
-
-  .trending-slider-viewport::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
 
   .trending-slider-track {
@@ -120,8 +112,7 @@
     width: 100%;
     min-width: 100%;
     max-width: 100%;
-    scroll-snap-align: start;
     box-sizing: border-box;
-    padding: 0 4px;
+    padding: 0 2px;
   }
 }

@@ -259,14 +259,7 @@
 
   .slider-viewport {
     width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .slider-viewport::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
 
   .slider-track {
@@ -282,7 +275,5 @@
     max-width: 100% !important;
     box-sizing: border-box;
     padding: 20px 16px;
-    scroll-snap-align: start;
-    background: #ffffff !important;
   }
 }
