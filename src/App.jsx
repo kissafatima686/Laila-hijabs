@@ -8,7 +8,7 @@ import CategoriesPage from './pages/CategoriesPage';
 import CustomOrdersPage from './pages/CustomOrdersPage';
 import AboutUsPage from './pages/AboutUsPage';
 import BlogsPage from './pages/BlogsPage'; // 1. Import the new page
-import AffiliatePage from './pages/AffiliatePage'; // 1. Import the new page
+import AffiliatePage from './pages/Affiliatepage'; // 1. Import the new page
 import SizeGuide from './pages/SizeGuide';
 import TermsConditions from './components/Footer/TermsConditions';
 import PrivacyPolicy from './components/Footer/PrivacyPolicy';
@@ -28,7 +28,7 @@ import Delivery from "./components/Footer/DeliverynReturn/Delivery";
 import ReturnsExchanges from "./components/Footer/DeliverynReturn/ReturnsExchanges";
 import ProductDetail from "./components/Products/ProductDetail";
 import CartPage from "./pages/CartPage";
-import CheckoutPage from "./pages/CheckoutPage";
+import CheckoutPage from "./pages/CheckOutPage";
 import PaymentPage from "./pages/PaymentPage";
 import WishlistPage from "./pages/WishlistPage";
 import AccountPage from "./pages/AccountPage";
