@@ -79,7 +79,10 @@ const AccountPage = () => {
         email: regEmail,
         phone: "+92 323 8399480"
       });
-      setIsLoggedIn(true);
+      // After signing up, switch tab to Sign In form so the user logs in
+      setIsRegister(false);
+      setLoginEmail(regEmail);
+      alert("Registration successful! Please Sign In with your credentials.");
     }
   };
 
