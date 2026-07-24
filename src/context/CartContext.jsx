@@ -22,6 +22,16 @@ export const CartProvider = ({ children }) => {
   });
   
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showCartPopup, setShowCartPopup] = useState(false);
+
+  useEffect(() => {
+    if (showCartPopup) {
+      const timer = setTimeout(() => {
+        setShowCartPopup(false);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [showCartPopup]);
 
   useEffect(() => {
     localStorage.setItem('laila_hijabs_cart', JSON.stringify(cartItems));
@@ -41,6 +51,7 @@ export const CartProvider = ({ children }) => {
       }
       return [...prevItems, { ...product, quantity: 1, size: product.size || "M", color: product.color || "Olive" }];
     });
+    setShowCartPopup(true);
   };
 
   const removeFromCart = (productId) => {
@@ -120,6 +131,8 @@ export const CartProvider = ({ children }) => {
         moveToWishlist,
         cartCount,
         cartTotal,
+        showCartPopup,
+        setShowCartPopup,
       }}
     >
       {children}

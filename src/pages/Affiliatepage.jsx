@@ -41,17 +41,10 @@ const AffiliatePage = () => {
     { num: "02", title: "Share Your Link", desc: "Get a unique referral link and discount code to share on your stories, posts, or with friends directly." },
     { num: "03", title: "Earn on Every Order", desc: "Track your clicks and orders in real time, and receive your commission automatically each month." }
   ];
-
-  const tiers = [
-    { name: "Starter", title: "New Affiliate", rate: "10%", desc: "Every approved affiliate starts here â€” commission on all orders placed through your link.", featured: false },
-    { name: "Growth", title: "10+ Orders / Month", rate: "15%", desc: "Unlocked automatically once you cross 10 successful referred orders in a month.", featured: true, badge: "Most Popular" },
-    { name: "Studio Partner", title: "25+ Orders / Month", rate: "20%", desc: "Our top affiliates â€” with early access to new collections and personal styling support.", featured: false }
-  ];
-
   const faqs = [
-    { question: "Do I need a large following to join?", answer: "No â€” we welcome everyday customers who love the brand just as much as influencers. Your commission is based on results, not follower count." },
+    { question: "Do I need a large following to join?", answer: "No — we welcome everyday customers who love the brand just as much as influencers. Your commission is based on results, not follower count." },
     { question: "How and when do I get paid?", answer: "Commissions are calculated monthly and paid via bank transfer or JazzCash, once your referred orders are confirmed and delivered." },
-    { question: "Is there a minimum payout amount?", answer: "Yes, a small minimum threshold applies before payout is processed â€” full details are shared once you're approved." },
+    { question: "Is there a minimum payout amount?", answer: "Yes, a small minimum threshold applies before payout is processed — full details are shared once you're approved." },
     { question: "Can I use my own discount code?", answer: "Yes, every approved affiliate receives a personal discount code their audience can use, which also tracks your referrals automatically." }
   ];
 
@@ -77,7 +70,6 @@ const AffiliatePage = () => {
             </div>
             <div className="aff-hero-img">
               <div className="v1"><img src="/hero2.png" alt="Laila Hijab affiliate" /></div>
-               {/* <div className="v2"><img src="/hero2.png" alt="Fabric detail" /></div> */} 
             </div>
           </div>
         </section>
@@ -106,25 +98,6 @@ const AffiliatePage = () => {
                 <div className="step-num">{step.num}</div>
                 <h4>{step.title}</h4>
                 <p>{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Commission Tiers */}
-        <section style={{ paddingTop: 0 }}>
-          <div className="section-head">
-            <span className="eyebrow">Commission Tiers</span>
-            <h2>The more you share, the more you earn</h2>
-          </div>
-          <div className="tiers">
-            {tiers.map((tier, idx) => (
-              <div className={`tier-card ${tier.featured ? 'featured' : ''}`} key={idx}>
-                {tier.badge && <div className="tier-badge">{tier.badge}</div>}
-                <span className="eyebrow">{tier.name}</span>
-                <h3>{tier.title}</h3>
-                <div className="tier-rate">{tier.rate}</div>
-                <p>{tier.desc}</p>
               </div>
             ))}
           </div>

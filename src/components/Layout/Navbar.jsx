@@ -13,7 +13,7 @@ import {
 import './Navbar.css';
 
 const Navbar = () => {
-  const { cartCount, wishlistItems } = useContext(CartContext);
+  const { cartCount, wishlistItems, showCartPopup, setShowCartPopup } = useContext(CartContext);
   const wishlistCount = wishlistItems ? wishlistItems.length : 0;
 
   const location = useLocation();
@@ -286,15 +286,23 @@ const Navbar = () => {
               {wishlistCount > 0 && <span className="nav-icon-badge">{wishlistCount}</span>}
             </Link>
             
-            <Link 
-              to="/cart" 
-              className="icon-btn nav-icon-wrapper" 
-              aria-label="Cart"
-              style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center', position: 'relative' }}
-            >
-              <IoCartOutline size={22} />
-              {cartCount > 0 && <span className="nav-icon-badge">{cartCount}</span>}
-            </Link>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+              <Link 
+                to="/cart" 
+                className="icon-btn nav-icon-wrapper" 
+                aria-label="Cart"
+                style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center', position: 'relative' }}
+                onClick={() => setShowCartPopup && setShowCartPopup(false)}
+              >
+                <IoCartOutline size={22} />
+                {cartCount > 0 && <span className="nav-icon-badge">{cartCount}</span>}
+              </Link>
+              {showCartPopup && (
+                <span className="blinking-oval-badge" style={{ marginLeft: '2px', whiteSpace: 'nowrap' }}>
+                  New
+                </span>
+              )}
+            </div>
           </div>
         </nav>
 
@@ -393,6 +401,11 @@ const Navbar = () => {
               {cartCount > 0 && <span className="nav-icon-badge mini">{cartCount}</span>}
             </div>
             <span>Cart</span>
+            {showCartPopup && (
+              <span className="blinking-oval-badge" style={{ marginLeft: '4px' }}>
+                Added to Cart 
+              </span>
+            )}
           </Link>
         </div>
 

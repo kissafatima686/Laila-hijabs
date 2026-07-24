@@ -9,12 +9,15 @@
   background-size: cover;
   background-position: center;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  padding: 0 10%;
+  text-align: left;
 }
 
 .hero-text {
   color: white;
   font-size: 3rem;
   font-family: serif;
+  text-align: left;
 }

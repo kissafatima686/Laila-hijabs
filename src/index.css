@@ -101,11 +101,37 @@ a:hover,
   width: 100%;       /* Changed from max-width: 1180px */
   max-width: 100%;   /* Ensures it fills the screen */
   margin: 0;
-  text-align: center;
+  text-align: left;
   border-inline: none; /* Removes the side borders */
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+}
+
+/* All Hero & Promo Banner Left Alignment */
+.hero-banner,
+.hero-content,
+.hero-copy,
+.hero-text,
+.offer-hero,
+.offer-hero-copy,
+.cat-hero,
+.cat-hero-copy,
+.about-hero,
+.about-hero-copy,
+.aff-hero,
+.aff-hero-copy,
+.cd-hero,
+.cd-hero-copy,
+.location-hero,
+.location-hero-content,
+.journal-hero,
+.cats-header,
+.review-banner,
+.banner,
+.banner-copy,
+.banner-content {
+  text-align: left !important;
 }
 
 /* Typography */

@@ -38,7 +38,7 @@
 .blogs-page-wrapper .crumb span { margin: 0 8px; color: #b3b19a; }
 
 /* Journal Hero */
-.journal-hero { text-align: center; padding: 40px 0 50px; max-width: 600px; margin: 0 auto; }
+.journal-hero { text-align: left; padding: 40px 0 50px; max-width: 600px; margin: 0; }
 .journal-hero h1 { font-size: clamp(32px, 4vw, 46px); margin-top: 14px; }
 .journal-hero p { margin-top: 16px; font-size: 15px; color: #5a5947; line-height: 1.75; }
 

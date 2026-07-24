@@ -34,6 +34,7 @@ import WishlistPage from "./pages/WishlistPage";
 import AccountPage from "./pages/AccountPage";
 import BlogDetailPage from "./pages/BlogDetailPage";
 import ProductGalleryPage from "./pages/ProductGalleryPage";
+import LocationDetailPage from "./pages/LocationDetailPage";
 import { CartProvider } from './context/CartContext';
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
           <Route path="/our-story" element={<OurStory />} />
           <Route path="/loyalty" element={<Loyalty />} />
           <Route path="/visit-us" element={<VisitUs />} />
+          <Route path="/location/:id" element={<LocationDetailPage />} />
           <Route path="/careers" element={<Careers />} /> 
           <Route path="/journal" element={<Journal />} />  
           <Route path="/affiliate-program" element={<AffiliateProgram />} />
@@ -71,7 +73,6 @@ function App() {
           <Route path="/Products/:slug" element={<ProductDetail />} />
           <Route path="/Products/:slug/gallery" element={<ProductGalleryPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />

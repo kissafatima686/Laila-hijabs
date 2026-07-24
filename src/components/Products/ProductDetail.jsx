@@ -281,6 +281,51 @@ const ProductDetail = () => {
   // How We Do It Modal state
   const [activePillar, setActivePillar] = useState(null);
 
+  const [categoryItems, setCategoryItems] = useState(() => {
+    const curColor = product ? (product.color || "Olive Green") : "Olive Green";
+    const curFabric = product ? (product.material || product.fabric || "Nida Crepe") : "Nida Crepe";
+
+    return [
+      { id: 'cat-abaya', garmentType: 'Abaya', size: 'S', fabricType: curFabric, customColor: curColor },
+      { id: 'cat-scarf', garmentType: 'Scarf / Hijab', size: 'Free Size', fabricType: 'Georgette Chiffon', customColor: curColor },
+      { id: 'cat-coord', garmentType: 'Co-Ord Set', size: 'S', fabricType: 'Cotton Blend Poplin', customColor: curColor },
+      { id: 'cat-irani', garmentType: 'Irani Chadar', size: 'S', fabricType: 'Lightweight Nida Fabric', customColor: curColor },
+      { id: 'cat-jilbab', garmentType: 'Jilbab', size: 'S', fabricType: 'Soft Nida Silk Blend', customColor: curColor },
+      { id: 'cat-namaz', garmentType: 'Namaz Chadar', size: 'S', fabricType: '100% Soft Cotton', customColor: curColor },
+      { id: 'cat-round', garmentType: 'Round Chadar', size: 'S', fabricType: 'Premium Nida Fabric', customColor: curColor }
+    ];
+  });
+
+  const [openCategoryAccordions, setOpenCategoryAccordions] = useState({});
+
+  const toggleCategoryAccordion = (id) => {
+    setOpenCategoryAccordions(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const updateCategoryItem = (id, field, value) => {
+    setCategoryItems(prev => prev.map(item => {
+      if (item.id === id) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    }));
+  };
+
+  const updateItemMeasurement = (id, mKey, mVal) => {
+    setCategoryItems(prev => prev.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          measurements: { ...item.measurements, [mKey]: mVal }
+        };
+      }
+      return item;
+    }));
+  };
+
   // Toast feedback state
   const [wishlistToast, setWishlistToast] = useState(false);
 
@@ -329,7 +374,12 @@ const ProductDetail = () => {
   };
 
   const handleAddToBag = () => {
-    addToCart({ ...product, size: selectedSize, color: selectedColor });
+    addToCart({ 
+      ...product, 
+      size: selectedSize, 
+      color: selectedColor, 
+      categoryItems 
+    });
   };
 
   const handleToggleWishlist = () => {
@@ -346,6 +396,19 @@ const ProductDetail = () => {
     { name: product.color || "Yellow", hex: "#E5C158" },
     { name: "Nude", hex: "#C8A88B" }
   ];
+
+  const getProductFabric = (prod) => {
+    if (prod.material) return prod.material;
+    if (prod.fabric) return prod.fabric;
+    const cat = (prod.category || '').toLowerCase();
+    if (cat.includes('hijab') || cat.includes('scarf')) return "Premium Georgette Chiffon";
+    if (cat.includes('abaya')) return "Breathable Nida Crepe";
+    if (cat.includes('irani')) return "Lightweight Nida Fabric";
+    if (cat.includes('jilbab')) return "Soft Nida Silk Blend";
+    if (cat.includes('namaz')) return "100% Breathable Soft Cotton";
+    if (cat.includes('round')) return "Classic Nida Crepe";
+    return "Cotton & Silk Blend";
+  };
 
   return (
     <div className="product-page-container">
@@ -386,79 +449,213 @@ const ProductDetail = () => {
 
           <p className="product-description">{product.description}</p>
 
-          <ul className="product-bullets">
-            {features.map((feature, idx) => {
-              const isLast = idx === features.length - 1;
-              return (
-                <li key={idx}>
-                  <span className="bullet-dash">-</span>
-                  <span className={isLast ? 'bold-bullet' : ''}>{feature}</span>
-                </li>
-              );
-            })}
-          </ul>
-
-          {/* Color Selector */}
-          <div className="color-selection-block">
-            <div className="color-header">
-              <span className="block-label">COLOUR:</span>
-              <span className="selected-color-name">{(selectedColor || "").toUpperCase()}</span>
+          {/* Category Details FAQ Accordions Block */}
+          <div className="product-category-accordions-container">
+            <div className="category-accordions-header">
+              <span className="specs-title">CATEGORY SPECIFICATIONS & CUSTOMIZATION</span>
             </div>
-            <div className="swatches-row">
-              {colorSwatches.map((swatch, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`color-swatch-circle ${selectedColor === swatch.name ? 'active' : ''}`}
-                  style={{ backgroundColor: swatch.hex }}
-                  onClick={() => setSelectedColor(swatch.name)}
-                  title={swatch.name}
-                />
-              ))}
+
+            {/* Accordion list for each category */}
+            <div className="category-accordions-list">
+              {categoryItems.map((item) => {
+                const isScarf = item.garmentType.toLowerCase().includes('scarf') || item.garmentType.toLowerCase().includes('hijab');
+                const isOpen = Boolean(openCategoryAccordions[item.id]);
+
+                return (
+                  <div key={item.id} className={`category-accordion-item ${isOpen ? 'open' : ''}`}>
+                    <div className="category-accordion-header-bar">
+                      <button 
+                        type="button"
+                        className="category-accordion-trigger"
+                        onClick={() => toggleCategoryAccordion(item.id)}
+                      >
+                        <span className="category-accordion-title">
+                          FOR {item.garmentType.toUpperCase()}
+                        </span>
+                        <span className="category-accordion-chevron">{isOpen ? '∧' : '∨'}</span>
+                      </button>
+                    </div>
+
+                    {isOpen && (
+                      <div className="category-accordion-body">
+                        {/* Garment & Fabric Type Row */}
+                        <div className="custom-form-row">
+                          <div className="custom-form-field">
+                            <label className="custom-field-label">GARMENT TYPE *</label>
+                            <select 
+                              className="custom-field-select"
+                              value={item.garmentType}
+                              onChange={(e) => updateCategoryItem(item.id, 'garmentType', e.target.value)}
+                            >
+                              <option value="Abaya">Abaya</option>
+                              <option value="Scarf / Hijab">Scarf / Hijab</option>
+                              <option value="Co-Ord Set">Co-Ord Set</option>
+                              <option value="Irani Chadar">Irani Chadar</option>
+                              <option value="Jilbab">Jilbab</option>
+                              <option value="Namaz Chadar">Namaz Chadar</option>
+                              <option value="Round Chadar">Round Chadar</option>
+                            </select>
+                          </div>
+
+                          <div className="custom-form-field">
+                            <label className="custom-field-label">FABRIC TYPE *</label>
+                            <select 
+                              className="custom-field-select"
+                              value={item.fabricType}
+                              onChange={(e) => updateCategoryItem(item.id, 'fabricType', e.target.value)}
+                            >
+                              <option value="Nida Crepe">Nida Crepe</option>
+                              <option value="Georgette Chiffon">Georgette Chiffon</option>
+                              <option value="Cotton Jersey">Cotton Jersey</option>
+                              <option value="Silk Satin">Silk Satin</option>
+                              <option value="Cotton Blend Poplin">Cotton Blend Poplin</option>
+                              <option value="Linen Blend">Linen Blend</option>
+                              <option value="Soft Cotton">Soft Cotton</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Color Selector matching Image 2 */}
+                        <div className="color-selection-block">
+                          <div className="color-header">
+                            <span className="block-label">COLOUR:</span>
+                            <span className="selected-color-name">{(item.customColor || selectedColor || "").toUpperCase()}</span>
+                          </div>
+                          <div className="swatches-row">
+                            {colorSwatches.map((swatch, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                className={`color-swatch-circle ${(item.customColor || selectedColor) === swatch.name ? 'active' : ''}`}
+                                style={{ backgroundColor: swatch.hex }}
+                                onClick={() => {
+                                  updateCategoryItem(item.id, 'customColor', swatch.name);
+                                  setSelectedColor(swatch.name);
+                                }}
+                                title={swatch.name}
+                              />
+                            ))}
+                            <div className="custom-color-input-wrapper" style={{ marginLeft: '12px', flex: 1 }}>
+                              <input 
+                                type="text"
+                                className="custom-field-input"
+                                style={{ padding: '6px 10px', fontSize: '12px' }}
+                                placeholder="Or enter custom color name..."
+                                value={item.customColor}
+                                onChange={(e) => {
+                                  updateCategoryItem(item.id, 'customColor', e.target.value);
+                                  setSelectedColor(e.target.value);
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Size Selector matching Image 2 */}
+                        {!isScarf && (
+                          <div className="size-selection-block">
+                            <div className="size-header-line">
+                              <span className="block-label">SELECT SIZE</span>
+                              <button 
+                                type="button" 
+                                className="size-guide-link"
+                                onClick={() => setShowSizeChart(true)}
+                              >
+                                SIZE GUIDE
+                              </button>
+                            </div>
+
+                            <div className="size-boxes-grid">
+                              {sizes.map((size) => {
+                                const isOutOfStock = size === "XXS";
+                                return (
+                                  <button
+                                    key={size}
+                                    type="button"
+                                    className={`size-box ${item.size === size ? 'active' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`}
+                                    onClick={() => {
+                                      updateCategoryItem(item.id, 'size', size);
+                                      setSelectedSize(size);
+                                    }}
+                                  >
+                                    {isOutOfStock && (
+                                      <svg className="notify-mail-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                                      </svg>
+                                    )}
+                                    <span>{size}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Virtual Try-On Button 
-          <button type="button" className="virtual-tryon-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-            <span>Virtual Try-On</span>
-          </button>*/}
-
-          {/* Size Selector & Size Guide Link */}
-          <div className="size-selection-block">
-            <div className="size-header-line">
-              <span className="block-label">SELECT SIZE</span>
-              <button 
-                type="button" 
-                className="size-guide-link"
-                onClick={() => setShowSizeChart(true)}
-              >
-                SIZE GUIDE
-              </button>
+          {/* Standalone Color & Size Selector Block Above Cart Button */}
+          <div className="product-quick-selection-block" style={{ margin: '20px 0 24px 0' }}>
+            {/* Color Selector */}
+            <div className="color-selection-block">
+              <div className="color-header">
+                <span className="block-label">COLOUR:</span>
+                <span className="selected-color-name">{(selectedColor || "").toUpperCase()}</span>
+              </div>
+              <div className="swatches-row">
+                {colorSwatches.map((swatch, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`color-swatch-circle ${selectedColor === swatch.name ? 'active' : ''}`}
+                    style={{ backgroundColor: swatch.hex }}
+                    onClick={() => setSelectedColor(swatch.name)}
+                    title={swatch.name}
+                  />
+                ))}
+              </div>
             </div>
 
-            <div className="size-boxes-grid">
-              {sizes.map((size) => {
-                const isOutOfStock = size === "XXS";
-                return (
-                  <button
-                    key={size}
-                    type="button"
-                    className={`size-box ${selectedSize === size ? 'active' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {isOutOfStock && (
-                      <svg className="notify-mail-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="2" y="4" width="20" height="16" rx="2"/>
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                      </svg>
-                    )}
-                    <span>{size}</span>
-                  </button>
-                );
-              })}
+            {/* Size Selector */}
+            <div className="size-selection-block">
+              <div className="size-header-line">
+                <span className="block-label">SELECT SIZE</span>
+                <button 
+                  type="button" 
+                  className="size-guide-link"
+                  onClick={() => setShowSizeChart(true)}
+                >
+                  SIZE GUIDE
+                </button>
+              </div>
+
+              <div className="size-boxes-grid">
+                {sizes.map((size) => {
+                  const isOutOfStock = size === "XXS";
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      className={`size-box ${selectedSize === size ? 'active' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`}
+                      onClick={() => setSelectedSize(size)}
+                    >
+                      {isOutOfStock && (
+                        <svg className="notify-mail-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="2" y="4" width="20" height="16" rx="2"/>
+                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                        </svg>
+                      )}
+                      <span>{size}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

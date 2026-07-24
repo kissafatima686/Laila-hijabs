@@ -8,12 +8,12 @@
   display: flex;
   /* Use flex-wrap to stack items on small screens */
   flex-wrap: wrap; 
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 15px; 
   font-size: clamp(12px, 2vw, 14px); /* Fluid font size */
   font-family: 'Jost', sans-serif;
-  text-align: center;
+  text-align: left;
 }
 
 .stars {

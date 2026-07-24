@@ -1,10 +1,45 @@
-// src/pages/AboutUsPage.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { IoLogoWhatsapp } from 'react-icons/io5';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { IoLogoWhatsapp, IoChevronBackOutline, IoChevronForwardOutline } from 'react-icons/io5';
 import './AboutUsPage.css';
 
 const AboutUsPage = () => {
+  const studioImages = [
+    { id: 1, src: '/hero2.png', alt: 'Laila Hijabs Studio 1' },
+    { id: 2, src: '/Categories/abaya/abaya1.png', alt: 'Abaya Collection Display' },
+    { id: 3, src: '/Categories/hijabs.png', alt: 'Premium Fabric Hijabs' },
+    { id: 4, src: '/Categories/iranichadar.png', alt: 'Traditional Irani Chadar' },
+    { id: 5, src: '/Categories/jilbab.png', alt: 'Jilbab Collection' },
+    { id: 6, src: '/Categories/namazchadar.png', alt: 'Namaz Chadar Section' },
+  ];
+
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlideIndex((prevIndex) => (prevIndex + 1) % studioImages.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [studioImages.length]);
+
+  const handlePrevSlide = () => {
+    setCurrentSlideIndex((prevIndex) => (prevIndex - 1 + studioImages.length) % studioImages.length);
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlideIndex((prevIndex) => (prevIndex + 1) % studioImages.length);
+  };
+
+  const navigate = useNavigate();
+
+  const handleSlideClick = (index, imgId) => {
+    if (index === currentSlideIndex) {
+      navigate(`/location/${imgId}`);
+    } else {
+      setCurrentSlideIndex(index);
+    }
+  };
+
   // Brand values mapped from your original structure
   const values = [
     { icon: "E", title: "Elegance", desc: "Refined design over excess â€” every piece earns its place in the collection." },
@@ -103,7 +138,59 @@ const AboutUsPage = () => {
       {/* Studio Visit & Contact Band[cite: 6] */}
       <section className="shop-band">
         <div className="wrap shop-grid">
-          <div className="shop-img"><img src="/hero2.png" alt="Laila Hijabs physical shop" /></div>
+          <div className="shop-slider-container">
+            <div className="popup-slider-wrapper">
+              <div className="popup-slider-track">
+                {studioImages.map((img, index) => {
+                  let position = 'hidden';
+                  const total = studioImages.length;
+                  const diff = (index - currentSlideIndex + total) % total;
+
+                  if (diff === 0) {
+                    position = 'active';
+                  } else if (diff === 1 || (currentSlideIndex === total - 1 && index === 0)) {
+                    position = 'next';
+                  } else if (diff === total - 1 || (currentSlideIndex === 0 && index === total - 1)) {
+                    position = 'prev';
+                  }
+
+                  return (
+                    <div 
+                      key={img.id} 
+                      className={`popup-slide ${position}`}
+                      onClick={() => handleSlideClick(index, img.id)}
+                    >
+                      <img src={img.src} alt={img.alt} />
+                      {position === 'active' && (
+                        <div className="slide-badge-overlay">
+                          View Location Details 
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="slider-controls">
+              <button 
+                type="button" 
+                className="slider-arrow prev-arrow" 
+                onClick={handlePrevSlide}
+                aria-label="Previous slide"
+              >
+                <IoChevronBackOutline size={18} />
+              </button>
+              <button 
+                type="button" 
+                className="slider-arrow next-arrow" 
+                onClick={handleNextSlide}
+                aria-label="Next slide"
+              >
+                <IoChevronForwardOutline size={18} />
+              </button>
+            </div>
+          </div>
           <div className="shop-copy">
             <span className="eyebrow">Visit Us</span>
             <h2 style={{ marginTop: '12px' }}>Prefer to see the fabric in person?</h2>

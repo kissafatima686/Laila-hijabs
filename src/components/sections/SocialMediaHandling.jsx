@@ -104,7 +104,7 @@ const SocialMediaHandling = () => {
       <div className="slider-wrapper">
         <div className="social-handling-header">
           <div className="social-handling-title-group">
-            <h2>SOCIAL MEDIA HANDLE</h2>
+            <h2>SOCIAL MEDIA HANDLES</h2>
             <div className="social-icons">
               <a href="https://www.facebook.com/thelailahijab/?rdid=bXKFISlW0hph3zh4" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebookF /></a>
               <a href="https://www.instagram.com/the_lailahijabs/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
