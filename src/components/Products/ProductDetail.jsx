@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { products as mainProducts } from '../../data/products';
 import { CartContext } from '../../context/CartContext';
+import ProductReviews from './ProductReviews';
 import './ProductDetail.css';
 
 // Unified product database including detail fields
@@ -908,6 +909,9 @@ const ProductDetail = () => {
           document.body
         )}
       </div>
+
+      {/* CUSTOMER REVIEWS & PARCEL UNBOXING SECTION */}
+      <ProductReviews product={product} />
 
       {/* HOW WE DO IT Bottom Section (Bg White & Workable) */}
       <div className="how-we-do-it-section">

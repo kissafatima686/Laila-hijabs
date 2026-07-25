@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './Testimonials.css';
 import { FaStar, FaCheckCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const reviewsData = [
+const initialReviewsData = [
   {
     name: "Anonymous",
     rating: 5,
@@ -31,14 +31,46 @@ const reviewsData = [
   }
 ];
 
+const getStoredUserReviews = () => {
+  try {
+    const saved = localStorage.getItem('laila_user_reviews');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.map(r => ({
+        name: r.author || 'Customer',
+        rating: r.rating || 5,
+        text: r.comment || r.title || '',
+        image: r.parcelImage || null,
+        location: 'Verified Buyer',
+        date: 'Just now'
+      }));
+    }
+  } catch(e) {}
+  return [];
+};
+
 const Testimonials = () => {
-  const displayReviews = [...reviewsData, ...reviewsData, ...reviewsData];
+  const [userReviews, setUserReviews] = useState(getStoredUserReviews);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [noTransition, setNoTransition] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const totalOriginal = reviewsData.length;
+  useEffect(() => {
+    const handleReviewAdded = () => {
+      setUserReviews(getStoredUserReviews());
+    };
+    window.addEventListener('reviewAdded', handleReviewAdded);
+    window.addEventListener('storage', handleReviewAdded);
+    return () => {
+      window.removeEventListener('reviewAdded', handleReviewAdded);
+      window.removeEventListener('storage', handleReviewAdded);
+    };
+  }, []);
+
+  const combinedReviews = [...userReviews, ...initialReviewsData];
+  const displayReviews = [...combinedReviews, ...combinedReviews, ...combinedReviews];
+  const totalOriginal = combinedReviews.length;
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -82,7 +114,7 @@ const Testimonials = () => {
     }, 2500);
 
     return () => clearInterval(interval);
-  }, [isPaused, currentIndex]);
+  }, [isPaused, currentIndex, totalOriginal]);
 
   return (
     <section 
@@ -98,7 +130,7 @@ const Testimonials = () => {
             <FaStar /><FaStar /><FaStar /><FaStar /><FaStar className="half-star" />
           </div>
           <p className="average-rating">4.35 average</p>
-          <p className="reviews-count-text">1,561 reviews</p>
+          <p className="reviews-count-text">{1561 + userReviews.length} reviews</p>
         </div>
 
         {/* Carousel Slider Panel */}
