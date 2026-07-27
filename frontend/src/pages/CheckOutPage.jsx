@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
-import './CheckoutPage.css';
+import './CheckOutPage.css';
 
 const CheckoutPage = () => {
   const { cartItems, cartTotal } = useContext(CartContext);
