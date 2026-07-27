@@ -15,7 +15,7 @@
 
 /* Left Rating Summary Block */
 .rating-summary-block {
-  background: #000000;
+  background: #3E4930;
   color: #ffffff;
   width: 250px;
   min-width: 250px;
@@ -30,15 +30,16 @@
 
 .rating-summary-block h3 {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 600px;
   margin: 0 0 12px 0;
   letter-spacing: 1px;
+  color:#ffffff
 }
 
 .stars-row {
   display: flex;
   gap: 4px;
-  color: #00b67a; /* Trustpilot green stars */
+  color: #e6e604; /* Trustpilot green stars */
   font-size: 20px;
   margin-bottom: 12px;
 }
@@ -122,19 +123,19 @@
 }
 
 .check-icon {
-  color: #00b67a; /* Trustpilot style check */
+  color: #e6e604;/* Trustpilot style check */
   font-size: 11px;
 }
 
 .card-stars {
   display: flex;
   gap: 2px;
-  color: #00b67a;
+  color: #e6e604;
   font-size: 11px;
 }
 
 .star-filled {
-  color: #00b67a;
+  color: #e6e604;
 }
 
 .star-empty {
