@@ -1,21 +1,25 @@
-// src/pages/BlogsPage.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IoSearchOutline, IoCloseOutline } from 'react-icons/io5';
+import { useContent } from '../context/useContent';
 import './BlogsPage.css';
 
 const BlogsPage = () => {
   const [activeCategory, setActiveCategory] = useState("All Posts");
   const [searchQuery, setSearchQuery] = useState('');
+  const { getSectionContent } = useContent();
 
-  const categories = [
-    "All Posts",
-    "Styling Guides",
-    "Fabric & Care",
-    "Eid & Occasion",
-    "Brand Journal",
-    "How to Order"
-  ];
+  const title = getSectionContent('blogs_page_header', 'title', 'Notes on grace, fabric, and everyday style');
+  const subtitle = getSectionContent('blogs_page_header', 'subtitle', '');
+  const body = getSectionContent('blogs_page_header', 'body_content', 'Styling ideas, fabric guides, and quiet reflections from our studio — written for the woman who wears her modesty with confidence.');
+  const badgeText = getSectionContent('blogs_page_header', 'badge_text', 'The Laila Journal');
+  
+  const rawCategories = getSectionContent('blogs_filters_config', 'categories', '');
+  const configCategories = (typeof rawCategories === 'string' && rawCategories.trim() !== '') 
+    ? rawCategories.split(',').map(c => c.trim()) 
+    : ["Styling Guides", "Fabric & Care", "Eid & Occasion", "Brand Journal", "How to Order"];
+
+  const categories = ["All Posts", ...configCategories];
 
   // Blog post data mapped from original structure including featured post
   const blogPosts = [
@@ -109,9 +113,10 @@ const BlogsPage = () => {
 
         {/* Journal Hero */}
         <div className="journal-hero">
-          <span className="eyebrow">The Laila Journal</span>
-          <h1>Notes on grace, fabric, and everyday style</h1>
-          <p>Styling ideas, fabric guides, and quiet reflections from our studio — written for the woman who wears her modesty with confidence.</p>
+          <span className="eyebrow">{badgeText}</span>
+          <h1>{title}</h1>
+          {subtitle && <h2>{subtitle}</h2>}
+          <p>{body}</p>
         </div>
 
         {/* Category Filter & Search Bar */}

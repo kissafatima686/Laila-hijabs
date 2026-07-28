@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../context/useContent';
 import './AccountPage.css';
 import { 
   IoCubeOutline, 
@@ -9,6 +10,9 @@ import {
 } from 'react-icons/io5';
 
 const AccountPage = () => {
+  const { getSectionContent } = useContent();
+  const pageTitle = getSectionContent('account_page_settings', 'title', 'Account Overview');
+  const pageSubtitle = getSectionContent('account_page_settings', 'subtitle', 'Manage your orders, profile, and addresses.');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
@@ -189,7 +193,8 @@ const AccountPage = () => {
   return (
     <div className="account-container">
       <div className="account-header">
-        <h1>My Account</h1>
+        <h1>{pageTitle}</h1>
+        <p>{pageSubtitle}</p>
         <p>Welcome back, <strong>{userData.name}</strong></p>
       </div>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import AnnouncementBar from './AnnouncementBar';
 import { CartContext } from '../../context/CartContext';
+import { useContent } from '../../context/useContent';
 import { 
   IoSearchOutline, 
   IoCloseOutline, 
@@ -15,6 +16,16 @@ import './Navbar.css';
 const Navbar = () => {
   const { cartCount, wishlistItems, showCartPopup, setShowCartPopup } = useContext(CartContext);
   const wishlistCount = wishlistItems ? wishlistItems.length : 0;
+  const { getSectionContent } = useContent();
+
+  // Settings from CMS
+  const logoText = getSectionContent('navbar_settings', 'logo_text', 'Laila');
+  const badgeText = getSectionContent('navbar_settings', 'badge_text', 'HIJABS');
+  const showSearch = getSectionContent('navbar_settings', 'show_search', 'true') !== 'false';
+  const showWishlist = getSectionContent('navbar_settings', 'show_wishlist', 'true') !== 'false';
+  const showCart = getSectionContent('navbar_settings', 'show_cart', 'true') !== 'false';
+  const showAccount = getSectionContent('navbar_settings', 'show_account', 'true') !== 'false';
+  const isSticky = getSectionContent('navbar_settings', 'sticky', 'true') !== 'false';
 
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -141,6 +152,10 @@ const Navbar = () => {
   } else {
     headerClassName += ' is-scrolled';
   }
+  
+  if (!isSticky) {
+    headerClassName += ' non-sticky';
+  }
 
   return (
     <div className="nav-wrapper-main">
@@ -163,8 +178,8 @@ const Navbar = () => {
 
           {/* Center: Logo */}
           <Link to="/" className="logo">
-            Laila
-            <span>HIJABS</span>
+            {logoText}
+            <span>{badgeText}</span>
           </Link>
 
           {/* Desktop Links with active gold underline */}
@@ -260,49 +275,48 @@ const Navbar = () => {
 
           {/* Right Action Icons */}
           <div className="nav-icons">
-            <button 
-              type="button"
-              className="icon-btn" 
-              aria-label="Search" 
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <IoSearchOutline size={22} />
-            </button>
-            <Link 
-              to="/account" 
-              className="icon-btn desktop-only" 
-              aria-label="Account"
-              style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center' }}
-            >
-              <IoPersonOutline size={22} />
-            </Link>
-            <Link 
-              to="/wishlist" 
-              className="icon-btn desktop-only nav-icon-wrapper" 
-              aria-label="Wishlist"
-              style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center', position: 'relative' }}
-            >
-              <IoHeartOutline size={22} />
-              {wishlistCount > 0 && <span className="nav-icon-badge">{wishlistCount}</span>}
-            </Link>
-            
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
-              <Link 
-                to="/cart" 
-                className="icon-btn nav-icon-wrapper" 
+            {showSearch && (
+              <button 
+                className="icon-btn search-btn" 
+                onClick={() => setIsSearchOpen(true)}
+                aria-label="Search"
+              >
+                <IoSearchOutline size={22} />
+              </button>
+            )}
+
+            {showAccount && (
+              <Link to="/account" className="icon-btn desktop-only" aria-label="Account">
+                <IoPersonOutline size={22} />
+              </Link>
+            )}
+
+            {showWishlist && (
+              <Link to="/wishlist" className="icon-btn desktop-only nav-icon-wrapper" aria-label="Wishlist" style={{ position: 'relative' }}>
+                <IoHeartOutline size={22} />
+                {wishlistCount > 0 && (
+                  <span className="nav-icon-badge" aria-live="polite">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            {showCart && (
+              <button 
+                className="icon-btn cart-icon nav-icon-wrapper"
+                onClick={() => setShowCartPopup(true)}
                 aria-label="Cart"
-                style={{ textDecoration: 'none', color: 'inherit', display: 'inline-flex', alignItems: 'center', position: 'relative' }}
-                onClick={() => setShowCartPopup && setShowCartPopup(false)}
+                style={{ position: 'relative' }}
               >
                 <IoCartOutline size={22} />
-                {cartCount > 0 && <span className="nav-icon-badge">{cartCount}</span>}
-              </Link>
-              {showCartPopup && (
-                <span className="blinking-oval-badge" style={{ marginLeft: '2px', whiteSpace: 'nowrap' }}>
-                  New
-                </span>
-              )}
-            </div>
+                {cartCount > 0 && (
+                  <span className="nav-icon-badge" aria-live="polite">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </nav>
 
@@ -370,8 +384,8 @@ const Navbar = () => {
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-menu-header">
           <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
-            Laila
-            <span>HIJABS</span>
+            {logoText}
+            <span>{badgeText}</span>
           </Link>
           <button 
             className="close-btn" 

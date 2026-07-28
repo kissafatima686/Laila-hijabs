@@ -1,10 +1,18 @@
-// src/pages/OffersPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { IoChevronBackOutline, IoChevronForwardOutline } from 'react-icons/io5';
+import { useContent } from '../context/useContent';
 import './OffersPage.css';
 
 const OffersPage = () => {
+  const { getSectionContent } = useContent();
+
+  const title = getSectionContent('offers_page_header', 'title', 'The Eid Edit Sale — up to 25% off');
+  const subtitle = getSectionContent('offers_page_header', 'subtitle', '');
+  const body = getSectionContent('offers_page_header', 'body_content', "Premium abayas and silk hijabs, marked down for a limited time. Once a piece sells out at our studio, it's gone.");
+  const badgeText = getSectionContent('offers_page_header', 'badge_text', 'Limited Time · Ends Soon');
+  const imageUrl = getSectionContent('offers_page_header', 'image_url', '/Categories/abaya/abaya1.png');
+
   // Timer Hook replacing static HTML Script
   const [time, setTime] = useState({ d: 3, h: 14, m: 52, s: 9 });
   const sliderRef = useRef(null);
@@ -70,11 +78,12 @@ const OffersPage = () => {
 
         {/* Hero Section with Countdown */}
         <div className="offer-hero">
-          <img src="/Categories/abaya/abaya1.png" alt="Eid sale" />
+          <img src={imageUrl} alt="Sale Hero" />
           <div className="offer-hero-copy">
-            <span className="eyebrow">Limited Time · Ends Soon</span>
-            <h1>The Eid Edit Sale — up to 25% off</h1>
-            <p>Premium abayas and silk hijabs, marked down for a limited time. Once a piece sells out at our studio, it's gone.</p>
+            <span className="eyebrow">{badgeText}</span>
+            <h1>{title}</h1>
+            {subtitle && <h2>{subtitle}</h2>}
+            <p>{body}</p>
             <div className="countdown">
               <div><div className="num">{String(time.d).padStart(2, '0')}</div><div className="lbl">Days</div></div>
               <div><div className="num">{String(time.h).padStart(2, '0')}</div><div className="lbl">Hours</div></div>

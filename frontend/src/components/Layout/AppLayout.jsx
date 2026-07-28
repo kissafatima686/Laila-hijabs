@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from '../Footer/Footer';
 import ScrollToTop from './ScrollToTop';
@@ -19,7 +20,7 @@ const AppLayout = ({ children }) => {
         can span the full width. 
       */}
       <main className="main-content">
-        {children} 
+        {children || <Outlet />} 
       </main>
       
       <Footer /> 

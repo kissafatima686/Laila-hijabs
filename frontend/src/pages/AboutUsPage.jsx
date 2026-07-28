@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoLogoWhatsapp, IoChevronBackOutline, IoChevronForwardOutline } from 'react-icons/io5';
+import { useContent } from '../context/useContent';
 import './AboutUsPage.css';
 
 const AboutUsPage = () => {
+  const { getSectionContent } = useContent();
+
+  const title = getSectionContent('about_who_we_are', 'title', 'Composed beauty, from Lahore outward.');
+  const subtitle = getSectionContent('about_who_we_are', 'subtitle', 'Our Story');
+  const body = getSectionContent('about_who_we_are', 'body_content', 'Laila Hijabs began with one belief — that modesty and modern style were never opposites. We design for the woman who moves through her day with quiet confidence: to campus, to work, to Eid morning.');
+
   const studioImages = [
     { id: 1, src: '/hero2.png', alt: 'Laila Hijabs Studio 1' },
     { id: 2, src: '/Categories/abaya/abaya1.png', alt: 'Abaya Collection Display' },
@@ -42,16 +49,16 @@ const AboutUsPage = () => {
 
   // Brand values mapped from your original structure
   const values = [
-    { icon: "E", title: "Elegance", desc: "Refined design over excess â€” every piece earns its place in the collection." },
+    { icon: "E", title: "Elegance", desc: "Refined design over excess — every piece earns its place in the collection." },
     { icon: "C", title: "Comfort", desc: "Fabrics chosen to move with you, not against you, across a full day." },
-    { icon: "I", title: "Inclusivity", desc: "Sizes XS through XXL, always â€” grace was never meant for one body type." },
+    { icon: "I", title: "Inclusivity", desc: "Sizes XS through XXL, always — grace was never meant for one body type." },
     { icon: "R", title: "Respect", desc: "For tradition, for modern taste, and for every woman's own idea of modesty." }
   ];
 
   // Journey milestones mapped from your original timeline
   const timelineMilestones = [
-    { period: "2026", title: "Laila Hijabs is born", desc: "Launched from our studio in Lahore with the Everyday Grace Collection â€” chiffon and jersey hijabs designed for daily wear." },
-    { period: "Next", title: "Premium & Abaya lines", desc: "Expanding into silk premium hijabs and structured abayas sized XSâ€“XXL, with a dedicated Eid edit each season." },
+    { period: "2026", title: "Laila Hijabs is born", desc: "Launched from our studio in Lahore with the Everyday Grace Collection — chiffon and jersey hijabs designed for daily wear." },
+    { period: "Next", title: "Premium & Abaya lines", desc: "Expanding into silk premium hijabs and structured abayas sized XS–XXL, with a dedicated Eid edit each season." },
     { period: "Later", title: "Pakistan-wide, then the Gulf", desc: "Growing city by city across Pakistan, before bringing Laila to Pakistani and South Asian women across the UAE." }
   ];
 
@@ -68,9 +75,9 @@ const AboutUsPage = () => {
       <section className="about-hero" style={{ paddingBottom: 0 }}>
         <div className="about-hero-grid">
           <div className="about-hero-copy">
-            <span className="eyebrow">Our Story</span>
-            <h1>Composed beauty,<br/>from Lahore <em>outward.</em></h1>
-            <p>Laila Hijabs began with one belief â€” that modesty and modern style were never opposites. We design for the woman who moves through her day with quiet confidence: to campus, to work, to Eid morning.</p>
+            <span className="eyebrow">{subtitle}</span>
+            <h1 dangerouslySetInnerHTML={{ __html: title.replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\n/g, '<br/>') }}></h1>
+            <p>{body}</p>
           </div>
           <div className="about-hero-img">
             <div className="v1"><img src="/hero2.png" alt="Laila Hijab studio" /></div>

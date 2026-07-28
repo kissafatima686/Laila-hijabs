@@ -1,24 +1,31 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { useContent } from '../context/useContent';
 import './WishlistPage.css';
 
 const WishlistPage = () => {
   const { wishlistItems, removeFromWishlist, moveToCart } = useContext(CartContext);
+  const { getSectionContent } = useContent();
+
+  const title = getSectionContent('wishlist_page_settings', 'title', 'My Wishlist');
+  const emptyMessage = getSectionContent('wishlist_page_settings', 'empty_wishlist_message', 'Your wishlist is currently empty');
+  const emptyButton = getSectionContent('wishlist_page_settings', 'empty_wishlist_button', 'Explore Products');
+  const emptyLink = getSectionContent('wishlist_page_settings', 'empty_wishlist_link', '/categories');
 
   return (
     <div className="wishlist-container">
       <div className="wishlist-header">
-        <h1 className="wishlist-title">My Wishlist</h1>
+        <h1 className="wishlist-title">{title}</h1>
         <p className="wishlist-count">{wishlistItems.length} {wishlistItems.length === 1 ? 'Item' : 'Items'}</p>
       </div>
 
       {wishlistItems.length === 0 ? (
         <div className="empty-wishlist" style={{ padding: '80px 20px', textAlign: 'center' }}>
-          <h2 style={{ fontFamily: 'Fraunces, serif', color: '#3E4930', marginBottom: '15px' }}>Your wishlist is currently empty</h2>
+          <h2 style={{ fontFamily: 'Fraunces, serif', color: '#3E4930', marginBottom: '15px' }}>{emptyMessage}</h2>
           <p style={{ color: '#6b6a58', marginBottom: '30px' }}>Save your favorite items here while you shop to easily find them later.</p>
-          <Link to="/categories" style={{ textDecoration: 'none' }}>
-            <button className="continue-shopping-btn" style={{ backgroundColor: '#3E4930', color: '#fff', border: 'none', padding: '12px 30px', fontSize: '14px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '2px' }}>Explore Products</button>
+          <Link to={emptyLink} style={{ textDecoration: 'none' }}>
+            <button className="continue-shopping-btn" style={{ backgroundColor: '#3E4930', color: '#fff', border: 'none', padding: '12px 30px', fontSize: '14px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '2px' }}>{emptyButton}</button>
           </Link>
         </div>
       ) : (

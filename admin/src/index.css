@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --olive-deep: #3E4930;
+  --cream: #F6F1E3;
+  --gold: #B8935B;
+  --blush: #E7D9C9;
+
+  /* Theme mappings for quiet luxury Olive & Gold */
+  --bg-dark: #182012;
+  --bg-sidebar: #222C1A;
+  --bg-card: #2B3722;
+  --bg-card-hover: #34422A;
+  --bg-banner: linear-gradient(135deg, #3E4930 0%, #262E1D 100%);
+  --border-color: rgba(184, 147, 91, 0.25);
+  --border-color-glow: rgba(184, 147, 91, 0.5);
+  --text-primary: #F6F1E3;
+  --text-secondary: #E7D9C9;
+  --text-muted: #B8A99A;
+  
+  --accent-gold: #B8935B;
+  --accent-gold-light: #D4B07B;
+  --accent-olive: #3E4930;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Custom Olive & Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #182012;
+}
+::-webkit-scrollbar-thumb {
+  background: #3E4930;
+  border: 1px solid rgba(184, 147, 91, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8935B;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

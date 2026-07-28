@@ -1,11 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { useContent } from '../context/useContent';
 import './CheckOutPage.css';
 
 const CheckoutPage = () => {
   const { cartItems, cartTotal } = useContext(CartContext);
   const navigate = useNavigate();
+  const { getSectionContent } = useContent();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -20,6 +22,22 @@ const CheckoutPage = () => {
 
   const [errors, setErrors] = useState({});
 
+  // Dynamic Settings
+  const title = getSectionContent('checkout_page_settings', 'title', 'Checkout');
+  const step2 = getSectionContent('checkout_page_settings', 'step_2_label', '2. Checkout');
+  const contactInfoTitle = getSectionContent('checkout_page_settings', 'contact_info_title', 'Contact Information');
+  const emailLabel = getSectionContent('checkout_page_settings', 'email_label', 'Email Address');
+  const phoneLabel = getSectionContent('checkout_page_settings', 'phone_label', 'Phone Number');
+  const shippingAddressTitle = getSectionContent('checkout_page_settings', 'shipping_address_title', 'Shipping Address');
+  const firstNameLabel = getSectionContent('checkout_page_settings', 'first_name_label', 'First Name');
+  const lastNameLabel = getSectionContent('checkout_page_settings', 'last_name_label', 'Last Name');
+  const streetAddressLabel = getSectionContent('checkout_page_settings', 'street_address_label', 'Street Address');
+  const townCityLabel = getSectionContent('checkout_page_settings', 'town_city_label', 'Town / City');
+  const postcodeLabel = getSectionContent('checkout_page_settings', 'postcode_label', 'Postcode');
+  const countryLabel = getSectionContent('checkout_page_settings', 'country_label', 'Country / Region');
+  const continueBtn = getSectionContent('checkout_page_settings', 'continue_to_payment_btn', 'Continue to Payment');
+  const returnBtn = getSectionContent('checkout_page_settings', 'return_to_cart_btn', 'Return to Cart');
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -29,14 +47,14 @@ const CheckoutPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.email.trim()) newErrors.email = 'Email Address is required';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone Number is required';
-    if (!formData.firstName.trim()) newErrors.firstName = 'First Name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last Name is required';
-    if (!formData.address.trim()) newErrors.address = 'Street Address is required';
-    if (!formData.city.trim()) newErrors.city = 'Town / City is required';
-    if (!formData.postcode.trim()) newErrors.postcode = 'Postcode is required';
-    if (!formData.country.trim()) newErrors.country = 'Country is required';
+    if (!formData.email.trim()) newErrors.email = `${emailLabel} is required`;
+    if (!formData.phone.trim()) newErrors.phone = `${phoneLabel} is required`;
+    if (!formData.firstName.trim()) newErrors.firstName = `${firstNameLabel} is required`;
+    if (!formData.lastName.trim()) newErrors.lastName = `${lastNameLabel} is required`;
+    if (!formData.address.trim()) newErrors.address = `${streetAddressLabel} is required`;
+    if (!formData.city.trim()) newErrors.city = `${townCityLabel} is required`;
+    if (!formData.postcode.trim()) newErrors.postcode = `${postcodeLabel} is required`;
+    if (!formData.country.trim()) newErrors.country = `${countryLabel} is required`;
     return newErrors;
   };
 
@@ -54,13 +72,13 @@ const CheckoutPage = () => {
 
   return (
     <div className="checkout-container">
-      <h1 className="checkout-title">Checkout</h1>
+      <h1 className="checkout-title">{title}</h1>
 
       {/* Progress Steps */}
       <div className="checkout-steps">
         <Link to="/cart" className="step completed-step">1. Cart</Link>
         <span className="step-divider">—</span>
-        <span className="step active">2. Checkout</span>
+        <span className="step active">{step2}</span>
         <span className="step-divider">—</span>
         <span className="step">3. Payment</span>
       </div>
@@ -69,9 +87,9 @@ const CheckoutPage = () => {
         {/* Left Column: Contact & Shipping Form */}
         <div className="checkout-form-section">
           <div className="form-box">
-            <h2>Contact Information</h2>
+            <h2>{contactInfoTitle}</h2>
             <div className="input-group">
-              <label>Email Address <span style={{ color: '#c92a2a' }}>*</span></label>
+              <label>{emailLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
               <input 
                 type="email" 
                 placeholder="you@example.com" 
@@ -83,7 +101,7 @@ const CheckoutPage = () => {
               {errors.email && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.email}</span>}
             </div>
             <div className="input-group">
-              <label>Phone Number <span style={{ color: '#c92a2a' }}>*</span></label>
+              <label>{phoneLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
               <input 
                 type="tel" 
                 placeholder="+92 323 8399480" 
@@ -95,13 +113,12 @@ const CheckoutPage = () => {
               {errors.phone && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.phone}</span>}
             </div>
 
-            <h2 className="section-spacing">Shipping Address</h2>
+            <h2 className="section-spacing">{shippingAddressTitle}</h2>
             <div className="form-row">
               <div className="input-group">
-                <label>First Name <span style={{ color: '#c92a2a' }}>*</span></label>
+                <label>{firstNameLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
                 <input 
                   type="text" 
-                  placeholder="First Name" 
                   value={formData.firstName}
                   onChange={(e) => handleChange('firstName', e.target.value)}
                   required 
@@ -110,10 +127,9 @@ const CheckoutPage = () => {
                 {errors.firstName && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.firstName}</span>}
               </div>
               <div className="input-group">
-                <label>Last Name <span style={{ color: '#c92a2a' }}>*</span></label>
+                <label>{lastNameLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
                 <input 
                   type="text" 
-                  placeholder="Last Name" 
                   value={formData.lastName}
                   onChange={(e) => handleChange('lastName', e.target.value)}
                   required 
@@ -124,10 +140,10 @@ const CheckoutPage = () => {
             </div>
 
             <div className="input-group">
-              <label>Street Address <span style={{ color: '#c92a2a' }}>*</span></label>
+              <label>{streetAddressLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
               <input 
                 type="text" 
-                placeholder="123 Street Name, Apartment, Suite" 
+                placeholder="House number and street name" 
                 value={formData.address}
                 onChange={(e) => handleChange('address', e.target.value)}
                 required 
@@ -138,10 +154,9 @@ const CheckoutPage = () => {
 
             <div className="form-row">
               <div className="input-group">
-                <label>Town / City <span style={{ color: '#c92a2a' }}>*</span></label>
+                <label>{townCityLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
                 <input 
                   type="text" 
-                  placeholder="City" 
                   value={formData.city}
                   onChange={(e) => handleChange('city', e.target.value)}
                   required 
@@ -150,10 +165,9 @@ const CheckoutPage = () => {
                 {errors.city && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.city}</span>}
               </div>
               <div className="input-group">
-                <label>Postcode <span style={{ color: '#c92a2a' }}>*</span></label>
+                <label>{postcodeLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
                 <input 
                   type="text" 
-                  placeholder="Postcode" 
                   value={formData.postcode}
                   onChange={(e) => handleChange('postcode', e.target.value)}
                   required 
@@ -164,7 +178,7 @@ const CheckoutPage = () => {
             </div>
 
             <div className="input-group">
-              <label>Country / Region <span style={{ color: '#c92a2a' }}>*</span></label>
+              <label>{countryLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
               <select 
                 value={formData.country} 
                 onChange={(e) => handleChange('country', e.target.value)}
@@ -172,12 +186,17 @@ const CheckoutPage = () => {
                 style={errors.country ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
               >
                 <option value="Pakistan">Pakistan</option>
-                <option value="United Arab Emirates">United Arab Emirates</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="United States">United States</option>
+                <option value="UAE">United Arab Emirates</option>
+                <option value="UK">United Kingdom</option>
+                <option value="US">United States</option>
               </select>
               {errors.country && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.country}</span>}
             </div>
+          </div>
+          
+          <div className="checkout-actions">
+            <Link to="/cart" className="return-link">‹ {returnBtn}</Link>
+            <button type="submit" className="continue-btn">{continueBtn}</button>
           </div>
         </div>
 

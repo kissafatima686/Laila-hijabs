@@ -1,16 +1,29 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { useContent } from '../context/useContent';
 import { IoLogoWhatsapp } from 'react-icons/io5';
 import './CartPage.css';
 
 const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart, cartTotal } = useContext(CartContext);
+  const { getSectionContent } = useContent();
 
   const [couponCode, setCouponCode] = React.useState('');
   const [appliedDiscount, setAppliedDiscount] = React.useState(0);
   const [couponMessage, setCouponMessage] = React.useState('');
   const [couponApplied, setCouponApplied] = React.useState(false);
+
+  // Dynamic Settings
+  const title = getSectionContent('cart_page_settings', 'title', 'Cart');
+  const step1 = getSectionContent('cart_page_settings', 'step_1_label', '1. Cart');
+  const step2 = getSectionContent('cart_page_settings', 'step_2_label', '2. Checkout');
+  const step3 = getSectionContent('cart_page_settings', 'step_3_label', '3. Payment');
+  
+  const emptyTitle = getSectionContent('cart_page_settings', 'empty_cart_title', 'Your shopping cart is empty');
+  const emptyMsg = getSectionContent('cart_page_settings', 'empty_cart_message', 'Add some products to your cart and make them yours!');
+  const emptyBtn = getSectionContent('cart_page_settings', 'empty_cart_button', 'Explore Products');
+  const emptyLink = getSectionContent('cart_page_settings', 'empty_cart_link', '/categories');
 
   const handleApplyCoupon = () => {
     const code = couponCode.trim().toUpperCase();
@@ -59,23 +72,23 @@ const CartPage = () => {
 
   return (
     <div className="cart-container">
-      <h1 className="cart-title">Cart</h1>
+      <h1 className="cart-title">{title}</h1>
 
       {/* Progress Steps */}
       <div className="cart-steps">
-        <span className="step active">1. Cart</span>
+        <span className="step active">{step1}</span>
         <span className="step-divider">—</span>
-        <span className="step">2. Checkout</span>
+        <span className="step">{step2}</span>
         <span className="step-divider">—</span>
-        <span className="step">3. Payment</span>
+        <span className="step">{step3}</span>
       </div>
 
       {cartItems.length === 0 ? (
         <div className="empty-cart" style={{ padding: '80px 20px', textAlign: 'center' }}>
-          <h2 style={{ fontFamily: 'Fraunces, serif', color: '#3E4930', marginBottom: '15px' }}>Your shopping cart is empty</h2>
-          <p style={{ color: '#6b6a58', marginBottom: '30px' }}>Add some products to your cart and make them yours!</p>
-          <Link to="/categories" style={{ textDecoration: 'none' }}>
-            <button className="continue-shopping-btn" style={{ backgroundColor: '#3E4930', color: '#fff', border: 'none', padding: '12px 30px', fontSize: '14px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '2px' }}>Explore Products</button>
+          <h2 style={{ fontFamily: 'Fraunces, serif', color: '#3E4930', marginBottom: '15px' }}>{emptyTitle}</h2>
+          <p style={{ color: '#6b6a58', marginBottom: '30px' }}>{emptyMsg}</p>
+          <Link to={emptyLink} style={{ textDecoration: 'none' }}>
+            <button className="continue-shopping-btn" style={{ backgroundColor: '#3E4930', color: '#fff', border: 'none', padding: '12px 30px', fontSize: '14px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '2px' }}>{emptyBtn}</button>
           </Link>
         </div>
       ) : (
