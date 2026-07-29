@@ -21,6 +21,8 @@ const Navbar = () => {
   // Settings from CMS
   const logoText = getSectionContent('navbar_settings', 'logo_text', 'Laila');
   const badgeText = getSectionContent('navbar_settings', 'badge_text', 'HIJABS');
+  const logoFontSize = getSectionContent('navbar_settings', 'logo_font_size', '');
+  const logoFontColor = getSectionContent('navbar_settings', 'logo_font_color', '');
   const showSearch = getSectionContent('navbar_settings', 'show_search', 'true') !== 'false';
   const showWishlist = getSectionContent('navbar_settings', 'show_wishlist', 'true') !== 'false';
   const showCart = getSectionContent('navbar_settings', 'show_cart', 'true') !== 'false';
@@ -34,6 +36,46 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const dropdownTimeoutRef = useRef(null);
+
+  const [dynamicNavLinks, setDynamicNavLinks] = useState([]);
+  const [megaMenuItems, setMegaMenuItems] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/admin/module/navbar-links')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const activeLinks = data
+            .filter(item => item.status === 'Live')
+            .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+          setDynamicNavLinks(activeLinks);
+        }
+      })
+      .catch(err => console.error("Failed to fetch navbar links", err));
+
+    fetch('http://localhost:5000/api/admin/module/categories-mega-menu')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMegaMenuItems(data);
+        }
+      })
+      .catch(err => console.error("Failed to fetch mega menu items", err));
+
+    fetch('http://localhost:5000/api/admin/module/categories')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDbCategories(data);
+        }
+      })
+      .catch(err => console.error("Failed to fetch categories", err));
+  }, []);
+
+  const allCategoriesLinks = megaMenuItems.filter(i => i.group_name === 'all_categories' && i.status === 'Live').sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  const featuredCategoriesLinks = megaMenuItems.filter(i => i.group_name === 'featured_categories' && i.status === 'Live').sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  const featuredCards = megaMenuItems.filter(i => i.group_name === 'featured_cards' && i.status === 'Live').sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 
   const handleCategoryMouseEnter = () => {
     if (dropdownTimeoutRef.current) {
@@ -92,7 +134,23 @@ const Navbar = () => {
     ? [] 
     : searchCatalog.filter(p => {
         const q = searchQuery.toLowerCase().trim();
-        const searchPool = `${p.name} ${p.keywords || ''} ${p.slug}`.toLowerCase();
+        let searchPool = `${p.name} ${p.keywords || ''} ${p.slug}`.toLowerCase();
+
+        // Dynamically include Category Keywords managed by Admin
+        dbCategories.forEach(cat => {
+          if (!cat.keywords) return;
+          const catKw = (cat.keywords || '').toLowerCase();
+          const catSlug = (cat.slug || '').toLowerCase();
+          const catName = (cat.name || '').toLowerCase();
+
+          if (catKw.includes(q) || catSlug.includes(q) || catName.includes(q)) {
+            // Match products that belong to this category
+            if (p.slug.includes(catSlug) || (p.keywords && p.keywords.toLowerCase().includes(catSlug)) || (catSlug && p.name.toLowerCase().includes(catSlug))) {
+              searchPool += ` ${catKw} ${catName}`;
+            }
+          }
+        });
+
         return searchPool.includes(q);
       });
 
@@ -177,100 +235,89 @@ const Navbar = () => {
           </div>
 
           {/* Center: Logo */}
-          <Link to="/" className="logo">
+          <Link to="/" className="logo" style={{ ...(logoFontSize && { fontSize: logoFontSize }), ...(logoFontColor && { color: logoFontColor }) }}>
             {logoText}
-            <span>{badgeText}</span>
+            <span style={{ letterSpacing: '0.2em' }}>{badgeText}</span>
           </Link>
 
           {/* Desktop Links with active gold underline */}
           <ul className="nav-links">
-            <li>
-             <NavLink 
-              to="/offers" 
-              className={({ isActive }) => isActive ? 'active' : ''}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
-            >
-              <span>Offers &amp; Discounts</span>
-              <span className="blinking-oval-badge">New</span>
-            </NavLink>
-            </li>
-            <li 
-              className="has-dropdown"
-              onMouseEnter={handleCategoryMouseEnter}
-              onMouseLeave={handleCategoryMouseLeave}
-            >
-              <NavLink 
-                to="/categories" 
-                className={({ isActive }) => isActive ? 'active' : ''}
-                onClick={() => setIsCategoryDropdownOpen(prev => !prev)}
-              >
-                Categories
-              </NavLink>
-              
-              {/* Mega Dropdown Menu */}
-              {isCategoryDropdownOpen && (
-                <div 
-                  className="mega-dropdown-menu"
-                  onMouseEnter={handleCategoryMouseEnter}
-                  onMouseLeave={handleCategoryMouseLeave}
-                >
-                  <div className="mega-dropdown-inner">
-                    {/* Column 1: All Categories */}
-                    <div className="mega-column">
-                      <h3 className="mega-title">ALL CATEGORIES</h3>
-                      <ul className="mega-list">
-                        <li><Link to="/categories" onClick={() => setIsCategoryDropdownOpen(false)}>VIEW ALL COLLECTIONS</Link></li>
-                        <li><Link to="/categories/abayas" onClick={() => setIsCategoryDropdownOpen(false)}>ABAYAS</Link></li>
-                        <li><Link to="/categories/hijabs" onClick={() => setIsCategoryDropdownOpen(false)}>HIJABS</Link></li>
-                        <li><Link to="/categories/irani-chadar" onClick={() => setIsCategoryDropdownOpen(false)}>IRANI CHADAR</Link></li>
-                        <li><Link to="/categories/jilbab" onClick={() => setIsCategoryDropdownOpen(false)}>JILBAB</Link></li>
-                        <li><Link to="/categories/namaz-chadar" onClick={() => setIsCategoryDropdownOpen(false)}>NAMAZ CHADAR</Link></li>
-                        <li><Link to="/categories/round-chadar" onClick={() => setIsCategoryDropdownOpen(false)}>ROUND CHADAR</Link></li>
-                      </ul>
-                    </div>
+            {dynamicNavLinks.map(link => {
+              const hasBadge = link.is_highlighted === 1;
 
-                    {/* Column 2: Specific Collections */}
-                    <div className="mega-column">
-                      <h3 className="mega-title">FEATURED CATEGORIES</h3>
-                      <ul className="mega-list">
-                        <li><Link to="/categories/abayas" onClick={() => setIsCategoryDropdownOpen(false)}>STRUCTURED ABAYAS</Link></li>
-                        <li><Link to="/categories/hijabs" onClick={() => setIsCategoryDropdownOpen(false)}>PREMIUM FABRIC HIJABS</Link></li>
-                        <li><Link to="/categories/irani-chadar" onClick={() => setIsCategoryDropdownOpen(false)}>TRADITIONAL IRANI CHADAR</Link></li>
-                        <li><Link to="/categories/jilbab" onClick={() => setIsCategoryDropdownOpen(false)}>OVERHEAD & 2-PIECE JILBABS</Link></li>
-                        <li><Link to="/categories/namaz-chadar" onClick={() => setIsCategoryDropdownOpen(false)}>PRAYER NAMAZ CHADAR</Link></li>
-                        <li><Link to="/categories/round-chadar" onClick={() => setIsCategoryDropdownOpen(false)}>CLASSIC ROUND CHADAR</Link></li>
-                      </ul>
-                    </div>
+              if (link.url === '/categories' || link.url === '/categories/') {
+                return (
+                  <li 
+                    key={link.link_id || link.url}
+                    className="has-mega-menu"
+                    onMouseEnter={handleCategoryMouseEnter}
+                    onMouseLeave={handleCategoryMouseLeave}
+                  >
+                    <NavLink to={link.url} className={({ isActive }) => isActive || isCategoryDropdownOpen ? 'active' : ''} style={hasBadge ? { display: 'inline-flex', alignItems: 'center', gap: '6px' } : undefined}>
+                      <span>{link.label}</span>
+                      {hasBadge && link.badge_text && (
+                        <span className="blinking-oval-badge" style={{ marginLeft: '4px', backgroundColor: link.badge_color || '#ef4444' }}>
+                          {link.badge_text}
+                        </span>
+                      )}
+                    </NavLink>
+                    
+                    {/* MEGA MENU COMPONENT INLINED */}
+                    {isCategoryDropdownOpen && (
+                      <div className="mega-menu-wrapper">
+                        <div className="mega-menu-grid">
+                          {/* Column 1: ALL CATEGORIES */}
+                          <div className="mega-col-list">
+                            <h4 className="mega-col-title">ALL CATEGORIES</h4>
+                            {allCategoriesLinks.map(cat => (
+                              <Link key={cat.id} to={cat.url} className="mega-link" onClick={() => setIsCategoryDropdownOpen(false)}>
+                                {cat.label}
+                              </Link>
+                            ))}
+                          </div>
 
-                    {/* Column 3: Featured Abayas */}
-                    <div className="mega-card-item">
-                      <Link to="/categories/abayas" onClick={() => setIsCategoryDropdownOpen(false)}>
-                        <img src="/Categories/abaya/abaya1.png" alt="Abayas Collection" />
-                        <div className="card-overlay">
-                          <h3>ABAYAS COLLECTION</h3>
-                          <span className="shop-link">EXPLORE NOW</span>
+                          {/* Column 2: FEATURED CATEGORIES */}
+                          <div className="mega-col-list">
+                            <h4 className="mega-col-title">FEATURED CATEGORIES</h4>
+                            {featuredCategoriesLinks.map(cat => (
+                              <Link key={cat.id} to={cat.url} className="mega-link" onClick={() => setIsCategoryDropdownOpen(false)}>
+                                {cat.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Column 3 & 4: FEATURED CARDS */}
+                          {featuredCards.map(card => (
+                            <div key={card.id} className="mega-card-item">
+                              <Link to={card.url} onClick={() => setIsCategoryDropdownOpen(false)}>
+                                <img src={card.image_url} alt={card.label} />
+                                <div className="card-overlay">
+                                  <h3>{card.label.toUpperCase()}</h3>
+                                  <span className="shop-link">{card.subtitle || 'EXPLORE NOW'}</span>
+                                </div>
+                              </Link>
+                            </div>
+                          ))}
                         </div>
-                      </Link>
-                    </div>
+                      </div>
+                    )}
+                  </li>
+                );
+              }
 
-                    {/* Column 4: Featured Hijabs */}
-                    <div className="mega-card-item">
-                      <Link to="/categories/hijabs" onClick={() => setIsCategoryDropdownOpen(false)}>
-                        <img src="/Categories/hijabs/hijab1.png" alt="Hijabs Collection" />
-                        <div className="card-overlay">
-                          <h3>HIJABS COLLECTION</h3>
-                          <span className="shop-link">EXPLORE NOW</span>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </li>
-            <li><NavLink to="/custom-orders" className={({ isActive }) => isActive ? 'active' : ''}>Custom Design Orders</NavLink></li>
-            <li><NavLink to="/blogs" className={({ isActive }) => isActive ? 'active' : ''}>Blogs</NavLink></li>
-            <li><NavLink to="/affiliate" className={({ isActive }) => isActive ? 'active' : ''}>Affiliate Program</NavLink></li>
-            <li><NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''}>About Us</NavLink></li>
+              return (
+                <li key={link.link_id || link.url}>
+                  <NavLink to={link.url} className={({ isActive }) => isActive ? 'active' : ''} style={hasBadge ? { display: 'inline-flex', alignItems: 'center', gap: '6px' } : undefined}>
+                    <span>{link.label}</span>
+                    {hasBadge && link.badge_text && (
+                      <span className="blinking-oval-badge" style={{ marginLeft: '4px', backgroundColor: link.badge_color || '#ef4444' }}>
+                        {link.badge_text}
+                      </span>
+                    )}
+                  </NavLink>
+                </li>
+              );
+            })}
           </ul>
 
           {/* Right Action Icons */}
@@ -303,11 +350,11 @@ const Navbar = () => {
             )}
 
             {showCart && (
-              <button 
+              <Link 
+                to="/cart"
                 className="icon-btn cart-icon nav-icon-wrapper"
-                onClick={() => setShowCartPopup(true)}
                 aria-label="Cart"
-                style={{ position: 'relative' }}
+                style={{ position: 'relative', display: 'flex', alignItems: 'center', color: 'inherit', textDecoration: 'none' }}
               >
                 <IoCartOutline size={22} />
                 {cartCount > 0 && (
@@ -315,7 +362,7 @@ const Navbar = () => {
                     {cartCount}
                   </span>
                 )}
-              </button>
+              </Link>
             )}
           </div>
         </nav>
@@ -326,7 +373,7 @@ const Navbar = () => {
             <div className="search-bar-inner">
               <input 
                 type="text" 
-                placeholder="SEARCH..." 
+                placeholder={getSectionContent('search_bar_settings', 'placeholder', 'SEARCH...')} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
@@ -383,9 +430,9 @@ const Navbar = () => {
       {/* Mobile Drawer */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-menu-header">
-          <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
+          <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)} style={{ ...(logoFontSize && { fontSize: logoFontSize }), ...(logoFontColor && { color: logoFontColor }) }}>
             {logoText}
-            <span>{badgeText}</span>
+            <span style={{ letterSpacing: '0.2em' }}>{badgeText}</span>
           </Link>
           <button 
             className="close-btn" 
@@ -425,23 +472,27 @@ const Navbar = () => {
 
         {/* Navigation Links */}
         <ul className="mobile-nav-links">
-          <li><NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Home</NavLink></li>
-          <li>
-            <NavLink 
-              to="/offers" 
-              className={({ isActive }) => isActive ? 'active' : ''} 
-              onClick={() => setMobileMenuOpen(false)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <span>Offers &amp; Discounts</span>
-              <span className="blinking-oval-badge" style={{ marginLeft: '4px' }}>New</span>
-            </NavLink>
-          </li>
-          <li><NavLink to="/categories" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Categories</NavLink></li>
-          <li><NavLink to="/custom-orders" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Custom Design Orders</NavLink></li>
-          <li><NavLink to="/blogs" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Blogs</NavLink></li>
-          <li><NavLink to="/affiliate" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>Affiliate Program</NavLink></li>
-          <li><NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>About Us</NavLink></li>
+          {dynamicNavLinks.map(link => {
+            const hasBadge = link.is_highlighted === 1;
+
+            return (
+              <li key={`mobile-${link.link_id || link.url}`}>
+                <NavLink 
+                  to={link.url} 
+                  className={({ isActive }) => isActive ? 'active' : ''} 
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={hasBadge ? { display: 'inline-flex', alignItems: 'center', gap: '6px' } : undefined}
+                >
+                  <span>{link.label}</span>
+                  {hasBadge && link.badge_text && (
+                    <span className="blinking-oval-badge" style={{ marginLeft: '4px', backgroundColor: link.badge_color || '#ef4444' }}>
+                      {link.badge_text}
+                    </span>
+                  )}
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>

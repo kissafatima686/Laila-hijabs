@@ -21,33 +21,42 @@ const AnnouncementBar = () => {
   const bgColor = getSectionContent('home_announcement_bar', 'background_color', '');
   const textColor = getSectionContent('home_announcement_bar', 'text_color', '');
 
-  const announcements = dynamicTitle ? [dynamicTitle] : defaultAnnouncements;
+  const metaRaw = getSectionContent('home_announcement_bar', 'metadata', {});
+  let meta = {};
+  try { meta = typeof metaRaw === 'string' ? JSON.parse(metaRaw) : (metaRaw || {}); } catch(e) {}
+
+  const activeSlides = Array.isArray(meta.slides) 
+    ? meta.slides.filter(s => s.status === 'Active' && s.value).map(s => s.value) 
+    : [];
+
+  const announcements = activeSlides.length > 0 ? activeSlides : (dynamicTitle ? [dynamicTitle] : defaultAnnouncements);
+  const finalBgColor = meta.background_color || bgColor;
+  const finalTextColor = meta.text_color || textColor;
+  const speedMs = (parseInt(meta.slide_speed || '4', 10) || 4) * 1000;
 
   useEffect(() => {
     if (announcements.length <= 1) return;
     
     const interval = setInterval(() => {
-      // Trigger fade out animation
       setFade(false);
 
-      // Wait for fade out to finish, then update text and fade back in
       setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % announcements.length);
         setFade(true);
-      }, 300); // 300ms matches CSS transition duration
-    }, 4000); // Changes message every 4 seconds
+      }, 300);
+    }, speedMs);
 
     return () => clearInterval(interval);
-  }, [announcements.length]);
+  }, [announcements.length, speedMs]);
 
-  if (!isEnabled) return null;
+  if (!isEnabled || (meta.is_enabled === 'false')) return null;
 
   return (
     <div 
       className="announce-wrapper" 
       style={{ 
-        ...(bgColor ? { backgroundColor: bgColor } : {}),
-        ...(textColor ? { color: textColor } : {})
+        ...(finalBgColor ? { backgroundColor: finalBgColor } : {}),
+        ...(finalTextColor ? { color: finalTextColor } : {})
       }}
     >
       <div className="announce-ticker-track">

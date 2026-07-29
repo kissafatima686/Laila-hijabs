@@ -8,7 +8,7 @@ const PaymentPage = () => {
   const { cartItems, cartTotal } = useContext(CartContext);
   const { getSectionContent } = useContent();
 
-  // Dynamic Settings
+  // Dynamic Settings from Admin CMS
   const title = getSectionContent('payment_page_settings', 'title', 'Order Confirmation');
   const step3 = getSectionContent('payment_page_settings', 'step_3_label', '3. Payment & Receipt');
   const paymentBadge = getSectionContent('payment_page_settings', 'payment_confirmed_badge', '✓ Order Confirmed');
@@ -16,19 +16,30 @@ const PaymentPage = () => {
   const billedToHeader = getSectionContent('payment_page_settings', 'billed_to_header', 'Billed To:');
   const orderInfoHeader = getSectionContent('payment_page_settings', 'order_info_header', 'Order Info:');
   const itemBreakdownHeader = getSectionContent('payment_page_settings', 'item_breakdown_header', 'Item Breakdown');
-  const sendWhatsappBtn = getSectionContent('payment_page_settings', 'send_whatsapp_btn', 'Send Receipt via WhatsApp');
+  const subtotalLabel = getSectionContent('payment_page_settings', 'subtotal_label', 'Subtotal');
+  const discountLabel = getSectionContent('payment_page_settings', 'discount_label', 'Discount');
+  const shippingLabel = getSectionContent('payment_page_settings', 'shipping_label', 'Shipping');
+  const freeText = getSectionContent('payment_page_settings', 'free_text', 'Free');
+  const totalPaidLabel = getSectionContent('payment_page_settings', 'total_paid_label', 'Total Paid');
+  const sendWhatsappBtn = getSectionContent('payment_page_settings', 'send_whatsapp_btn', 'Send Receipt to WhatsApp');
+  const whatsappNumber = getSectionContent('payment_page_settings', 'whatsapp_number', '923238399480');
   const returnHomeBtn = getSectionContent('payment_page_settings', 'return_home_btn', 'Return to Home');
+  const returnHomeLink = getSectionContent('payment_page_settings', 'return_home_link', '/');
 
-  // Generate random order ID
-  const orderId = "LH-" + Math.floor(100000 + Math.random() * 900000);
+  // Gradually increment order ID for every order (starts at LH-962355, LH-962356, LH-962357...)
+  const [orderId] = React.useState(() => {
+    const savedNum = parseInt(localStorage.getItem('laila_last_order_num') || '962354', 10);
+    const nextNum = savedNum + 1;
+    localStorage.setItem('laila_last_order_num', nextNum.toString());
+    return `LH-${nextNum}`;
+  });
   const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   // Resolve cart items
   const finalItems = cartItems.length > 0 ? cartItems : [
-    { name: "LAMIA OPEN KAFTAN SET", size: "M", color: "Burgundy", quantity: 1, price: 9900 },
-    { name: "PLEATED SATIN ABAYA", size: "L", color: "Olive", quantity: 2, price: 12900 }
+    { name: "Premium Chiffon Hijab", size: "M", color: "Olive", quantity: 1, price: 2400 }
   ];
-  const finalTotal = cartItems.length > 0 ? cartTotal : 35700;
+  const finalTotal = cartItems.length > 0 ? cartTotal : 2400;
 
   const orderDetails = {
     orderId: orderId,
@@ -46,7 +57,7 @@ const PaymentPage = () => {
 
   // Function to format and open WhatsApp with the Receipt
   const sendToWhatsApp = () => {
-    const businessPhoneNumber = "923238399480"; 
+    const businessPhoneNumber = whatsappNumber || "923238399480"; 
     
     let message = `*ORDER CONFIRMATION RECEIPT - LAILA HIJABS*\n\n`;
     message += `*Order ID:* #${orderDetails.orderId}\n`;
@@ -54,19 +65,18 @@ const PaymentPage = () => {
     message += `*Customer:* ${orderDetails.customerName}\n`;
     message += `*Phone:* ${orderDetails.phone}\n`;
     message += `*Shipping Address:* ${orderDetails.address}\n\n`;
-    message += `*--- ORDERED ITEMS ---*\n`;
+    message += `*--- ITEM BREAKDOWN ---*\n`;
     
     orderDetails.items.forEach(item => {
-      message += `▪️ ${item.quantity || item.qty}x ${item.name} (${item.size || "M"}/${item.color || "Olive"}) - Rs. ${(item.price * (item.quantity || item.qty)).toLocaleString()}\n`;
+      message += `▪️ ${item.quantity || item.qty || 1}x ${item.name} (Size: ${item.size || "M"} | Color: ${item.color || "Olive"}) - Rs. ${(item.price * (item.quantity || item.qty || 1)).toLocaleString()}\n`;
     });
 
     message += `\n*Subtotal:* Rs. ${orderDetails.subtotal.toLocaleString()}\n`;
     message += `*Discount:* Rs. ${orderDetails.discount.toLocaleString()}\n`;
     message += `*Shipping:* FREE\n`;
     message += `*TOTAL PAID:* *Rs. ${orderDetails.total.toLocaleString()}*\n\n`;
-    message += `Thank you for shopping with us! We will process your order soon. ✨`;
+    message += `Thank you for shopping with us! ✨`;
 
-    // Encode the text for URL and open WhatsApp
     const whatsappUrl = `https://wa.me/${businessPhoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -85,13 +95,10 @@ const PaymentPage = () => {
       </div>
 
       <div className="receipt-wrapper">
-        <div 
-          className="receipt-card" 
-          style={{ backgroundColor: '#ffffff', border: '1px solid #e2ded6', borderRadius: '8px' }}
-        >
+        <div className="receipt-card">
           <div className="receipt-header">
             <div className="success-badge">{paymentBadge}</div>
-            <h2>{thankYouTitle}</h2>
+            <h2 className="thank-you-title">{thankYouTitle}</h2>
             <p className="order-number">Order #{orderDetails.orderId}</p>
           </div>
 
@@ -99,32 +106,32 @@ const PaymentPage = () => {
 
           <div className="receipt-details-grid">
             <div>
-              <h4>{billedToHeader}</h4>
-              <p><strong>{orderDetails.customerName}</strong></p>
-              <p>{orderDetails.phone}</p>
-              <p>{orderDetails.address}</p>
+              <h4 className="grid-heading">{billedToHeader}</h4>
+              <p className="customer-info">{orderDetails.customerName}</p>
+              <p className="customer-info">{orderDetails.phone}</p>
+              <p className="customer-info">{orderDetails.address}</p>
             </div>
             <div>
-              <h4>{orderInfoHeader}</h4>
-              <p><strong>Date:</strong> {orderDetails.date}</p>
-              <p><strong>Payment Status:</strong> Confirmed</p>
-              <p><strong>Method:</strong> {orderDetails.paymentMethod}</p>
+              <h4 className="grid-heading">{orderInfoHeader}</h4>
+              <p className="order-info-line"><span>Date:</span> {orderDetails.date}</p>
+              <p className="order-info-line"><span>Payment Status:</span> Confirmed</p>
+              <p className="order-info-line"><span>Method:</span> {orderDetails.paymentMethod}</p>
             </div>
           </div>
 
           <hr className="receipt-divider" />
 
-          <div className="receipt-items">
-            <h4>{itemBreakdownHeader}</h4>
+          <div className="receipt-items-section">
+            <h4 className="section-heading">{itemBreakdownHeader}</h4>
             <div className="receipt-items-list">
               {orderDetails.items.map((item, idx) => (
-                <div key={idx} className="receipt-item-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0' }}>
-                  <div className="receipt-item-name">
-                    <strong>{item.quantity || item.qty}x</strong> {item.name}
-                    <span className="receipt-item-meta" style={{ display: 'block', fontSize: '0.85rem', color: '#666' }}>({item.size || "M"} / {item.color || "Olive"})</span>
+                <div key={idx} className="receipt-item-row">
+                  <div className="item-name-block">
+                    <span className="item-title"><strong>{(item.quantity || item.qty || 1)}x</strong> {item.name}</span>
+                    <span className="item-meta">Size: {item.size || "M"} | Color: {item.color || "Olive"}</span>
                   </div>
-                  <div className="receipt-item-price">
-                    Rs. {(item.price * (item.quantity || item.qty)).toLocaleString()}
+                  <div className="item-price">
+                    Rs. {(item.price * (item.quantity || item.qty || 1)).toLocaleString()}
                   </div>
                 </div>
               ))}
@@ -133,41 +140,34 @@ const PaymentPage = () => {
 
           <hr className="receipt-divider" />
 
-          <div className="receipt-summary" style={{ padding: '15px 0' }}>
-            <div className="summary-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span>Subtotal</span>
+          <div className="receipt-summary">
+            <div className="summary-row">
+              <span>{subtotalLabel}</span>
               <span>Rs. {orderDetails.subtotal.toLocaleString()}</span>
             </div>
-            <div className="summary-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span>Discount</span>
+            <div className="summary-row">
+              <span>{discountLabel}</span>
               <span>Rs. {orderDetails.discount.toLocaleString()}</span>
             </div>
-            <div className="summary-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span>Shipping</span>
-              <span>FREE</span>
+            <div className="summary-row">
+              <span>{shippingLabel}</span>
+              <span className="free-tag">{freeText}</span>
             </div>
-            <div className="summary-row total-row" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #eee', fontWeight: 'bold', fontSize: '1.2rem' }}>
-              <span>Total Paid</span>
+            <div className="total-divider" />
+            <div className="summary-row total-paid-row">
+              <span>{totalPaidLabel}</span>
               <span>Rs. {orderDetails.total.toLocaleString()}</span>
             </div>
           </div>
-        </div>
 
-        <div className="receipt-actions" style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <button 
-            className="whatsapp-receipt-btn" 
-            onClick={sendToWhatsApp}
-            style={{ padding: '15px', backgroundColor: '#25D366', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            {sendWhatsappBtn}
-          </button>
-          <Link 
-            to="/" 
-            className="home-return-btn"
-            style={{ padding: '15px', backgroundColor: '#f5f5f5', color: '#333', textAlign: 'center', textDecoration: 'none', borderRadius: '4px', border: '1px solid #ddd' }}
-          >
-            {returnHomeBtn}
-          </Link>
+          <div className="receipt-actions">
+            <button className="whatsapp-btn" onClick={sendToWhatsApp}>
+              {sendWhatsappBtn}
+            </button>
+            <Link to={returnHomeLink || "/"} className="home-btn">
+              {returnHomeBtn}
+            </Link>
+          </div>
         </div>
       </div>
     </div>

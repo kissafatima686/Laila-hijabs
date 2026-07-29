@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { useContent } from '../context/useContent';
-import { IoLogoWhatsapp } from 'react-icons/io5';
 import './CartPage.css';
 
 const CartPage = () => {
@@ -22,10 +21,39 @@ const CartPage = () => {
   
   const emptyTitle = getSectionContent('cart_page_settings', 'empty_cart_title', 'Your shopping cart is empty');
   const emptyMsg = getSectionContent('cart_page_settings', 'empty_cart_message', 'Add some products to your cart and make them yours!');
-  const emptyBtn = getSectionContent('cart_page_settings', 'empty_cart_button', 'Explore Products');
-  const emptyLink = getSectionContent('cart_page_settings', 'empty_cart_link', '/categories');
+  const emptyBtn = getSectionContent('cart_page_settings', 'empty_cart_button', 'EXPLORE PRODUCTS');
+  const emptyLink = getSectionContent('cart_page_settings', 'empty_cart_link', '/products');
 
-  const handleApplyCoupon = () => {
+  // Dynamic Order Summary Settings
+  const summaryHeading = getSectionContent('cart_page_settings', 'summary_heading', 'Order Summary');
+  const subtotalLabel = getSectionContent('cart_page_settings', 'subtotal_label', 'Sub Total');
+  const shippingLabel = getSectionContent('cart_page_settings', 'shipping_label', 'Shipping');
+  const shippingValue = getSectionContent('cart_page_settings', 'shipping_value', 'Free');
+  const totalLabel = getSectionContent('cart_page_settings', 'total_label', 'Total');
+  const checkoutBtnText = getSectionContent('cart_page_settings', 'checkout_btn_text', 'Proceed to Checkout');
+  const continueShoppingText = getSectionContent('cart_page_settings', 'continue_shopping_btn_text', '← CONTINUE SHOPPING');
+  
+  // Dynamic Delivery Date Logic
+  const deliveryDays = parseInt(getSectionContent('cart_page_settings', 'estimated_delivery_days', '2'), 10) || 2;
+  const customDeliveryDate = getSectionContent('cart_page_settings', 'custom_delivery_date', '');
+  const deliveryPrefix = getSectionContent('cart_page_settings', 'estimated_delivery_prefix', 'Estimated Delivery by');
+
+  const getComputedDeliveryText = () => {
+    if (customDeliveryDate && customDeliveryDate.trim() !== '') {
+      return `${deliveryPrefix} ${customDeliveryDate.trim()}`;
+    }
+    const d = new Date();
+    d.setDate(d.getDate() + deliveryDays);
+    const day = d.getDate();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = monthNames[d.getMonth()];
+    const year = d.getFullYear();
+    return `${deliveryPrefix} ${day} ${month}, ${year}`;
+  };
+
+  const deliveryEstimateText = getComputedDeliveryText();
+
+  const handleApplyCoupon = async () => {
     const code = couponCode.trim().toUpperCase();
     if (!code) {
       setCouponMessage('Please enter a coupon code.');
@@ -33,42 +61,52 @@ const CartPage = () => {
       return;
     }
 
-    if (code === 'LAILA10' || code === 'WELCOME10') {
-      const discount = Math.round(cartTotal * 0.1);
-      setAppliedDiscount(discount);
-      setCouponMessage('✓ Coupon LAILA10 applied! (10% OFF)');
-      setCouponApplied(true);
-    } else if (code === 'EID2026' || code === 'LAILA20') {
-      const discount = Math.round(cartTotal * 0.2);
-      setAppliedDiscount(discount);
-      setCouponMessage('✓ Coupon EID2026 applied! (20% OFF)');
-      setCouponApplied(true);
-    } else {
-      setAppliedDiscount(0);
-      setCouponMessage('Invalid coupon code. Try "LAILA10" or "EID2026".');
-      setCouponApplied(false);
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/module/coupons');
+      const data = await res.json();
+      const activeCoupons = Array.isArray(data) ? data : [];
+      const found = activeCoupons.find(c => c.code && c.code.toUpperCase() === code && (c.status || 'Active') === 'Active');
+
+      if (found) {
+        let discount = 0;
+        if (found.discount_type === 'fixed' || (found.discount_amount && Number(found.discount_amount) > 0)) {
+          discount = parseFloat(found.discount_amount || 0);
+        } else {
+          const pct = parseFloat(found.discount_percentage || 10);
+          discount = Math.round(cartTotal * (pct / 100));
+        }
+        setAppliedDiscount(discount);
+        setCouponMessage(`✓ Coupon ${found.code} applied! (${found.description || `${found.discount_percentage}% OFF`})`);
+        setCouponApplied(true);
+      } else {
+        if (code === 'LAILA10' || code === 'WELCOME10') {
+          setAppliedDiscount(Math.round(cartTotal * 0.1));
+          setCouponMessage('✓ Coupon LAILA10 applied! (10% OFF)');
+          setCouponApplied(true);
+        } else if (code === 'EID2026') {
+          setAppliedDiscount(Math.round(cartTotal * 0.2));
+          setCouponMessage('✓ Coupon EID2026 applied! (20% OFF)');
+          setCouponApplied(true);
+        } else {
+          setAppliedDiscount(0);
+          setCouponMessage('Invalid or expired coupon code.');
+          setCouponApplied(false);
+        }
+      }
+    } catch (err) {
+      if (code === 'LAILA10') {
+        setAppliedDiscount(Math.round(cartTotal * 0.1));
+        setCouponMessage('✓ Coupon LAILA10 applied! (10% OFF)');
+        setCouponApplied(true);
+      } else {
+        setAppliedDiscount(0);
+        setCouponMessage('Invalid coupon code.');
+        setCouponApplied(false);
+      }
     }
   };
 
   const finalTotal = Math.max(0, cartTotal - appliedDiscount);
-
-  const sendToWhatsApp = () => {
-    let message = `*🛒 NEW ORDER REQUEST - LAILA HIJABS*\n\n`;
-    message += `*Ordered Items:*\n`;
-    cartItems.forEach((item, idx) => {
-      message += `▪️ ${item.quantity}x ${item.name} (${item.size || "M"}/${item.color || "Olive"}) - Rs. ${(item.price * item.quantity).toLocaleString()}\n`;
-    });
-    message += `\n*Subtotal:* Rs. ${cartTotal.toLocaleString()}\n`;
-    if (appliedDiscount > 0) {
-      message += `*Discount:* -Rs. ${appliedDiscount.toLocaleString()}\n`;
-    }
-    message += `*Shipping:* FREE\n`;
-    message += `*GRAND TOTAL:* *Rs. ${finalTotal.toLocaleString()}*\n\n`;
-    message += `Please confirm my order. Thank you! ✨`;
-
-    const whatsappUrl = `https://wa.me/923238399480?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
 
   return (
     <div className="cart-container">
@@ -101,9 +139,9 @@ const CartPage = () => {
                   <img src={item.image || "/hero2.png"} alt={item.name} className="item-image" />
                   <div className="item-details">
                     <h3>{item.name}</h3>
-                    <p className="item-desc">{item.description || "Premium Modest Wear Collection"}</p>
+                    <p className="item-desc">{item.description || "Lightweight and breathable."}</p>
                     <p className="item-variant">
-                      Size <strong>{item.size || "M"}</strong> / Color <strong>{item.color || "Olive"}</strong>
+                      Size <strong>{item.size || "S"}</strong> / Color <strong>{item.color || "Dusty Rose"}</strong>
                     </p>
                     <div className="item-pricing">
                       <span className="current-price">Rs. {item.price.toLocaleString()}</span>
@@ -126,9 +164,9 @@ const CartPage = () => {
             ))}
             
             <div style={{ textAlign: 'left', marginTop: '20px' }}>
-              <Link to="/categories" style={{ textDecoration: 'none' }} onClick={() => window.scrollTo(0, 0)}>
+              <Link to="/products" style={{ textDecoration: 'none' }} onClick={() => window.scrollTo(0, 0)}>
                 <button style={{ background: '#eae7dc', border: '1px solid #ccc', color: '#333', padding: '10px 20px', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '2px' }}>
-                  ← CONTINUE SHOPPING
+                  {continueShoppingText}
                 </button>
               </Link>
             </div>
@@ -137,9 +175,9 @@ const CartPage = () => {
           {/* Right Column: Order Summary & Coupon Code */}
           <div className="cart-summary-section">
             <div className="summary-box">
-              <h3>Order Summary</h3>
+              <h3>{summaryHeading}</h3>
               <div className="summary-row">
-                <span>Sub Total</span>
+                <span>{subtotalLabel}</span>
                 <span>Rs. {cartTotal.toLocaleString()}</span>
               </div>
               
@@ -151,21 +189,21 @@ const CartPage = () => {
               )}
 
               <div className="summary-row">
-                <span>Shipping</span>
-                <span className="free-shipping">Free</span>
+                <span>{shippingLabel}</span>
+                <span className="free-shipping">{shippingValue}</span>
               </div>
               <hr className="summary-divider" />
               <div className="summary-row total-row">
-                <span>Total</span>
+                <span>{totalLabel}</span>
                 <span>Rs. {finalTotal.toLocaleString()}</span>
               </div>
 
               <div className="cart-actions-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
                 <Link to="/checkout" style={{ textDecoration: 'none' }}>
-                  <button className="checkout-btn" style={{ width: '100%' }}>Proceed to Checkout</button>
+                  <button className="checkout-btn" style={{ width: '100%' }}>{checkoutBtnText}</button>
                 </Link>
               </div>
-              <p className="delivery-estimate">Estimated Delivery by <strong>30 July, 2026</strong></p>
+              <p className="delivery-estimate">{deliveryEstimateText}</p>
             </div>
 
             {/* Coupon Code Section Directly Below Order Summary */}

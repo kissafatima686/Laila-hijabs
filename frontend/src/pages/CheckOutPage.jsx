@@ -22,21 +22,34 @@ const CheckoutPage = () => {
 
   const [errors, setErrors] = useState({});
 
-  // Dynamic Settings
+  // Dynamic Settings from Admin CMS
   const title = getSectionContent('checkout_page_settings', 'title', 'Checkout');
+  const step1 = getSectionContent('checkout_page_settings', 'step_1_label', '1. Cart');
   const step2 = getSectionContent('checkout_page_settings', 'step_2_label', '2. Checkout');
-  const contactInfoTitle = getSectionContent('checkout_page_settings', 'contact_info_title', 'Contact Information');
+  const step3 = getSectionContent('checkout_page_settings', 'step_3_label', '3. Payment');
+
+  const contactTitle = getSectionContent('checkout_page_settings', 'contact_title', 'Contact Information');
   const emailLabel = getSectionContent('checkout_page_settings', 'email_label', 'Email Address');
+  const emailPlaceholder = getSectionContent('checkout_page_settings', 'email_placeholder', 'you@example.com');
   const phoneLabel = getSectionContent('checkout_page_settings', 'phone_label', 'Phone Number');
-  const shippingAddressTitle = getSectionContent('checkout_page_settings', 'shipping_address_title', 'Shipping Address');
+  const phonePlaceholder = getSectionContent('checkout_page_settings', 'phone_placeholder', '+92 323 8399480');
+
+  const shippingTitle = getSectionContent('checkout_page_settings', 'shipping_title', 'Shipping Address');
   const firstNameLabel = getSectionContent('checkout_page_settings', 'first_name_label', 'First Name');
   const lastNameLabel = getSectionContent('checkout_page_settings', 'last_name_label', 'Last Name');
-  const streetAddressLabel = getSectionContent('checkout_page_settings', 'street_address_label', 'Street Address');
-  const townCityLabel = getSectionContent('checkout_page_settings', 'town_city_label', 'Town / City');
+  const streetLabel = getSectionContent('checkout_page_settings', 'street_label', 'Street Address');
+  const streetPlaceholder = getSectionContent('checkout_page_settings', 'street_placeholder', 'House number and street name');
+  const cityLabel = getSectionContent('checkout_page_settings', 'city_label', 'Town / City');
   const postcodeLabel = getSectionContent('checkout_page_settings', 'postcode_label', 'Postcode');
   const countryLabel = getSectionContent('checkout_page_settings', 'country_label', 'Country / Region');
-  const continueBtn = getSectionContent('checkout_page_settings', 'continue_to_payment_btn', 'Continue to Payment');
-  const returnBtn = getSectionContent('checkout_page_settings', 'return_to_cart_btn', 'Return to Cart');
+
+  const summaryHeading = getSectionContent('checkout_page_settings', 'summary_heading', 'Order Summary');
+  const subtotalLabel = getSectionContent('checkout_page_settings', 'subtotal_label', 'Sub Total');
+  const shippingLabel = getSectionContent('checkout_page_settings', 'shipping_label', 'Shipping');
+  const shippingValue = getSectionContent('checkout_page_settings', 'shipping_value', 'Free');
+  const totalPayLabel = getSectionContent('checkout_page_settings', 'total_pay_label', 'Total to Pay');
+  const paymentButtonText = getSectionContent('checkout_page_settings', 'payment_button_text', 'Continue to Payment');
+  const returnCartText = getSectionContent('checkout_page_settings', 'return_cart_text', '← Return to Cart');
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -51,8 +64,8 @@ const CheckoutPage = () => {
     if (!formData.phone.trim()) newErrors.phone = `${phoneLabel} is required`;
     if (!formData.firstName.trim()) newErrors.firstName = `${firstNameLabel} is required`;
     if (!formData.lastName.trim()) newErrors.lastName = `${lastNameLabel} is required`;
-    if (!formData.address.trim()) newErrors.address = `${streetAddressLabel} is required`;
-    if (!formData.city.trim()) newErrors.city = `${townCityLabel} is required`;
+    if (!formData.address.trim()) newErrors.address = `${streetLabel} is required`;
+    if (!formData.city.trim()) newErrors.city = `${cityLabel} is required`;
     if (!formData.postcode.trim()) newErrors.postcode = `${postcodeLabel} is required`;
     if (!formData.country.trim()) newErrors.country = `${countryLabel} is required`;
     return newErrors;
@@ -60,60 +73,65 @@ const CheckoutPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      window.scrollTo({ top: 100, behavior: 'smooth' });
-    } else {
-      setErrors({});
-      navigate('/payment');
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      return;
     }
+    navigate('/payment');
   };
 
   return (
     <div className="checkout-container">
       <h1 className="checkout-title">{title}</h1>
-
+      
       {/* Progress Steps */}
       <div className="checkout-steps">
-        <Link to="/cart" className="step completed-step">1. Cart</Link>
+        <Link to="/cart" className="step completed-step">{step1}</Link>
         <span className="step-divider">—</span>
         <span className="step active">{step2}</span>
         <span className="step-divider">—</span>
-        <span className="step">3. Payment</span>
+        <span className="step upcoming-step">{step3}</span>
       </div>
 
-      <form onSubmit={handleSubmit} className="checkout-grid" noValidate>
-        {/* Left Column: Contact & Shipping Form */}
-        <div className="checkout-form-section">
-          <div className="form-box">
-            <h2>{contactInfoTitle}</h2>
+      <form onSubmit={handleSubmit} className="checkout-content-grid">
+        {/* Left Column: Forms */}
+        <div className="checkout-forms-section">
+          {/* Contact Info Card */}
+          <div className="checkout-card">
+            <h3>{contactTitle}</h3>
+            
             <div className="input-group">
               <label>{emailLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
               <input 
                 type="email" 
-                placeholder="you@example.com" 
+                placeholder={emailPlaceholder}
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                required 
+                required
                 style={errors.email ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
               />
               {errors.email && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.email}</span>}
             </div>
+
             <div className="input-group">
               <label>{phoneLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
               <input 
                 type="tel" 
-                placeholder="+92 323 8399480" 
+                placeholder={phonePlaceholder}
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
-                required 
+                required
                 style={errors.phone ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
               />
               {errors.phone && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.phone}</span>}
             </div>
+          </div>
 
-            <h2 className="section-spacing">{shippingAddressTitle}</h2>
+          {/* Shipping Address Card */}
+          <div className="checkout-card">
+            <h3>{shippingTitle}</h3>
+            
             <div className="form-row">
               <div className="input-group">
                 <label>{firstNameLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
@@ -121,18 +139,19 @@ const CheckoutPage = () => {
                   type="text" 
                   value={formData.firstName}
                   onChange={(e) => handleChange('firstName', e.target.value)}
-                  required 
+                  required
                   style={errors.firstName ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
                 />
                 {errors.firstName && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.firstName}</span>}
               </div>
+
               <div className="input-group">
                 <label>{lastNameLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
                 <input 
                   type="text" 
                   value={formData.lastName}
                   onChange={(e) => handleChange('lastName', e.target.value)}
-                  required 
+                  required
                   style={errors.lastName ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
                 />
                 {errors.lastName && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.lastName}</span>}
@@ -140,13 +159,13 @@ const CheckoutPage = () => {
             </div>
 
             <div className="input-group">
-              <label>{streetAddressLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
+              <label>{streetLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
               <input 
                 type="text" 
-                placeholder="House number and street name" 
+                placeholder={streetPlaceholder}
                 value={formData.address}
                 onChange={(e) => handleChange('address', e.target.value)}
-                required 
+                required
                 style={errors.address ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
               />
               {errors.address && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.address}</span>}
@@ -154,23 +173,24 @@ const CheckoutPage = () => {
 
             <div className="form-row">
               <div className="input-group">
-                <label>{townCityLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
+                <label>{cityLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
                 <input 
                   type="text" 
                   value={formData.city}
                   onChange={(e) => handleChange('city', e.target.value)}
-                  required 
+                  required
                   style={errors.city ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
                 />
                 {errors.city && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.city}</span>}
               </div>
+
               <div className="input-group">
                 <label>{postcodeLabel} <span style={{ color: '#c92a2a' }}>*</span></label>
                 <input 
                   type="text" 
                   value={formData.postcode}
                   onChange={(e) => handleChange('postcode', e.target.value)}
-                  required 
+                  required
                   style={errors.postcode ? { borderColor: '#c92a2a', backgroundColor: '#fff5f5' } : {}}
                 />
                 {errors.postcode && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.postcode}</span>}
@@ -193,17 +213,12 @@ const CheckoutPage = () => {
               {errors.country && <span style={{ color: '#c92a2a', fontSize: '11px', marginTop: '4px', display: 'block', fontWeight: '500' }}>{errors.country}</span>}
             </div>
           </div>
-          
-          <div className="checkout-actions">
-            <Link to="/cart" className="return-link">‹ {returnBtn}</Link>
-            <button type="submit" className="continue-btn">{continueBtn}</button>
-          </div>
         </div>
 
         {/* Right Column: Order Summary */}
         <div className="checkout-summary-section">
           <div className="summary-box">
-            <h3>Order Summary</h3>
+            <h3>{summaryHeading}</h3>
             
             {/* Quick item preview */}
             <div className="summary-items-preview">
@@ -217,23 +232,23 @@ const CheckoutPage = () => {
             <hr className="summary-divider" />
 
             <div className="summary-row">
-              <span>Sub Total</span>
+              <span>{subtotalLabel}</span>
               <span>Rs. {cartTotal.toLocaleString()}</span>
             </div>
             <div className="summary-row">
-              <span>Shipping</span>
-              <span className="free-shipping">Free</span>
+              <span>{shippingLabel}</span>
+              <span className="free-shipping">{shippingValue}</span>
             </div>
             <hr className="summary-divider" />
             <div className="summary-row total-row">
-              <span>Total to Pay</span>
+              <span>{totalPayLabel}</span>
               <span>Rs. {cartTotal.toLocaleString()}</span>
             </div>
 
-            <button type="submit" className="payment-btn">Continue to Payment</button>
+            <button type="submit" className="payment-btn">{paymentButtonText}</button>
             
             <Link to="/cart" className="back-to-cart-link">
-              ← Return to Cart
+              {returnCartText}
             </Link>
           </div>
         </div>

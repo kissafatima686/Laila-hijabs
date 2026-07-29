@@ -6,7 +6,9 @@ import {
   IoCubeOutline, 
   IoLocationOutline, 
   IoSettingsOutline, 
-  IoLogOutOutline 
+  IoLogOutOutline,
+  IoHeartOutline,
+  IoCutOutline
 } from 'react-icons/io5';
 
 const AccountPage = () => {
@@ -190,12 +192,14 @@ const AccountPage = () => {
     );
   }
 
+  const welcomePrefix = getSectionContent('account_page_settings', 'welcome_prefix', 'Welcome back, ');
+
   return (
     <div className="account-container">
       <div className="account-header">
         <h1>{pageTitle}</h1>
         <p>{pageSubtitle}</p>
-        <p>Welcome back, <strong>{userData.name}</strong></p>
+        <p>{welcomePrefix}<strong>{userData.name}</strong></p>
       </div>
 
       <div className="account-grid">
@@ -213,6 +217,20 @@ const AccountPage = () => {
             onClick={() => setActiveTab('addresses')}
           >
             <IoLocationOutline size={18} /> Saved Addresses
+          </button>
+
+          <button 
+            className={`tab-btn ${activeTab === 'wishlist' ? 'active' : ''}`}
+            onClick={() => setActiveTab('wishlist')}
+          >
+            <IoHeartOutline size={18} /> My Wishlist
+          </button>
+
+          <button 
+            className={`tab-btn ${activeTab === 'custom_orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('custom_orders')}
+          >
+            <IoCutOutline size={18} /> Custom Orders
           </button>
           
           <button 
@@ -351,7 +369,41 @@ const AccountPage = () => {
             </div>
           )}
 
-          {/* TAB 3: ACCOUNT DETAILS */}
+          {/* TAB 3: MY WISHLIST */}
+          {activeTab === 'wishlist' && (
+            <div className="tab-pane">
+              <h2>My Wishlist</h2>
+              <p className="empty-text" style={{ marginBottom: '20px' }}>Quickly access and view all your saved items.</p>
+              <Link to="/wishlist" className="save-btn" style={{ display: 'inline-block', textDecoration: 'none', textAlign: 'center' }}>
+                View Full Wishlist Page
+              </Link>
+            </div>
+          )}
+
+          {/* TAB 4: CUSTOM ORDERS */}
+          {activeTab === 'custom_orders' && (
+            <div className="tab-pane">
+              <h2>Custom Tailoring Requests</h2>
+              <div className="orders-list">
+                <div className="order-card">
+                  <div className="order-card-header">
+                    <div>
+                      <span className="order-id">#CUST-9042</span>
+                      <span className="order-date">24 July, 2026</span>
+                    </div>
+                    <span className="order-status processing">In Progress</span>
+                  </div>
+                  <p className="order-items">Bespoke Silk Abaya (Custom Length & Special Embroidery)</p>
+                  <div className="order-card-footer">
+                    <span className="order-total">Status: <strong>Patterning & Stitching</strong></span>
+                    <Link to="/contact-us" className="help-link">Need Help?</Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: ACCOUNT DETAILS */}
           {activeTab === 'details' && (
             <div className="tab-pane">
               <h2>Account Details</h2>

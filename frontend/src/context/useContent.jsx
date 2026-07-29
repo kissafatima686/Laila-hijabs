@@ -6,12 +6,10 @@ export function ContentProvider({ children }) {
   const [sections, setSections] = useState({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Fetch all dynamic sections from the backend API
-    fetch('http://localhost:5000/api/sections')
+  const fetchSections = () => {
+    fetch('http://localhost:5000/api/admin/sections')
       .then((res) => res.json())
       .then((data) => {
-        // Convert array of sections into a key-value dictionary for fast lookups
         const map = {};
         if (Array.isArray(data)) {
           data.forEach((item) => {
@@ -41,19 +39,34 @@ export function ContentProvider({ children }) {
         console.error('Failed to load dynamic site content', err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchSections();
   }, []);
 
   // Helper to grab text or image dynamically: getSectionContent('home_hero', 'title', 'Default Title')
-  // Returns fallback if the section, the field, or the disabled state is triggered.
+  // Returns null if deactivated/disabled so element is hidden from frontend!
   const getSectionContent = (sectionKey, fieldKey, fallback = '') => {
     if (!sections[sectionKey]) return fallback;
-    const val = sections[sectionKey][fieldKey];
-    if (typeof val === 'string' && val.startsWith('[DISABLED]')) return null;
-    return val !== undefined && val !== null && val !== '' ? val : fallback;
+    const sec = sections[sectionKey];
+
+    // Check explicitly saved field statuses
+    const fieldStatuses = sec.field_statuses || {};
+    if (fieldStatuses[fieldKey] === 'Inactive' || fieldStatuses[fieldKey] === 'Draft' || fieldStatuses[fieldKey] === 'Disabled') {
+      return null;
+    }
+
+    const val = sec[fieldKey];
+    if (typeof val === 'string' && (val === '[DISABLED]' || val.startsWith('[DISABLED]'))) {
+      return null;
+    }
+
+    return val !== undefined && val !== null ? val : fallback;
   };
 
   return (
-    <ContentContext.Provider value={{ getSectionContent, sections, loading }}>
+    <ContentContext.Provider value={{ getSectionContent, sections, loading, refetchContent: fetchSections }}>
       {children}
     </ContentContext.Provider>
   );
