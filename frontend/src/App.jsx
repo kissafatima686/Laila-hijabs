@@ -61,6 +61,7 @@ function App() {
               <Route path="/offers" element={<OffersPage />} />
               <Route path="/categories" element={<AllCategoriesPage />} />
               <Route path="/categories/:categoryId" element={<CategoriesPage />} />
+              <Route path="/collections" element={<CategoriesPage />} />
               <Route path="/custom-orders" element={<CustomOrdersPage />} />
               <Route path="/about" element={<AboutUsPage />} />
               <Route path="/blogs" element={<BlogsPage />} />

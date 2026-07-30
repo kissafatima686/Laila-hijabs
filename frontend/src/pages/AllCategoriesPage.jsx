@@ -1,53 +1,34 @@
-// src/pages/AllCategoriesPage.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './AllCategoriesPage.css';
 
 const AllCategoriesPage = () => {
-  const collections = [
-    {
-      title: "Abayas",
-      count: "5 Designs",
-      desc: "Structured yet soft silhouettes tailored generously for daily grace and formal Eid gatherings.",
-      image: "/Categories/abaya/abaya1.png",
-      path: "/categories/abayas"
-    },
-    {
-      title: "Hijabs",
-      count: "2 Colors",
-      desc: "Premium fabrics crafted with hand-rolled edges for everyday and formal elegance.",
-      image: "/Categories/hijabs/hijab1.png",
-      path: "/categories/hijabs"
-    },
-    {
-      title: "Irani Chadar",
-      count: "5 Designs",
-      desc: "Traditional flowing chadar providing full coverage with an elegant drape.",
-      image: "/Categories/iranichadar/irani1.png",
-      path: "/categories/irani-chadar"
-    },
-    {
-      title: "Jilbab",
-      count: "4 Designs",
-      desc: "Classic overhead and two-piece jilbabs designed for comfort and modesty.",
-      image: "/Categories/jilbab/jilbab.png",
-      path: "/categories/jilbab"
-    },
-    {
-      title: "Namaz Chadar",
-      count: "1 Design",
-      desc: "Breathable and comfortable prayer chadar for your daily devotions.",
-      image: "/Categories/namazchadar/namazchaddar.png",
-      path: "/categories/namaz-chadar"
-    },
-    {
-      title: "Round Chadar",
-      count: "1 Design",
-      desc: "Classic round chadar ensuring perfect coverage with premium nida fabric.",
-      image: "/Categories/roundchadar/round1.png",
-      path: "/categories/round-chadar"
-    }
-  ];
+  const [collections, setCollections] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/categories')
+      .then(res => res.json())
+      .then(data => {
+        const formatted = data.map(cat => ({
+          title: cat.name,
+          count: "Explore Collection",
+          desc: cat.description,
+          image: cat.image_url,
+          path: `/categories/${cat.slug}`
+        }));
+        setCollections(formatted);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch categories", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: '100px 20px' }}>Loading categories...</div>;
+  }
 
   return (
     <div className="all-cats-wrapper">
