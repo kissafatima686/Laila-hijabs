@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 const SECTION_CONFIGS = {
   global_navbar: {
@@ -212,13 +213,14 @@ const SECTION_CONFIGS = {
     metaKeys: []
   },
   home_whatsapp_float: {
-    label: 'WhatsApp Float Button',
+    label: 'Floating WhatsApp & Socials',
     fields: ['title', 'button_link'],
     metaKeys: [
       { key: 'is_enabled', label: 'Enabled? (true/false)', type: 'text' },
-      { key: 'phone', label: 'Phone Number (with country code)', type: 'text' },
+      { key: 'phone', label: 'WhatsApp Phone Number (with country code)', type: 'text' },
       { key: 'message', label: 'Pre-filled WhatsApp Message', type: 'text' },
-      { key: 'position', label: 'Position (bottom-right / bottom-left)', type: 'text' }
+      { key: 'position', label: 'Position (bottom-right / bottom-left)', type: 'text' },
+      { key: 'social_items', label: 'Floating Social Icons & Links', type: 'array', subfields: ['icon', 'label', 'url'] }
     ]
   },
   home_value_slider: {
@@ -258,12 +260,15 @@ const SECTION_CONFIGS = {
     ]
   },
   products_specs_template: {
-    label: 'Specifications & Customization Template',
-    fields: ['title', 'body_content'],
+    label: 'Product Specifications & Tailoring Template',
+    fields: ['title', 'subtitle', 'body_content'],
     metaKeys: [
-      { key: 'spec_labels', label: 'Specification Labels (comma separated)', type: 'csv' },
-      { key: 'care_instructions', label: 'Default Care Instructions', type: 'text' },
-      { key: 'customization_note', label: 'Customization Note', type: 'text' }
+      { key: 'spec_labels', label: 'Specification Fields (comma separated)', type: 'csv', placeholder: 'Fabric, Fit, Care Instructions, Country of Origin, Lining' },
+      { key: 'default_fabric', label: 'Default Fabric Specification', type: 'text', placeholder: 'Korean Nida / Silk Crepe' },
+      { key: 'default_fit', label: 'Default Fit Specification', type: 'text', placeholder: 'Saudi Flared Loose Fit' },
+      { key: 'care_instructions', label: 'Default Care Instructions', type: 'textarea', placeholder: 'Dry clean only. Do not bleach. Store in a cool dry place.' },
+      { key: 'country_of_origin', label: 'Country of Origin / Craftsmanship', type: 'text', placeholder: 'Handcrafted in Pakistan' },
+      { key: 'customization_note', label: 'Customization & Tailoring Note', type: 'textarea', placeholder: 'Custom colours and bespoke sizing available on request.' }
     ]
   },
 
@@ -361,15 +366,13 @@ const SECTION_CONFIGS = {
 
   // ─── GLOBAL ──────────────────────────────────────────────────────────────────
   navbar_settings: {
-    label: 'Navbar Settings',
-    fields: ['title', 'badge_text'],
+    label: 'Branding & Logo',
+    fields: [],
     metaKeys: [
-      { key: 'logo_text', label: 'Logo Text', type: 'text' },
-      { key: 'show_search', label: 'Show Search Icon (true/false)', type: 'text' },
-      { key: 'show_wishlist', label: 'Show Wishlist Icon (true/false)', type: 'text' },
-      { key: 'show_cart', label: 'Show Cart Icon (true/false)', type: 'text' },
-      { key: 'show_account', label: 'Show Account Icon (true/false)', type: 'text' },
-      { key: 'sticky', label: 'Sticky Navbar (true/false)', type: 'text' }
+      { key: 'logo_text', label: 'Logo Text (e.g., Laila)', type: 'text' },
+      { key: 'badge_text', label: 'Badge Text (e.g., HIJABS)', type: 'text' },
+      { key: 'logo_font_size', label: 'Logo Text Size (e.g., 28px or 1.5rem)', type: 'text' },
+      { key: 'logo_font_color', label: 'Logo Text Color (e.g., #FFFFFF)', type: 'text' }
     ]
   },
   footer_settings: {
@@ -468,11 +471,15 @@ const ArrayEditor = ({ items = [], subfields, onChange }) => {
 };
 
 // ─── Main Section Editor ───────────────────────────────────────────────────────
-const SectionEditorPage = ({ sectionKey }) => {
-  const config = SECTION_CONFIGS[sectionKey];
+const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
+  const params = useParams();
+  const sectionKey = propSectionKey || params?.sectionKey;
+  const [activeSectionKey, setActiveSectionKey] = useState(sectionKey);
+  const [config, setConfig] = useState(SECTION_CONFIGS[sectionKey] || { label: sectionKey, fields: ['title', 'subtitle', 'body_content', 'image_url', 'button_text', 'button_link'], metaKeys: [] });
   const [data, setData] = useState(null);
   const [form, setForm] = useState({});
   const [metaForm, setMetaForm] = useState({});
+  const [customFields, setCustomFields] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -480,21 +487,34 @@ const SectionEditorPage = ({ sectionKey }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [imagePreview2, setImagePreview2] = useState(null);
 
+  // New Section Modal State
+  const [showNewSectionModal, setShowNewSectionModal] = useState(false);
+  const [newSectionForm, setNewSectionForm] = useState({
+    key: '',
+    title: '',
+    subtitle: '',
+    fields: ['title', 'subtitle', 'body_content', 'image_url', 'button_text', 'button_link']
+  });
+
   const fetchSection = () => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:5000/api/admin/sections/${sectionKey}`)
+    const targetKey = activeSectionKey || sectionKey;
+    const currentConfig = SECTION_CONFIGS[targetKey] || { label: targetKey, fields: ['title', 'subtitle', 'body_content', 'image_url', 'button_text', 'button_link'], metaKeys: [] };
+    setConfig(currentConfig);
+
+    fetch(`http://localhost:5000/api/admin/sections/${targetKey}`)
       .then(r => r.json())
       .then(d => {
         setData(d);
         const f = {};
-        (config?.fields || []).forEach(field => {
+        (currentConfig.fields || []).forEach(field => {
           f[field] = d[field] || '';
         });
         setForm(f);
         const meta = d.metadata || {};
         const mf = {};
-        (config?.metaKeys || []).forEach(mk => {
+        (currentConfig.metaKeys || []).forEach(mk => {
           if (mk.type === 'csv') {
             mf[mk.key] = Array.isArray(meta[mk.key]) ? meta[mk.key].join(', ') : (meta[mk.key] || '');
           } else {
@@ -502,6 +522,11 @@ const SectionEditorPage = ({ sectionKey }) => {
           }
         });
         setMetaForm(mf);
+        if (Array.isArray(meta.custom_fields)) {
+          setCustomFields(meta.custom_fields);
+        } else {
+          setCustomFields([]);
+        }
         setImagePreview(d.image_url || null);
         setImagePreview2(d.image_url_2 || null);
       })
@@ -510,8 +535,12 @@ const SectionEditorPage = ({ sectionKey }) => {
   };
 
   useEffect(() => {
-    fetchSection();
+    setActiveSectionKey(sectionKey);
   }, [sectionKey]);
+
+  useEffect(() => {
+    fetchSection();
+  }, [activeSectionKey]);
 
   const handleSave = () => {
     setSaving(true);
@@ -524,8 +553,15 @@ const SectionEditorPage = ({ sectionKey }) => {
         builtMeta[mk.key] = metaForm[mk.key] || (mk.type === 'array' ? [] : '');
       }
     });
+
+    if (customFields.length > 0) {
+      builtMeta.custom_fields = customFields;
+    }
+
     const payload = { ...form, metadata: Object.keys(builtMeta).length > 0 ? builtMeta : null };
-    fetch(`http://localhost:5000/api/admin/sections/${sectionKey}`, {
+    const targetKey = activeSectionKey || sectionKey;
+
+    fetch(`http://localhost:5000/api/admin/sections/${targetKey}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -534,6 +570,63 @@ const SectionEditorPage = ({ sectionKey }) => {
       .then(() => { setSaved(true); setTimeout(() => setSaved(false), 3000); })
       .catch(() => setError('Failed to save. Please try again.'))
       .finally(() => setSaving(false));
+  };
+
+  const handleAddCustomField = () => {
+    const fieldName = window.prompt("Enter the label for the new text field / column:");
+    if (!fieldName || !fieldName.trim()) return;
+    const fieldKey = fieldName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    setCustomFields(prev => [...prev, { key: fieldKey, label: fieldName.trim(), value: '' }]);
+  };
+
+  const handleRemoveCustomField = (index) => {
+    setCustomFields(prev => prev.filter((_, idx) => idx !== index));
+  };
+
+  const handleUpdateCustomField = (index, val) => {
+    setCustomFields(prev => prev.map((f, idx) => idx === index ? { ...f, value: val } : f));
+  };
+
+  const handleCreateNewSection = (e) => {
+    e.preventDefault();
+    if (!newSectionForm.key || !newSectionForm.title) return;
+    const cleanKey = newSectionForm.key.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+
+    const payload = {
+      title: newSectionForm.title,
+      subtitle: newSectionForm.subtitle || '',
+      metadata: { custom_fields: [] }
+    };
+
+    fetch(`http://localhost:5000/api/admin/sections/${cleanKey}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(() => {
+        SECTION_CONFIGS[cleanKey] = {
+          label: newSectionForm.title,
+          fields: newSectionForm.fields,
+          metaKeys: []
+        };
+        setShowNewSectionModal(false);
+        setActiveSectionKey(cleanKey);
+        alert(`New section "${newSectionForm.title}" created successfully!`);
+      })
+      .catch(err => console.error("Error creating new section:", err));
+  };
+
+  const handleDeleteSection = () => {
+    const targetKey = activeSectionKey || sectionKey;
+    if (!window.confirm(`Are you sure you want to delete section "${targetKey}"?`)) return;
+    fetch(`http://localhost:5000/api/admin/sections/${targetKey}`, {
+      method: 'DELETE'
+    })
+      .then(() => {
+        alert("Section deleted successfully!");
+        window.location.reload();
+      })
+      .catch(err => console.error("Error deleting section:", err));
   };
 
   if (!config) return (
@@ -563,7 +656,13 @@ const SectionEditorPage = ({ sectionKey }) => {
             All changes are saved to MySQL and reflected on the live frontend.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button onClick={() => setShowNewSectionModal(true)} style={{ padding: '10px 16px', borderRadius: '8px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+            + Add New Section
+          </button>
+          <button onClick={handleDeleteSection} style={{ padding: '10px 14px', borderRadius: '8px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', color: '#EF4444', fontSize: '13px', cursor: 'pointer' }}>
+            Delete Section
+          </button>
           {saved && (
             <span style={{ fontSize: '13px', color: '#22c55e', fontWeight: '600', padding: '8px 16px', borderRadius: '8px', backgroundColor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved
@@ -623,6 +722,44 @@ const SectionEditorPage = ({ sectionKey }) => {
               </div>
             </div>
 
+            {/* Custom Text Fields & Columns Section */}
+            <div style={{ backgroundColor: '#222C1A', borderRadius: '16px', padding: '24px', border: '1px solid rgba(184,147,91,0.3)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#F6F1E3' }}>
+                  Custom Text Fields & Columns
+                </h3>
+                <button onClick={handleAddCustomField} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: '#B8935B', border: 'none', color: '#1A2010', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                  + Add Text Field / Column
+                </button>
+              </div>
+
+              {customFields.length === 0 ? (
+                <div style={{ color: '#B8A99A', fontSize: '13px', fontStyle: 'italic' }}>
+                  No custom text fields or columns added yet. Click "+ Add Text Field / Column" above to add new fields to this section!
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {customFields.map((cf, idx) => (
+                    <div key={idx} style={{ backgroundColor: '#182012', padding: '14px', borderRadius: '10px', border: '1px solid rgba(184,147,91,0.2)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ ...labelStyle, marginBottom: 0 }}>{cf.label || `Field ${idx + 1}`}</label>
+                        <button onClick={() => handleRemoveCustomField(idx)} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: '4px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                          Remove Field
+                        </button>
+                      </div>
+                      <input 
+                        type="text" 
+                        value={cf.value || ''} 
+                        onChange={e => handleUpdateCustomField(idx, e.target.value)} 
+                        style={inputStyle} 
+                        placeholder={`Enter ${cf.label}...`} 
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Metadata / Dynamic Config Fields */}
             {config.metaKeys && config.metaKeys.length > 0 && (
               <div style={{ backgroundColor: '#222C1A', borderRadius: '16px', padding: '24px', border: '1px solid rgba(184,147,91,0.3)' }}>
@@ -631,7 +768,8 @@ const SectionEditorPage = ({ sectionKey }) => {
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   {config.metaKeys.map(mk => {
-                    const val = metaForm[mk.key] || '';
+                    const rawVal = metaForm[mk.key];
+                    const val = typeof rawVal === 'string' ? rawVal : (rawVal !== undefined && rawVal !== null ? JSON.stringify(rawVal, null, 2) : '');
                     const isEnabled = !val.startsWith('[DISABLED]');
                     const cleanVal = val.replace(/^\[DISABLED\]\s*/, '');
 
@@ -661,61 +799,66 @@ const SectionEditorPage = ({ sectionKey }) => {
                                 }));
                               }}
                               style={{
-                                padding: '5px 12px',
-                                borderRadius: '8px',
-                                fontSize: '11px',
-                                fontWeight: '700',
+                                padding: '7px 12px',
+                                borderRadius: '6px',
+                                backgroundColor: '#3E4930',
+                                border: '1px solid #B8935B',
+                                color: '#F6F1E3',
+                                fontSize: '12px',
                                 cursor: 'pointer',
-                                border: 'none',
-                                backgroundColor: isEnabled ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
-                                color: isEnabled ? '#22c55e' : '#ef4444',
+                                display: 'flex',
+                                alignItems: 'center',
                                 transition: 'all 0.15s ease'
                               }}
                             >
-                              {isEnabled ? 'Active' : 'Disabled'}
+                              {isEnabled ? 'Deactivate' : 'Activate'}
                             </button>
 
                             {/* Edit Button */}
                             <button
                               type="button"
+                              title="Edit"
                               onClick={() => {
                                 const inputEl = document.getElementById(`meta_input_${mk.key}`);
                                 if (inputEl) inputEl.focus();
                               }}
                               style={{
-                                padding: '5px 12px',
-                                borderRadius: '8px',
-                                fontSize: '11px',
-                                fontWeight: '700',
+                                padding: '7px 12px',
+                                borderRadius: '6px',
+                                backgroundColor: '#3E4930',
+                                border: '1px solid #B8935B',
+                                color: '#F6F1E3',
+                                fontSize: '12px',
                                 cursor: 'pointer',
-                                border: 'none',
-                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                                color: '#60a5fa',
+                                display: 'flex',
+                                alignItems: 'center',
                                 transition: 'all 0.15s ease'
                               }}
                             >
-                              Edit
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             </button>
 
                             {/* Delete Button */}
                             <button
                               type="button"
+                              title="Delete"
                               onClick={() => {
                                 setMetaForm(prev => ({ ...prev, [mk.key]: '' }));
                               }}
                               style={{
-                                padding: '5px 12px',
-                                borderRadius: '8px',
-                                fontSize: '11px',
-                                fontWeight: '700',
+                                padding: '7px 12px',
+                                borderRadius: '6px',
+                                backgroundColor: '#3E4930',
+                                border: '1px solid #ef4444',
+                                color: '#ef4444',
+                                fontSize: '12px',
                                 cursor: 'pointer',
-                                border: 'none',
-                                backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                                color: '#f87171',
+                                display: 'flex',
+                                alignItems: 'center',
                                 transition: 'all 0.15s ease'
                               }}
                             >
-                              Delete
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             </button>
                           </div>
                         </div>
@@ -884,6 +1027,61 @@ const SectionEditorPage = ({ sectionKey }) => {
                 Last saved: {new Date(data.updated_at).toLocaleString()}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* New Section Creation Modal */}
+      {showNewSectionModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#222C1A', borderRadius: '16px', padding: '26px', width: '90%', maxWidth: '480px', border: '1px solid #B8935B' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <div>
+                <div style={{ fontSize: '10px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px' }}>CMS MANAGEMENT</div>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#F6F1E3' }}>Add New Site Section</h3>
+              </div>
+              <button onClick={() => setShowNewSectionModal(false)} style={{ background: 'none', border: 'none', color: '#E7D9C9', cursor: 'pointer', fontSize: '18px' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleCreateNewSection} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={labelStyle}>Section Display Title *</label>
+                <input 
+                  required 
+                  value={newSectionForm.title} 
+                  onChange={e => setNewSectionForm(p => ({ ...p, title: e.target.value }))} 
+                  style={inputStyle} 
+                  placeholder="e.g. Home Special Deals Banner" 
+                />
+              </div>
+
+              <div>
+                <label style={labelStyle}>Section Identifier Key *</label>
+                <input 
+                  required 
+                  value={newSectionForm.key} 
+                  onChange={e => setNewSectionForm(p => ({ ...p, key: e.target.value }))} 
+                  style={inputStyle} 
+                  placeholder="e.g. home_special_deals" 
+                />
+                <span style={{ fontSize: '11px', color: '#B8A99A', marginTop: '4px', display: 'block' }}>Unique slug key in lowercase (e.g. home_promo_strip)</span>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Subtitle / Description</label>
+                <input 
+                  value={newSectionForm.subtitle} 
+                  onChange={e => setNewSectionForm(p => ({ ...p, subtitle: e.target.value }))} 
+                  style={inputStyle} 
+                  placeholder="Optional section description..." 
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', paddingTop: '14px', borderTop: '1px solid rgba(184,147,91,0.2)' }}>
+                <button type="button" onClick={() => setShowNewSectionModal(false)} style={{ padding: '8px 16px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" style={{ padding: '8px 18px', borderRadius: '6px', backgroundColor: '#B8935B', border: 'none', color: '#1A2010', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>Create & Edit Section</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

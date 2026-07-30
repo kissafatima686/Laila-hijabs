@@ -10,7 +10,9 @@ const {
   submitContactMessage, 
   getActiveOffers, 
   getStoreLocations, 
-  getBlogs 
+  getBlogs,
+  getProductReviews,
+  submitProductReview
 } = require('../controllers/productController');
 
 // Categories & Products
@@ -36,7 +38,8 @@ router.get('/offers', getActiveOffers);
 // Boutique Store Locations (LocationDetailPage.jsx)
 router.get('/locations', getStoreLocations);
 
-// Published Blog Posts (BlogsPage.jsx)
-router.get('/blogs', getBlogs);
+// Customer Product Reviews & Submission (ProductDetail.jsx)
+router.get('/products/:productId/reviews', getProductReviews);
+router.post('/products/:productId/reviews', submitProductReview);
 
 module.exports = router;

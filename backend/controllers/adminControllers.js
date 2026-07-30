@@ -219,7 +219,12 @@ const TABLE_MAP = {
   'value-strip': { table: 'value_strip_items', key: 'item_id' },
   'navbar-links': { table: 'navbar_links', key: 'link_id' },
   'footer-links': { table: 'footer_links', key: 'link_id' },
-  'reviews': { table: 'product_reviews', key: 'review_id' }
+  'categories-mega-menu': { table: 'categories_mega_menu', key: 'id' },
+  'reviews': { table: 'product_reviews', key: 'review_id' },
+  'wishlists': { table: 'wishlists', key: 'wishlist_id' },
+  'cart-perks': { table: 'cart_perks_promos', key: 'id' },
+  'checkout-rules': { table: 'checkout_shipping_rules', key: 'id' },
+  'coupons': { table: 'coupons', key: 'id' }
 };
 
 const getModuleItems = async (req, res) => {
@@ -236,14 +241,20 @@ const getModuleItems = async (req, res) => {
 const createModuleItem = async (req, res) => {
   const config = TABLE_MAP[req.params.moduleName];
   if (!config) return res.status(400).json({ error: 'Invalid module' });
-  const fields = Object.keys(req.body);
-  const values = Object.values(req.body);
+  let bodyData = { ...req.body };
+  if (req.params.moduleName === 'wishlists') {
+    if (!('user_id' in bodyData)) bodyData.user_id = null;
+    if (!('product_id' in bodyData)) bodyData.product_id = null;
+  }
+  const fields = Object.keys(bodyData);
+  const values = Object.values(bodyData);
   if (fields.length === 0) return res.status(400).json({ error: 'No data provided' });
   try {
-    const sql = `INSERT INTO \`${config.table}\` (${fields.join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`;
+    const sql = `INSERT INTO \`${config.table}\` (${fields.map(f => `\`${f}\``).join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`;
     const [result] = await pool.query(sql, values);
     res.status(201).json({ message: 'Item created!', id: result.insertId });
   } catch (err) {
+    console.error("createModuleItem error:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -316,16 +327,36 @@ const updateSection = async (req, res) => {
   const { title, subtitle, body_content, image_url, image_url_2, button_text, button_link, badge_text, metadata } = req.body;
   try {
     const metadataStr = metadata ? (typeof metadata === 'string' ? metadata : JSON.stringify(metadata)) : null;
-    await pool.query(
-      `UPDATE site_sections SET 
-        title = ?, subtitle = ?, body_content = ?, 
-        image_url = ?, image_url_2 = ?,
-        button_text = ?, button_link = ?, badge_text = ?,
-        metadata = ?
-       WHERE section_key = ?`,
-      [title || null, subtitle || null, body_content || null, image_url || null, image_url_2 || null, button_text || null, button_link || null, badge_text || null, metadataStr, key]
-    );
-    res.status(200).json({ message: 'Section updated successfully!' });
+    const [existing] = await pool.query(`SELECT section_key FROM site_sections WHERE section_key = ?`, [key]);
+    
+    if (existing.length === 0) {
+      await pool.query(
+        `INSERT INTO site_sections (section_key, title, subtitle, body_content, image_url, image_url_2, button_text, button_link, badge_text, metadata)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [key, title || null, subtitle || null, body_content || null, image_url || null, image_url_2 || null, button_text || null, button_link || null, badge_text || null, metadataStr]
+      );
+    } else {
+      await pool.query(
+        `UPDATE site_sections SET 
+          title = ?, subtitle = ?, body_content = ?, 
+          image_url = ?, image_url_2 = ?,
+          button_text = ?, button_link = ?, badge_text = ?,
+          metadata = ?
+         WHERE section_key = ?`,
+        [title || null, subtitle || null, body_content || null, image_url || null, image_url_2 || null, button_text || null, button_link || null, badge_text || null, metadataStr, key]
+      );
+    }
+    res.status(200).json({ message: 'Section saved successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const deleteSection = async (req, res) => {
+  const { key } = req.params;
+  try {
+    await pool.query(`DELETE FROM site_sections WHERE section_key = ?`, [key]);
+    res.status(200).json({ message: 'Section deleted successfully!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -428,6 +459,7 @@ module.exports = {
   getAllSections,
   getSectionByKey,
   updateSection,
+  deleteSection,
   getModuleItems,
   createModuleItem,
   updateModuleItem,

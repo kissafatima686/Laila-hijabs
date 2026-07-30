@@ -1,0 +1,269 @@
+.payment-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Georgia', serif;
+  color: #222;
+}
+
+.payment-title {
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* Progress Steps */
+.payment-steps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 35px;
+  font-family: sans-serif;
+  font-size: 14px;
+  color: #888;
+}
+
+.payment-steps .step.active {
+  color: #000;
+  font-weight: 600;
+}
+
+.payment-steps .completed-step {
+  color: #555;
+  text-decoration: none;
+}
+
+.payment-steps .completed-step:hover {
+  text-decoration: underline;
+}
+
+.step-divider {
+  color: #ccc;
+}
+
+/* Receipt Card */
+.receipt-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.receipt-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e2db;
+  border-radius: 12px;
+  padding: 35px 35px;
+  width: 100%;
+  max-width: 580px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.success-badge {
+  display: inline-block;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  font-family: sans-serif;
+}
+
+.thank-you-title {
+  font-family: 'Georgia', serif;
+  font-size: 28px;
+  font-weight: 400;
+  margin: 0 0 6px 0;
+  color: #111;
+}
+
+.order-number {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.receipt-divider {
+  border: none;
+  border-top: 1px dashed #d5d3ce;
+  margin: 22px 0;
+}
+
+/* Details Grid */
+.receipt-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  font-size: 13px;
+  line-height: 1.68;
+}
+
+.grid-heading {
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #111;
+}
+
+.customer-info {
+  margin: 0;
+  color: #555;
+}
+
+.order-info-line {
+  margin: 0;
+  color: #555;
+}
+
+.order-info-line span {
+  color: #555;
+}
+
+/* Items Section */
+.section-heading {
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 14px 0;
+  color: #111;
+}
+
+.receipt-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 4px 0;
+}
+
+.item-name-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-title {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  color: #111;
+}
+
+.item-title strong {
+  font-weight: 700;
+}
+
+.item-meta {
+  font-size: 12px;
+  color: #777;
+  margin-top: 3px;
+}
+
+.item-price {
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #111;
+}
+
+/* Summary Rows */
+.receipt-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #555;
+}
+
+.free-tag {
+  color: #e53935;
+  font-weight: 700;
+}
+
+.total-divider {
+  border-top: 1px solid #e0ddd7;
+  margin: 6px 0 2px 0;
+}
+
+.total-paid-row {
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+}
+
+.total-paid-row span:last-child {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* Action Buttons */
+.receipt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.whatsapp-btn {
+  width: 100%;
+  background: #25D366;
+  color: #ffffff;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.whatsapp-btn:hover {
+  background: #20bd5a;
+}
+
+.home-btn {
+  width: 100%;
+  background: #111111;
+  color: #ffffff;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Georgia', serif;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s;
+  box-sizing: border-box;
+  display: block;
+}
+
+.home-btn:hover {
+  background: #252525;
+}
+
+@media (max-width: 600px) {
+  .receipt-details-grid {
+    grid-template-columns: 1fr;
+  }
+  .receipt-card {
+    padding: 25px 18px;
+  }
+}

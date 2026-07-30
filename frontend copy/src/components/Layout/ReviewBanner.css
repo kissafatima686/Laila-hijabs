@@ -1,0 +1,34 @@
+/* src/components/Layout/ReviewBanner.css */
+
+.review-banner {
+  background-color: #000;
+  color: #fff;
+  /* Reduced horizontal padding for mobile */
+  padding: 15px 20px; 
+  display: flex;
+  /* Use flex-wrap to stack items on small screens */
+  flex-wrap: wrap; 
+  justify-content: center !important;
+  align-items: center;
+  gap: 15px; 
+  font-size: clamp(12px, 2vw, 14px); /* Fluid font size */
+  font-family: 'Jost', sans-serif;
+  text-align: center !important;
+}
+
+.stars {
+  color: #ffd700;
+  display: flex;
+  gap: 3px; /* Slightly tighter gap for mobile */
+}
+
+/* Optional: Add spacing adjustments for laptop screens */
+@media (min-width: 768px) {
+  .review-banner {
+    padding: 15px 50px;
+    gap: 20px;
+  }
+  .stars {
+    gap: 5px;
+  }
+}

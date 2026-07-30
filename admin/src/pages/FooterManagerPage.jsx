@@ -74,8 +74,27 @@ const LinkListManager = ({ groupName, items, onSave, onDelete, onToggle }) => {
               <button onClick={() => onToggle(item)} style={{ ...btnG, padding: '5px 10px', fontSize: '11px' }}>
                 {item.status === 'Live' ? 'Hide' : 'Show'}
               </button>
-              <button onClick={() => openEdit(item)} style={{ ...btnG, padding: '5px 10px' }}><EditIcon /></button>
-              <button onClick={() => onDelete(item.link_id)} style={{ ...btnD, padding: '5px 10px' }}><TrashIcon /></button>
+              {item.url && item.url.startsWith('/') && (
+                <a
+                  href={`/admin#${item.url}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = item.url === '/about' ? '/sections/about_who_we_are' :
+                                          item.url === '/contact' ? '/sections/contact_main_section' :
+                                          item.url === '/faqs' ? '/faqs' :
+                                          item.url === '/size-guide' ? '/size-guide' :
+                                          item.url === '/locations' ? '/locations' :
+                                          item.url === '/blogs' ? '/blogs' : '/sections/footer_settings';
+                  }}
+                  style={{ ...btnG, padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                  title="Edit Page Content"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Edit Page
+                </a>
+              )}
+              <button onClick={() => openEdit(item)} style={{ ...btnG, padding: '5px 10px' }} title="Edit Link Details"><EditIcon /></button>
+              <button onClick={() => onDelete(item.link_id)} style={{ ...btnD, padding: '5px 10px' }} title="Delete Link"><TrashIcon /></button>
             </div>
           </div>
         ))}
@@ -108,17 +127,46 @@ const LinkListManager = ({ groupName, items, onSave, onDelete, onToggle }) => {
   );
 };
 
-// ─── Main FooterManagerPage ────────────────────────────────────────────────────
-const FooterManagerPage = () => {
-  const [links, setLinks] = useState([]);
+const DEFAULT_SEED_LINKS = [
+  { link_id: 1, group_name: 'Delivery & Returns', label: 'Free shipping for orders over £120', url: '/shipping', status: 'Live' },
+  { link_id: 2, group_name: 'Delivery & Returns', label: 'Shipping information', url: '/shipping-info', status: 'Live' },
+  { link_id: 3, group_name: 'Delivery & Returns', label: 'Delivery', url: '/delivery', status: 'Live' },
+  { link_id: 4, group_name: 'Delivery & Returns', label: 'Returns & Exchanges', url: '/returns', status: 'Live' },
+  { link_id: 5, group_name: 'Customer Care', label: 'Gift Card', url: '/gift-cards', status: 'Live' },
+  { link_id: 6, group_name: 'Customer Care', label: 'Size guide', url: '/size-guide', status: 'Live' },
+  { link_id: 7, group_name: 'Customer Care', label: 'Care & Repair', url: '/care-repair', status: 'Live' },
+  { link_id: 8, group_name: 'Customer Care', label: 'Frequently asked questions', url: '/faqs', status: 'Live' },
+  { link_id: 9, group_name: 'Customer Care', label: 'Contact us', url: '/contact', status: 'Live' },
+  { link_id: 10, group_name: 'Customer Care', label: 'Privacy policy', url: '/privacy', status: 'Live' },
+  { link_id: 11, group_name: 'Customer Care', label: 'Terms & conditions', url: '/terms', status: 'Live' },
+  { link_id: 12, group_name: 'Get In Touch', label: 'Message us on WhatsApp', url: 'https://wa.me/923238399480', status: 'Live' },
+  { link_id: 13, group_name: 'Get In Touch', label: '+92 323 8399480', url: 'tel:+923238399480', status: 'Live' },
+  { link_id: 14, group_name: 'Get In Touch', label: 'Email us:', url: 'mailto:info@lailahijabs.com', status: 'Live' },
+  { link_id: 15, group_name: 'Get In Touch', label: 'info@lailahijabs.com', url: 'mailto:info@lailahijabs.com', status: 'Live' },
+  { link_id: 16, group_name: 'About Us', label: 'Our Story', url: '/about', status: 'Live' },
+  { link_id: 17, group_name: 'About Us', label: 'Loyalty', url: '/loyalty', status: 'Live' },
+  { link_id: 18, group_name: 'About Us', label: 'Visit Us', url: '/locations', status: 'Live' },
+  { link_id: 19, group_name: 'About Us', label: 'Careers', url: '/careers', status: 'Live' },
+  { link_id: 20, group_name: 'About Us', label: 'Journal', url: '/blogs', status: 'Live' },
+  { link_id: 21, group_name: 'About Us', label: 'Affiliates', url: '/affiliates', status: 'Live' },
+];
+
+const FooterManagerPage = ({ initialTab = 'links' }) => {
+  const [links, setLinks] = useState(DEFAULT_SEED_LINKS);
+  const [customColumns, setCustomColumns] = useState(['Delivery & Returns', 'Customer Care', 'Get In Touch', 'About Us']);
+  const [newColumnName, setNewColumnName] = useState('');
+  const [showAddColModal, setShowAddColModal] = useState(false);
   const [settings, setSettings] = useState(null);
   const [settingsForm, setSettingsForm] = useState({});
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
   const [savedSettings, setSavedSettings] = useState(false);
-  const [activeTab, setActiveTab] = useState('links');
+  const [activeTab, setActiveTab] = useState(initialTab);
 
-  const LINK_GROUPS = ['Delivery & Returns', 'Customer Care', 'About Us'];
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
   const SOCIAL_PLATFORMS = [
     { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/...' },
     { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/...' },
@@ -128,94 +176,151 @@ const FooterManagerPage = () => {
   ];
 
   const fetchLinks = () => {
-    fetch(`${API}/module/footer-links`).then(r => r.json()).then(d => setLinks(Array.isArray(d) ? d : [])).catch(() => setLinks([]));
+    fetch(`${API}/module/footer-links`)
+      .then(r => r.json())
+      .then(d => {
+        if (Array.isArray(d) && d.length > 0) {
+          const existingKeys = new Set(d.map(item => `${(item.group_name||'').toLowerCase()}::${(item.label||'').toLowerCase()}`));
+          const missingSeeds = DEFAULT_SEED_LINKS.filter(s => !existingKeys.has(`${s.group_name.toLowerCase()}::${s.label.toLowerCase()}`));
+          setLinks([...d, ...missingSeeds]);
+        } else {
+          setLinks(DEFAULT_SEED_LINKS);
+        }
+      })
+      .catch(() => setLinks(DEFAULT_SEED_LINKS));
   };
 
   const fetchSettings = () => {
-    fetch(`${API}/sections/footer_settings`).then(r => r.json()).then(d => {
-      setSettings(d);
-      const meta = d.metadata || {};
-      setSettingsForm({
-        title: d.title || 'Laila Hijabs',
-        subtitle: d.subtitle || 'Where modesty meets luxury',
-        body_content: d.body_content || '',
-        copyright: meta.copyright || '© 2026 Laila Hijabs. All rights reserved.',
-        newsletter_placeholder: meta.newsletter_placeholder || 'ENTER YOUR EMAIL *',
-        newsletter_button: meta.newsletter_button || 'SIGN UP',
-        newsletter_text: meta.newsletter_text || 'Exclusive offers & sneak peeks are reserved for those on our mailing list, plus enjoy 10% OFF your first order.',
-        follow_title: meta.follow_title || 'FOLLOW US',
-        get_in_touch_title: meta.get_in_touch_title || 'Get In Touch',
-        whatsapp_label: meta.whatsapp_label || 'Message us on WhatsApp',
-        whatsapp_number: meta.whatsapp_number || '+92 323 8399480',
-        whatsapp_link: meta.whatsapp_link || 'https://wa.me/923238399480',
-        email_label: meta.email_label || 'Email us:',
-        email_address: meta.email_address || 'info@lailahijabs.com',
-        join_community_title: meta.join_community_title || 'Join Our Community',
-        facebook: (meta.social || {}).facebook || 'https://www.facebook.com/thelailahijab/',
-        instagram: (meta.social || {}).instagram || 'https://www.instagram.com/the_lailahijabs/',
-        tiktok: (meta.social || {}).tiktok || 'https://www.tiktok.com/@the_lailahijabs',
-        whatsapp_social: (meta.social || {}).whatsapp || 'https://wa.me/923238399480',
-        youtube: (meta.social || {}).youtube || '',
-      });
-    }).catch(() => {}).finally(() => setLoading(false));
+    fetch(`${API}/sections/footer_settings`)
+      .then(r => r.json())
+      .then(d => {
+        setSettings(d);
+        const meta = d.metadata || {};
+        setSettingsForm({
+          title: d.title || 'Laila Hijabs',
+          subtitle: d.subtitle || 'Where modesty meets luxury',
+          body_content: d.body_content || '',
+          copyright: meta.copyright || '© 2026 Laila Hijabs. All rights reserved.',
+          newsletter_placeholder: meta.newsletter_placeholder || 'ENTER YOUR EMAIL *',
+          newsletter_button: meta.newsletter_button || 'SIGN UP',
+          newsletter_text: meta.newsletter_text || 'Exclusive offers & sneak peeks are reserved for those on our mailing list, plus enjoy 10% OFF your first order.',
+          follow_title: meta.follow_title || 'FOLLOW US',
+          get_in_touch_title: meta.get_in_touch_title || 'Get In Touch',
+          whatsapp_label: meta.whatsapp_label || 'Message us on WhatsApp',
+          whatsapp_number: meta.whatsapp_number || '+92 323 8399480',
+          whatsapp_link: meta.whatsapp_link || 'https://wa.me/923238399480',
+          email_label: meta.email_label || 'Email us:',
+          email_address: meta.email_address || 'info@lailahijabs.com',
+          join_community_title: meta.join_community_title || 'Join Our Community',
+          facebook: (meta.social || {}).facebook || 'https://www.facebook.com/thelailahijab/',
+          instagram: (meta.social || {}).instagram || 'https://www.instagram.com/the_lailahijabs/',
+          tiktok: (meta.social || {}).tiktok || 'https://www.tiktok.com/@the_lailahijabs',
+          whatsapp_social: (meta.social || {}).whatsapp || 'https://wa.me/923238399480',
+          youtube: (meta.social || {}).youtube || '',
+          show_payment_badges: meta.show_payment_badges !== false,
+          payment_badges: meta.payment_badges || ['Visa', 'Mastercard', 'PayPak', 'EasyPaisa', 'JazzCash', 'Cash on Delivery']
+        });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchLinks(); fetchSettings(); }, []);
+  useEffect(() => {
+    fetchLinks();
+    fetchSettings();
+  }, []);
 
-  const handleSaveLink = (data, id) => {
-    const url = id ? `${API}/module/footer-links/${id}` : `${API}/module/footer-links`;
-    fetch(url, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(fetchLinks);
+  const handleSaveLink = (formData, linkId) => {
+    const url = linkId ? `${API}/module/footer-links/${linkId}` : `${API}/module/footer-links`;
+    fetch(url, {
+      method: linkId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
+      .then(() => fetchLinks())
+      .catch(() => {});
   };
-  const handleDeleteLink = (id) => {
-    if (!window.confirm('Delete this link?')) return;
-    fetch(`${API}/module/footer-links/${id}`, { method: 'DELETE' }).then(fetchLinks);
+
+  const handleDeleteLink = (linkId) => {
+    if (!window.confirm('Delete this footer link?')) return;
+    fetch(`${API}/module/footer-links/${linkId}`, { method: 'DELETE' })
+      .then(() => fetchLinks())
+      .catch(() => {});
   };
+
   const handleToggleLink = (item) => {
-    const next = item.status === 'Live' ? 'Draft' : 'Live';
-    fetch(`${API}/module/footer-links/${item.link_id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) }).then(fetchLinks);
+    const linkId = item.link_id;
+    const nextStatus = item.status === 'Live' ? 'Draft' : 'Live';
+    fetch(`${API}/module/footer-links/${linkId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: nextStatus })
+    })
+      .then(() => fetchLinks())
+      .catch(() => {});
   };
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = (e) => {
+    if (e) e.preventDefault();
     setSavingSettings(true);
-    const payload = {
-      title: settingsForm.title,
-      subtitle: settingsForm.subtitle,
-      body_content: settingsForm.body_content,
-      metadata: {
-        copyright: settingsForm.copyright,
-        newsletter_text: settingsForm.newsletter_text,
-        newsletter_placeholder: settingsForm.newsletter_placeholder,
-        newsletter_button: settingsForm.newsletter_button,
-        follow_title: settingsForm.follow_title,
-        get_in_touch_title: settingsForm.get_in_touch_title,
-        whatsapp_label: settingsForm.whatsapp_label,
-        whatsapp_number: settingsForm.whatsapp_number,
-        whatsapp_link: settingsForm.whatsapp_link,
-        email_label: settingsForm.email_label,
-        email_address: settingsForm.email_address,
-        join_community_title: settingsForm.join_community_title,
-        social: {
-          facebook: settingsForm.facebook,
-          instagram: settingsForm.instagram,
-          tiktok: settingsForm.tiktok,
-          whatsapp: settingsForm.whatsapp_social,
-          youtube: settingsForm.youtube,
+    fetch(`${API}/sections/footer_settings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: settingsForm.title,
+        subtitle: settingsForm.subtitle,
+        body_content: settingsForm.body_content,
+        metadata: {
+          copyright: settingsForm.copyright,
+          newsletter_placeholder: settingsForm.newsletter_placeholder,
+          newsletter_button: settingsForm.newsletter_button,
+          newsletter_text: settingsForm.newsletter_text,
+          follow_title: settingsForm.follow_title,
+          get_in_touch_title: settingsForm.get_in_touch_title,
+          whatsapp_label: settingsForm.whatsapp_label,
+          whatsapp_number: settingsForm.whatsapp_number,
+          whatsapp_link: settingsForm.whatsapp_link,
+          email_label: settingsForm.email_label,
+          email_address: settingsForm.email_address,
+          join_community_title: settingsForm.join_community_title,
+          social: {
+            facebook: settingsForm.facebook,
+            instagram: settingsForm.instagram,
+            tiktok: settingsForm.tiktok,
+            whatsapp: settingsForm.whatsapp_social,
+            youtube: settingsForm.youtube
+          },
+          show_payment_badges: settingsForm.show_payment_badges,
+          payment_badges: settingsForm.payment_badges
         }
-      }
-    };
-    fetch(`${API}/sections/footer_settings`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      .then(() => { setSavedSettings(true); setTimeout(() => setSavedSettings(false), 3000); })
+      })
+    })
+      .then(() => {
+        setSavedSettings(true);
+        setTimeout(() => setSavedSettings(false), 3000);
+      })
       .finally(() => setSavingSettings(false));
   };
 
-  const groupLinks = (groupName) => links.filter(l => l.group_name === groupName);
+  const groupLinks = (groupName) => {
+    if (!groupName) return [];
+    const cleanTarget = groupName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return links.filter(l => {
+      if (!l.group_name) return false;
+      const cleanGroup = l.group_name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return cleanGroup === cleanTarget || l.group_name.toLowerCase() === groupName.toLowerCase();
+    });
+  };
 
   const TABS = [
     { id: 'links', label: 'Footer Link Columns' },
+    { id: 'delivery', label: 'Delivery & Returns' },
+    { id: 'customercare', label: 'Customer Care' },
+    { id: 'aboutus', label: 'About Us' },
+    { id: 'copyright', label: 'Copyright' },
     { id: 'contact', label: 'Get In Touch' },
     { id: 'community', label: 'Join Our Community' },
-    { id: 'social', label: 'Social Media' },
-    { id: 'general', label: 'General Settings' },
+    { id: 'social', label: 'Social Links' }
   ];
 
   if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#E7D9C9' }}>Loading footer manager...</div>;
@@ -254,17 +359,194 @@ const FooterManagerPage = () => {
 
       {/* ── Tab: Footer Link Columns ─────────────────────────────────────────── */}
       {activeTab === 'links' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
-          {LINK_GROUPS.map(group => (
-            <LinkListManager
-              key={group}
-              groupName={group}
-              items={groupLinks(group)}
-              onSave={handleSaveLink}
-              onDelete={handleDeleteLink}
-              onToggle={handleToggleLink}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#222C1A', padding: '16px 20px', borderRadius: '12px', border: '1px solid rgba(184,147,91,0.3)' }}>
+            <div>
+              <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px' }}>FOOTER STRUCTURE</div>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#F6F1E3' }}>Footer Link Columns & Delivery/Returns</h3>
+            </div>
+            <button onClick={() => setShowAddColModal(true)} style={btnP}>+ Add New Column</button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
+            {Array.from(new Set([...customColumns, ...links.map(l => l.group_name).filter(Boolean)])).map(group => (
+              <LinkListManager
+                key={group}
+                groupName={group}
+                items={groupLinks(group)}
+                onSave={handleSaveLink}
+                onDelete={handleDeleteLink}
+                onToggle={handleToggleLink}
+              />
+            ))}
+          </div>
+
+          {/* Modal to create new custom footer column */}
+          {showAddColModal && (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+              <div style={{ backgroundColor: '#222C1A', borderRadius: '14px', padding: '26px', width: '90%', maxWidth: '420px', border: '1px solid #B8935B' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#F6F1E3' }}>Add New Footer Column</h3>
+                  <button onClick={() => setShowAddColModal(false)} style={{ background: 'none', border: 'none', color: '#E7D9C9', cursor: 'pointer' }}><CloseIcon /></button>
+                </div>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (newColumnName.trim()) {
+                    setCustomColumns(prev => [...prev, newColumnName.trim()]);
+                    setNewColumnName('');
+                    setShowAddColModal(false);
+                  }
+                }} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div>
+                    <label style={lStyle}>Column Title Name *</label>
+                    <input required value={newColumnName} onChange={e => setNewColumnName(e.target.value)} style={iStyle} placeholder="e.g. Delivery & Returns, Help & Support" />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                    <button type="button" onClick={() => setShowAddColModal(false)} style={btnG}>Cancel</button>
+                    <button type="submit" style={btnP}>Create Column</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Delivery & Returns ─────────────────────────────────────────── */}
+      {activeTab === 'delivery' && (
+        <div style={{ maxWidth: '580px' }}>
+          <LinkListManager
+            groupName="Delivery & Returns"
+            items={groupLinks("Delivery & Returns")}
+            onSave={handleSaveLink}
+            onDelete={handleDeleteLink}
+            onToggle={handleToggleLink}
+          />
+        </div>
+      )}
+
+      {/* ── Tab: Customer Care ─────────────────────────────────────────────── */}
+      {activeTab === 'customercare' && (
+        <div style={{ maxWidth: '580px' }}>
+          <LinkListManager
+            groupName="Customer Care"
+            items={groupLinks("Customer Care")}
+            onSave={handleSaveLink}
+            onDelete={handleDeleteLink}
+            onToggle={handleToggleLink}
+          />
+        </div>
+      )}
+
+      {/* ── Tab: About Us ─────────────────────────────────────────────────── */}
+      {activeTab === 'aboutus' && (
+        <div style={{ maxWidth: '580px' }}>
+          <LinkListManager
+            groupName="About Us"
+            items={groupLinks("About Us")}
+            onSave={handleSaveLink}
+            onDelete={handleDeleteLink}
+            onToggle={handleToggleLink}
+          />
+        </div>
+      )}
+
+      {/* ── Tab: Copyright ───────────────────────────────────────────────────── */}
+      {activeTab === 'copyright' && (
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8935B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#F6F1E3' }}>
+              Dynamic Data (Lists, FAQs, Links)
+            </h3>
+          </div>
+
+          <div style={{
+            backgroundColor: '#182012',
+            borderRadius: '12px',
+            padding: '20px',
+            border: settingsForm.copyright_active !== false ? '1px solid rgba(184,147,91,0.35)' : '1px solid rgba(239,68,68,0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.5px' }}>
+                Copyright Text
+              </label>
+              
+              {/* 3-Button Action Controls matching screenshot */}
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setSettingsForm(p => ({ ...p, copyright_active: p.copyright_active === false ? true : false }))} 
+                  style={{
+                    height: '34px',
+                    padding: '0 14px',
+                    borderRadius: '8px',
+                    backgroundColor: settingsForm.copyright_active !== false ? '#182012' : 'rgba(239,68,68,0.15)',
+                    color: settingsForm.copyright_active !== false ? '#F6F1E3' : '#EF4444',
+                    border: settingsForm.copyright_active !== false ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {settingsForm.copyright_active !== false ? 'Deactivate' : 'Activate'}
+                </button>
+
+                <button 
+                  type="button" 
+                  onClick={handleSaveSettings} 
+                  style={{
+                    height: '34px',
+                    width: '34px',
+                    borderRadius: '8px',
+                    backgroundColor: '#182012',
+                    border: '1px solid #B8935B',
+                    color: '#F6F1E3',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justify: 'center',
+                    cursor: 'pointer'
+                  }} 
+                  title="Save Copyright"
+                >
+                  <EditIcon />
+                </button>
+
+                <button 
+                  type="button" 
+                  onClick={() => setSettingsForm(p => ({ ...p, copyright: '' }))} 
+                  style={{
+                    height: '34px',
+                    width: '34px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(239,68,68,0.15)',
+                    border: '1px solid rgba(239,68,68,0.4)',
+                    color: '#EF4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justify: 'center',
+                    cursor: 'pointer'
+                  }} 
+                  title="Clear Text"
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            </div>
+
+            <input 
+              value={settingsForm.copyright || ''} 
+              onChange={e => setSettingsForm(p => ({ ...p, copyright: e.target.value }))} 
+              style={{ ...iStyle, fontWeight: '500', color: settingsForm.copyright_active !== false ? '#F6F1E3' : '#888' }} 
+              placeholder="2026 Laila Hijabs. All rights reserved." 
             />
-          ))}
+          </div>
         </div>
       )}
 

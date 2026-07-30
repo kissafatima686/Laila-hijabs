@@ -9,8 +9,8 @@ const btnPrimary = { padding: '10px 20px', borderRadius: '8px', backgroundColor:
 const btnGhost = { padding: '8px 14px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer' };
 const btnDanger = { padding: '7px 12px', borderRadius: '6px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', color: '#EF4444', fontSize: '12px', cursor: 'pointer' };
 
-const PAGE_CONTEXTS = ['home', 'product', 'contact', 'affiliate', 'custom-orders', 'about', 'blogs', 'offers', 'size-guide', 'account', 'cart', 'wishlist'];
-const EMPTY = { question: '', answer: '', page_context: 'home', display_order: 0, status: 'Live' };
+const PAGE_CONTEXTS = ['home', 'product', 'product-details', 'contact', 'affiliate', 'custom-orders', 'about', 'blogs', 'offers', 'size-guide', 'account', 'cart', 'wishlist'];
+const EMPTY = { question: '', answer: '', page_context: 'product-details', display_order: 0, status: 'Live' };
 
 const FAQsPage = () => {
   const [items, setItems] = useState([]);

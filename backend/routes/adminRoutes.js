@@ -5,6 +5,7 @@ const {
   getAllSections,
   getSectionByKey,
   updateSection,
+  deleteSection,
   getModuleItems,
   createModuleItem,
   updateModuleItem,
@@ -26,6 +27,7 @@ router.get('/stats', getDashboardStats);
 router.get('/sections', getAllSections);
 router.get('/sections/:key', getSectionByKey);
 router.put('/sections/:key', updateSection);
+router.delete('/sections/:key', deleteSection);
 
 // ─── Generic Module CRUD (lists, submissions, etc.) ───────────────────────────
 router.get('/module/:moduleName', getModuleItems);

@@ -140,15 +140,17 @@ const Sidebar = () => (
     {/* ─── NAVIGATION & HEADER ──────────────────────────────── */}
     <SectionLabel label="Navigation & Header" />
     <ColGroup label="Header Navbar Links" icon="navbar" defaultOpen={true}>
+      <SideLink to="/sections/navbar_settings" label="Branding & Logo" icon="section" indent />
       <SideLink to="/navbar-links" label="Navbar Links Manager" icon="navbar" indent />
+      <SideLink to="/categories-mega-menu" label="Categories Mega Menu" icon="categories" indent />
     </ColGroup>
     <ColGroup label="Header Utilities" icon="settings" defaultOpen={false}>
-      <SideLink to="/sections/products_filters_config" label="Search Bar Keywords" icon="section" indent />
-      <SideLink to="/users" label="Customer Accounts" icon="users" indent />
-      <SideLink to="/sections/wishlist_page_settings" label="Wishlist Settings" icon="section" indent />
-      <SideLink to="/sections/cart_page_settings" label="Cart Page Settings" icon="orders" indent />
-      <SideLink to="/sections/checkout_page_settings" label="Checkout Page Settings" icon="orders" indent />
-      <SideLink to="/sections/payment_page_settings" label="Payment & Receipt Settings" icon="orders" indent />
+      <SideLink to="/search-bar-keywords" label="Search Bar & Category Keywords" icon="section" indent />
+      <SideLink to="/customer-accounts-manager" label="Customer Accounts" icon="users" indent />
+      <SideLink to="/wishlist-manager" label="Wishlist Settings" icon="section" indent />
+      <SideLink to="/cart-manager" label="Cart Page Settings" icon="orders" indent />
+      <SideLink to="/checkout-manager" label="Checkout Page Settings" icon="orders" indent />
+      <SideLink to="/payment-manager" label="Payment & Receipt Settings" icon="orders" indent />
     </ColGroup>
 
     <Hr />
@@ -156,19 +158,18 @@ const Sidebar = () => (
     {/* ─── HOME PAGE ────────────────────────────────────────── */}
     <SectionLabel label="Home Page Manager" />
     <ColGroup label="Hero & Banners" icon="image" defaultOpen={false}>
-      <SideLink to="/sections/home_announcement_bar" label="Announcement Bar" icon="announce" indent />
-      <SideLink to="/sliders" label="Hero Sliders" icon="slider" indent />
-      <SideLink to="/sections/home_review_banner" label="Review Banner" icon="reviews" indent />
+      <SideLink to="/announcement-bar-manager" label="Announcement Bar" icon="announce" indent />
+      <SideLink to="/hero-sliders" label="Hero Sliders" icon="slider" indent />
+      <SideLink to="/review-banner-manager" label="Review Banner" icon="reviews" indent />
     </ColGroup>
     <ColGroup label="Content Sections" icon="section" defaultOpen={false}>
-      <SideLink to="/sections/home_value_strip" label="Value Features Strip" icon="valueStrip" indent />
-      <SideLink to="/sections/home_value_slider" label="Interactive Value Slider" icon="slider" indent />
-      <SideLink to="/sections/home_about" label="Brand Introduction" icon="section" indent />
+      <SideLink to="/value-features-strip-manager" label="Value Features Strip" icon="valueStrip" indent />
+      <SideLink to="/interactive-value-slider-manager" label="Interactive Value Slider" icon="slider" indent />
     </ColGroup>
     <ColGroup label="Dynamic Showcase" icon="trending" defaultOpen={false}>
       <SideLink to="/testimonials" label="Customer Testimonials" icon="testimonials" indent />
-      <SideLink to="/sections/home_trending" label="Trending Products" icon="trending" indent />
-      <SideLink to="/sections/home_featured_collections" label="Featured Collections" icon="categories" indent />
+      <SideLink to="/trending-manager" label="Trending Products" icon="trending" indent />
+      <SideLink to="/featured-collections-manager" label="Featured Collections" icon="categories" indent />
       <SideLink to="/sections/home_whatsapp_float" label="Floating WhatsApp & Socials" icon="whatsapp" indent />
     </ColGroup>
 
@@ -177,32 +178,36 @@ const Sidebar = () => (
     {/* ─── PRODUCTS & CATALOG ───────────────────────────────── */}
     <SectionLabel label="Products & Catalog" />
     <SideLink to="/products" label="Product Inventory" icon="products" />
-    <SideLink to="/categories" label="Product Categories" icon="categories" />
+    <SideLink to="/featured-collections-manager" label="Product Categories" icon="categories" />
     <ColGroup label="Product Page Elements" icon="section" defaultOpen={false}>
       <SideLink to="/product-reviews" label="Customer Reviews" icon="reviews" indent />
       <SideLink to="/sections/products_specs_template" label="Product Specifications" icon="section" indent />
       <SideLink to="/size-guide" label="Size Guide Chart" icon="sizeGuide" indent />
       <SideLink to="/sections/products_filters_config" label="Color & Filter Options" icon="section" indent />
+      <SideLink to="/filters/fabrics" label="↳ Fabric Options" icon="section" indent />
+      <SideLink to="/filters/sizes" label="↳ Size Options" icon="section" indent />
+      <SideLink to="/filters/colors" label="↳ Color Options & Swatches" icon="section" indent />
+      <SideLink to="/filters/prices" label="↳ Price Range Options" icon="section" indent />
       <SideLink to="/faqs/product" label="Product FAQs" icon="faqs" indent />
-      <SideLink to="/sections/home_cta" label="Process & How We Do It" icon="section" indent />
+      <SideLink to="/how-we-do-it" label="Process & How We Do It" icon="section" indent />
     </ColGroup>
 
     <Hr />
 
     {/* ─── OFFERS & PROMOTIONS ──────────────────────────────── */}
     <SectionLabel label="Offers & Promotions" />
-    <SideLink to="/offers" label="Active Discounts & Codes" icon="offers" />
-    <SideLink to="/sections/offers_page_header" label="Offers Page Header & Deals" icon="image" />
+    <ColGroup label="Promotions & Bundles" icon="offers" defaultOpen={false}>
+      <SideLink to="/offers" label="Offers & Promos Manager" icon="offers" indent />
+      <SideLink to="/offers/bundles" label="Offers Bundles Page" icon="offers" indent />
+    </ColGroup>
 
     <Hr />
 
     {/* ─── CUSTOM DESIGN ORDERS ─────────────────────────────── */}
     <SectionLabel label="Custom Design Orders" />
     <ColGroup label="Custom Order Management" icon="customOrders" defaultOpen={false}>
-      <SideLink to="/sections/custom_orders_settings" label="Page Banner & Hero Text" icon="section" indent />
-      <SideLink to="/custom-orders" label="How It Works & Requests" icon="customOrders" indent />
-      <SideLink to="/messages" label="Custom Order Enquiries" icon="messages" indent />
-      <SideLink to="/faqs" label="Custom Order FAQs" icon="faqs" indent />
+      <SideLink to="/sections/custom_orders_settings" label="Custom Order Page" icon="section" indent />
+      <SideLink to="/custom-orders" label="Custom Order Requests" icon="customOrders" indent />
     </ColGroup>
 
     <Hr />
@@ -210,10 +215,8 @@ const Sidebar = () => (
     {/* ─── BLOGS & EDITORIAL ────────────────────────────────── */}
     <SectionLabel label="Blogs & Content" />
     <ColGroup label="Blog Publishing" icon="blogs" defaultOpen={false}>
-      <SideLink to="/sections/blogs_page_header" label="Blogs Page Header" icon="image" indent />
-      <SideLink to="/sections/blogs_filters_config" label="Categories & Search Filters" icon="section" indent />
-      <SideLink to="/blogs" label="Articles & Blog Posts" icon="blogs" indent />
-      <SideLink to="/subscribers" label="Newsletter & Loop Banner" icon="subscribers" indent />
+      <SideLink to="/sections/blogs_page_header" label="Blogs Page" icon="blogs" indent />
+      <SideLink to="/blogs" label="Blogs Detail Page" icon="section" indent />
     </ColGroup>
 
     <Hr />
@@ -223,7 +226,6 @@ const Sidebar = () => (
     <ColGroup label="Affiliate Management" icon="affiliates" defaultOpen={false}>
       <SideLink to="/sections/affiliate_program_settings" label="Program Information & Banners" icon="section" indent />
       <SideLink to="/affiliates" label="Affiliate Applications" icon="affiliates" indent />
-      <SideLink to="/faqs" label="Affiliate FAQs" icon="faqs" indent />
     </ColGroup>
 
     <Hr />
@@ -232,8 +234,6 @@ const Sidebar = () => (
     <SectionLabel label="About Our Brand" />
     <ColGroup label="Brand Story & Mission" icon="section" defaultOpen={false}>
       <SideLink to="/sections/about_who_we_are" label="Brand Overview & Story" icon="section" indent />
-      <SideLink to="/sections/about_mission" label="Our Philosophy & Values" icon="section" indent />
-      <SideLink to="/sections/about_stats" label="Impact Stats & Founder Quote" icon="section" indent />
       <SideLink to="/sections/location_visit_us_section" label="Visit Us Gallery Slider" icon="image" indent />
     </ColGroup>
 
@@ -250,12 +250,7 @@ const Sidebar = () => (
 
     {/* ─── FOOTER MANAGEMENT ───────────────────────────────── */}
     <SectionLabel label="Footer Management" />
-    <ColGroup label="Footer Options" icon="footer" defaultOpen={false}>
-      <SideLink to="/footer-manager" label="Footer Links & Columns" icon="footer" indent />
-      <SideLink to="/sections/footer_about_text" label="About Us Footer Text" icon="section" indent />
-      <SideLink to="/subscribers" label="Newsletter & Social Links" icon="subscribers" indent />
-      <SideLink to="/sections/footer_settings" label="Copyright & Payment Badges" icon="settings" indent />
-    </ColGroup>
+    <SideLink to="/footer-manager" label="Footer Links & Columns" icon="footer" />
 
     <Hr />
 

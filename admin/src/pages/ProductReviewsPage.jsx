@@ -9,7 +9,13 @@ const btnPrimary = { padding: '10px 20px', borderRadius: '8px', backgroundColor:
 const btnGhost = { padding: '7px 14px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer' };
 const btnDanger = { padding: '7px 12px', borderRadius: '6px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', color: '#EF4444', fontSize: '12px', cursor: 'pointer' };
 
-const STATUS_COLORS = { 'Live': { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' }, 'Pending': { color: '#F6F1E3', bg: 'rgba(184,147,91,0.1)', border: 'rgba(184,147,91,0.3)' }, 'Approved': { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' }, 'Draft': { color: '#B8A99A', bg: 'rgba(184,147,91,0.05)', border: 'rgba(184,147,91,0.2)' } };
+const STATUS_COLORS = { 
+  'Live': { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' }, 
+  'Approved': { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' }, 
+  'Rejected': { color: '#EF4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)' }, 
+  'Pending': { color: '#F6F1E3', bg: 'rgba(184,147,91,0.1)', border: 'rgba(184,147,91,0.3)' }, 
+  'Draft': { color: '#B8A99A', bg: 'rgba(184,147,91,0.05)', border: 'rgba(184,147,91,0.2)' } 
+};
 
 const ProductReviewsPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -28,13 +34,16 @@ const ProductReviewsPage = () => {
     fetch(`${API}/module/reviews/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }).then(fetch_);
   };
   const handleDelete = (id) => {
-    if (!window.confirm('Delete this review?')) return;
+    if (!window.confirm('Delete this review permanently?')) return;
     fetch(`${API}/module/reviews/${id}`, { method: 'DELETE' }).then(fetch_);
   };
 
   const filtered = reviews.filter(r => {
     const matchSearch = (r.reviewer_name || '').toLowerCase().includes(search.toLowerCase()) || (r.comment || '').toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === 'All' || r.status === filterStatus;
+    const matchStatus = filterStatus === 'All' || 
+      (filterStatus === 'Approved' ? (r.status === 'Approved' || r.status === 'Live') : 
+       filterStatus === 'Rejected' ? (r.status === 'Rejected' || r.status === 'Draft' || r.status === 'Inactive') : 
+       r.status === filterStatus);
     const matchRating = filterRating === 'All' || r.rating === parseInt(filterRating);
     return matchSearch && matchStatus && matchRating;
   });
@@ -46,9 +55,9 @@ const ProductReviewsPage = () => {
       {/* Header */}
       <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #3E4930 0%, #222C1A 100%)', border: '1px solid #B8935B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1.5px', marginBottom: '6px' }}>PRODUCTS</div>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#F6F1E3' }}>Product Reviews & Comments</h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#E7D9C9' }}>Moderate, approve, or remove customer reviews on product detail pages.</p>
+          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1.5px', marginBottom: '6px' }}>PRODUCTS & COMMENTS</div>
+          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#F6F1E3' }}>Customer Reviews & Comments</h2>
+          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#E7D9C9' }}>Control, approve, or reject customer review comments before they appear on the store.</p>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
@@ -69,7 +78,7 @@ const ProductReviewsPage = () => {
           <option value="All">All Ratings</option>
           {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n} Star)</option>)}
         </select>
-        {['All', 'Live', 'Draft'].map(s => (
+        {['All', 'Approved', 'Rejected', 'Pending'].map(s => (
           <button key={s} onClick={() => setFilterStatus(s)} style={{ padding: '8px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', border: filterStatus === s ? '1px solid #B8935B' : '1px solid rgba(184,147,91,0.3)', backgroundColor: filterStatus === s ? '#B8935B' : 'transparent', color: filterStatus === s ? '#1A2010' : '#E7D9C9' }}>{s}</button>
         ))}
       </div>
@@ -83,31 +92,57 @@ const ProductReviewsPage = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ backgroundColor: '#182012', borderBottom: '1px solid rgba(184,147,91,0.3)' }}>
-                  {['Reviewer', 'Rating', 'Title', 'Review', 'Status', 'Date', 'Actions'].map(h => (
+                  {['Reviewer', 'Rating', 'Title', 'Review Comment', 'Status', 'Date', 'Actions'].map(h => (
                     <th key={h} style={{ padding: '12px 16px', fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '1px', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#B8A99A' }}>No reviews found.</td></tr>
+                  <tr><td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#B8A99A' }}>No reviews found under status '{filterStatus}'.</td></tr>
                 ) : filtered.map(r => {
                   const sc = STATUS_COLORS[r.status] || STATUS_COLORS['Draft'];
+                  const isApproved = r.status === 'Approved' || r.status === 'Live';
+                  const isRejected = r.status === 'Rejected' || r.status === 'Draft' || r.status === 'Inactive';
                   return (
                     <tr key={r.review_id} style={{ borderBottom: '1px solid rgba(184,147,91,0.1)' }}>
                       <td style={{ padding: '14px 16px', fontSize: '13px', fontWeight: '600', color: '#F6F1E3', whiteSpace: 'nowrap' }}>{r.reviewer_name}</td>
                       <td style={{ padding: '14px 16px', color: '#B8935B', whiteSpace: 'nowrap' }}>{'★'.repeat(r.rating || 0)}</td>
                       <td style={{ padding: '14px 16px', fontSize: '13px', color: '#E7D9C9', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title || '—'}</td>
-                      <td style={{ padding: '14px 16px', fontSize: '13px', color: '#E7D9C9', maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.comment}</td>
+                      <td style={{ padding: '14px 16px', fontSize: '13px', color: '#E7D9C9', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.comment}</td>
                       <td style={{ padding: '14px 16px' }}>
-                        <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '10px', fontWeight: '700', color: sc.color, backgroundColor: sc.bg, border: `1px solid ${sc.border}` }}>{r.status}</span>
+                        <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '10px', fontWeight: '700', color: sc.color, backgroundColor: sc.bg, border: `1px solid ${sc.border}` }}>
+                          {isApproved ? 'Approved' : isRejected ? 'Rejected' : (r.status || 'Pending')}
+                        </span>
                       </td>
                       <td style={{ padding: '14px 16px', fontSize: '12px', color: '#B8A99A', whiteSpace: 'nowrap' }}>{r.created_at ? new Date(r.created_at).toLocaleDateString() : '—'}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          {r.status !== 'Live' && <button onClick={() => handleStatus(r.review_id, 'Live')} style={btnGhost}>Approve</button>}
-                          {r.status === 'Live' && <button onClick={() => handleStatus(r.review_id, 'Draft')} style={btnGhost}>Hide</button>}
-                          <button onClick={() => handleDelete(r.review_id)} style={btnDanger}>
+                          <button 
+                            onClick={() => handleStatus(r.review_id, 'Approved')} 
+                            style={{ 
+                              ...btnGhost, 
+                              backgroundColor: isApproved ? '#3E4930' : 'transparent', 
+                              borderColor: isApproved ? '#B8935B' : 'rgba(34,197,94,0.4)',
+                              color: isApproved ? '#F6F1E3' : '#22c55e',
+                              fontWeight: '700'
+                            }}
+                          >
+                            Approve
+                          </button>
+                          <button 
+                            onClick={() => handleStatus(r.review_id, 'Rejected')} 
+                            style={{ 
+                              ...btnDanger, 
+                              backgroundColor: isRejected ? 'rgba(239,68,68,0.25)' : 'transparent', 
+                              borderColor: 'rgba(239,68,68,0.4)',
+                              color: '#EF4444',
+                              fontWeight: '700'
+                            }}
+                          >
+                            Reject
+                          </button>
+                          <button onClick={() => handleDelete(r.review_id)} style={btnDanger} title="Delete">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                           </button>
                         </div>

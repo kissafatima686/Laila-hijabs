@@ -46,6 +46,7 @@ const MODULE_FIELDS = {
   categories: [
     { key: 'name', label: 'Category Name', type: 'text', required: true },
     { key: 'slug', label: 'Slug (URL path)', type: 'text', required: true },
+    { key: 'keywords', label: 'Search Keywords / Tags (comma separated)', type: 'textarea', placeholder: 'e.g. saudi abaya, kaftan, gown, nida, open abaya' },
     { key: 'description', label: 'Description', type: 'textarea' },
     { key: 'image_url', label: 'Cover Image URL', type: 'text' },
     { key: 'display_order', label: 'Display Order', type: 'number' },
@@ -118,6 +119,24 @@ const MODULE_FIELDS = {
     { key: 'payment_status', label: 'Payment Status', type: 'select', options: ['Unpaid', 'Paid', 'Refunded'] },
     { key: 'notes', label: 'Admin Notes', type: 'textarea' },
   ],
+  custom_orders: [
+    { key: 'customer_name', label: 'Customer Full Name', type: 'text', required: true },
+    { key: 'phone', label: 'WhatsApp / Phone Number', type: 'text' },
+    { key: 'email', label: 'Customer Email', type: 'email' },
+    { key: 'garment_type', label: 'Garment Type (e.g. Abaya, Hijab Set)', type: 'text' },
+    { key: 'size_label', label: 'Standard Size (XS-XXL / Custom)', type: 'text' },
+    { key: 'fabric_type', label: 'Fabric Choice', type: 'text' },
+    { key: 'color_choice', label: 'Color Choice', type: 'text' },
+    { key: 'chest', label: 'Chest Measurement (inches)', type: 'text' },
+    { key: 'hips', label: 'Hips Measurement (inches)', type: 'text' },
+    { key: 'shoulders', label: 'Shoulders Measurement (inches)', type: 'text' },
+    { key: 'waist', label: 'Waist Measurement (inches)', type: 'text' },
+    { key: 'length', label: 'Length Measurement (inches)', type: 'text' },
+    { key: 'width', label: 'Width Measurement (inches)', type: 'text' },
+    { key: 'description', label: 'Vision & Design Description', type: 'textarea' },
+    { key: 'reference_image', label: 'Reference Image Photo URL', type: 'text' },
+    { key: 'status', label: 'Custom Order Status', type: 'select', options: ['Pending', 'Confirmed', 'In Progress', 'Ready to Ship', 'Delivered', 'Cancelled'] },
+  ],
   'custom-orders': [
     { key: 'customer_name', label: 'Customer Name', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' },
@@ -129,7 +148,9 @@ const MODULE_FIELDS = {
     { key: 'label', label: 'Link Label', type: 'text', required: true },
     { key: 'url', label: 'URL / Path', type: 'text', required: true },
     { key: 'display_order', label: 'Display Order', type: 'number' },
-    { key: 'is_highlighted', label: 'Highlighted? (1 = yes)', type: 'number' },
+    { key: 'is_highlighted', label: 'Enable Badge?', type: 'select', options: ['1', '0'] },
+    { key: 'badge_text', label: 'Badge Text (e.g., New)', type: 'text' },
+    { key: 'badge_color', label: 'Badge Color (e.g., #ef4444)', type: 'text' },
     { key: 'status', label: 'Status', type: 'select', options: ['Live', 'Draft'] },
   ],
   'footer-links': [
@@ -309,7 +330,22 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(184,147,91,0.04)'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      <td style={{ padding: '13px 18px', fontSize: '13px', fontWeight: '600', color: '#F6F1E3', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{itemTitle}</td>
+                      <td style={{ padding: '13px 18px', fontSize: '13px', fontWeight: '600', color: '#F6F1E3', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <span>{itemTitle}</span>
+                          {moduleKey === 'navbar-links' && Number(item.is_highlighted) === 1 && item.badge_text && (
+                            <span style={{
+                              backgroundColor: item.badge_color || '#ef4444', 
+                              color: '#fff', 
+                              fontSize: '10px', 
+                              fontWeight: 'bold', 
+                              padding: '2px 8px', 
+                              borderRadius: '12px',
+                              letterSpacing: '0.5px'
+                            }}>{item.badge_text}</span>
+                          )}
+                        </div>
+                      </td>
                       <td style={{ padding: '13px 18px', fontSize: '12px', color: '#B8A99A', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{itemDetail}</td>
                       <td style={{ padding: '13px 18px' }}>
                         <StatusBadge status={item.status} />

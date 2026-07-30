@@ -342,10 +342,12 @@ const createTables = [
 const seedData = [
   // 1. Seed Categories
   `INSERT IGNORE INTO categories (category_id, name, slug, description, image_url) VALUES 
-    (1, 'CO-ORD SETS', 'co-ord-sets', 'Two-piece kaftans and matching co-ord sets crafted for effortless elegance.', '/hero2.png'),
-    (2, 'ABAYAS', 'abayas', 'Luxury occasion, daywear, and open abayas with intricate draping and craftsmanship.', '/hero2.png'),
-    (3, 'HIJABS & SCARVES', 'hijabs-scarves', 'Breathable Modal jersey, premium chiffon, and silk hijabs for everyday modesty.', '/hero1.png'),
-    (4, 'EID COLLECTION', 'eid-collection', 'Exclusive festive couture featuring metallic trims, embroidery, and satin finishes.', '/hero2.png');`,
+    (1, 'Abayas', 'abayas', 'Structured yet soft silhouettes tailored generously for daily grace and formal Eid gatherings.', '/Categories/abaya/abaya1.png'),
+    (2, 'Hijabs', 'hijabs', 'Premium fabrics crafted with hand-rolled edges for everyday and formal elegance.', '/Categories/hijabs/hijab1.png'),
+    (3, 'Irani Chadar', 'irani-chadar', 'Traditional flowing chadar providing full coverage with an elegant drape.', '/Categories/iranichadar/irani1.png'),
+    (4, 'Jilbab', 'jilbab', 'Classic overhead and two-piece jilbabs designed for comfort and modesty.', '/Categories/jilbab/jilbab.png'),
+    (5, 'Namaz Chadar', 'namaz-chadar', 'Breathable and comfortable prayer chadar for your daily devotions.', '/Categories/namazchadar/namazchaddar.png'),
+    (6, 'Round Chadar', 'round-chadar', 'Classic round chadar ensuring perfect coverage with premium nida fabric.', '/Categories/roundchadar/round1.png');`,
 
   // 2. Seed Products
   `INSERT IGNORE INTO products 
@@ -359,6 +361,159 @@ const seedData = [
       'NEW IN', 'Regular Fit', 'Burgundy',
       '[{"name": "Burgundy", "hex": "#722F37"}, {"name": "Olive", "hex": "#5C6B44"}]',
       '["S", "M", "L", "XL"]', 'Premium Nida-Silk', 'Live', 1
+    ),
+    (
+      102, 2, 'Premium Nida Abaya', 'premium-nida-abaya-1',
+      'Classic black Saudi abaya crafted from smooth, high-grade Korean Nida fabric.',
+      5990.00, 6990.00, 25, '/Categories/abaya/abaya1.png',
+      '["/Categories/abaya/abaya1.png"]',
+      'BEST SELLER', 'Saudi Fit', 'Black',
+      '[{"name": "Black", "hex": "#000000"}]',
+      '["XS", "S", "M", "L", "XL"]', 'Korean Nida', 'Live', 1
+    ),
+    (
+      103, 2, 'Everyday Abaya', 'everyday-abaya-2',
+      'Beige casual modest dress abaya designed for everyday comfort.',
+      4990.00, 5800.00, 30, '/Categories/abaya/abaya2.png',
+      '["/Categories/abaya/abaya2.png"]',
+      'NEW IN', 'Regular Fit', 'Beige',
+      '[{"name": "Beige", "hex": "#F5F5DC"}]',
+      '["S", "M", "L"]', 'Soft Linen Nida', 'Live', 1
+    ),
+    (
+      104, 2, 'Classic Black Abaya', 'classic-black-abaya-3',
+      'Timeless front-closed black abaya with clean stitching and elegant drape.',
+      5490.00, 6200.00, 18, '/Categories/abaya/abaya3.png',
+      '["/Categories/abaya/abaya3.png"]',
+      'ESSENTIAL', 'Classic Fit', 'Black',
+      '[{"name": "Black", "hex": "#000000"}]',
+      '["S", "M", "L", "XL"]', 'Premium Nida', 'Live', 1
+    ),
+    (
+      105, 2, 'Elegant Abaya', 'elegant-abaya-4',
+      'Dusty rose chiffon overlay abaya for special dinners and formal gatherings.',
+      6490.00, 7500.00, 15, '/Categories/abaya/abaya4.png',
+      '["/Categories/abaya/abaya4.png"]',
+      'NEW IN', 'Flared Fit', 'Dusty Rose',
+      '[{"name": "Dusty Rose", "hex": "#DCAE96"}]',
+      '["S", "M", "L"]', 'Chiffon Overlay', 'Live', 1
+    ),
+    (
+      106, 2, 'Luxury Occasion Abaya', 'luxury-occasion-abaya-5',
+      'Olive green festive abaya with subtle gold threading and embroidered cuffs.',
+      7490.00, 8900.00, 12, '/Categories/abaya/abaya5.png',
+      '["/Categories/abaya/abaya5.png"]',
+      'LIMITED EDITION', 'Saudi Fit', 'Olive',
+      '[{"name": "Olive", "hex": "#5C6B44"}]',
+      '["S", "M", "L", "XL"]', 'Silk Nida', 'Live', 1
+    ),
+    (
+      107, 2, 'STRUCTURED DAY ABAYA', 'structured-day-abaya',
+      'Tailored olive day abaya featuring structured lapels and pop-button closure.',
+      5990.00, 6800.00, 22, '/hero2.png',
+      '["/hero2.png"]',
+      'FEATURED', 'Straight Fit', 'Olive',
+      '[{"name": "Olive", "hex": "#5C6B44"}]',
+      '["S", "M", "L"]', 'Structured Crepe', 'Live', 1
+    ),
+    (
+      108, 2, 'IVORY CHIFFON ABAYA', 'ivory-chiffon-abaya',
+      'Flowing ivory chiffon abaya with inner slip for serene bridal and formal wear.',
+      6490.00, 7200.00, 14, '/hero2.png',
+      '["/hero2.png"]',
+      'NEW IN', 'Loose Fit', 'Ivory',
+      '[{"name": "Ivory", "hex": "#FFFFF0"}]',
+      '["S", "M", "L"]', 'Pure Chiffon', 'Live', 1
+    ),
+    (
+      109, 2, 'GOLD-TRIM EID ABAYA', 'gold-trim-eid-abaya',
+      'Festive black abaya adorned with rich gold braid trimming along the sleeves.',
+      7490.00, 8500.00, 16, '/hero2.png',
+      '["/hero2.png"]',
+      'LIMITED EDITION', 'Saudi Fit', 'Black',
+      '[{"name": "Black", "hex": "#000000"}]',
+      '["S", "M", "L", "XL"]', 'Luxury Nida', 'Live', 1
+    ),
+    (
+      110, 2, 'DUSTY ROSE OPEN ABAYA', 'dusty-rose-open-abaya',
+      'Open-front dusty rose kimono abaya paired with belt tie.',
+      6890.00, 7900.00, 20, '/hero2.png',
+      '["/hero2.png"]',
+      'BEST SELLER', 'Open Fit', 'Dusty Rose',
+      '[{"name": "Dusty Rose", "hex": "#DCAE96"}]',
+      '["S", "M", "L"]', 'Satin-Finish Crepe', 'Live', 1
+    ),
+    (
+      111, 3, 'Premium Chiffon Hijab', 'premium-chiffon-hijab-1',
+      'Breathable lightweight chiffon hijab in dusty rose with hand-rolled hems.',
+      2400.00, 2900.00, 50, '/Categories/hijabs/hijab1.png',
+      '["/Categories/hijabs/hijab1.png"]',
+      'ESSENTIAL', 'One Size', 'Dusty Rose',
+      '[{"name": "Dusty Rose", "hex": "#DCAE96"}]',
+      '["One Size"]', 'Georgette Chiffon', 'Live', 1
+    ),
+    (
+      112, 3, 'Everyday Jersey Hijab', 'everyday-jersey-hijab-2',
+      'Non-slip 4-way stretch cotton jersey hijab for maximum comfort.',
+      2200.00, 2600.00, 60, '/Categories/hijabs/hijab2.png',
+      '["/Categories/hijabs/hijab2.png"]',
+      'BEST SELLER', 'One Size', 'Olive',
+      '[{"name": "Olive", "hex": "#5C6B44"}]',
+      '["One Size"]', 'Cotton Jersey', 'Live', 1
+    ),
+    (
+      113, 3, 'EMBROIDERED CHIFFON HIJAB', 'embroidered-chiffon-hijab',
+      'Delicate embroidery edging along chiffon wrap.',
+      2500.00, 3000.00, 35, '/hero2.png',
+      '["/hero2.png"]',
+      'NEW IN', 'One Size', 'Rose Gold',
+      '[{"name": "Rose Gold", "hex": "#B76E79"}]',
+      '["One Size"]', 'Embroidered Chiffon', 'Live', 1
+    ),
+    (
+      114, 3, 'EVERYDAY MODAL HIJAB', 'everyday-modal-hijab',
+      'Silky breathable modal hijab wrap in deep black.',
+      1800.00, 2200.00, 40, '/hero2.png',
+      '["/hero2.png"]',
+      'ESSENTIAL', 'One Size', 'Black',
+      '[{"name": "Black", "hex": "#000000"}]',
+      '["One Size"]', 'Premium Modal', 'Live', 1
+    ),
+    (
+      115, 2, 'Two Piece Jilbab Set', 'two-piece-jilbab-1',
+      'Full-coverage 2-piece overhead khimar and flared maxi skirt set.',
+      6990.00, 7990.00, 15, '/Categories/jilbab/jilbab.png',
+      '["/Categories/jilbab/jilbab.png"]',
+      'FEATURED', 'Full Fit', 'Black',
+      '[{"name": "Black", "hex": "#000000"}]',
+      '["Free Size"]', 'Micro-Nida', 'Live', 1
+    ),
+    (
+      116, 2, 'Overhead Jilbab', 'overhead-jilbab-2',
+      'One-piece tie-head olive jilbab offering complete modest coverage.',
+      6490.00, 7400.00, 18, '/Categories/jilbab/jilbab2.png',
+      '["/Categories/jilbab/jilbab2.png"]',
+      'NEW IN', 'Full Fit', 'Olive',
+      '[{"name": "Olive", "hex": "#5C6B44"}]',
+      '["Free Size"]', 'Soft Crepe', 'Live', 1
+    ),
+    (
+      117, 2, 'Classic Irani Chadar', 'classic-irani-chadar-1',
+      'Traditional full-length black Irani chadar with arm-slits and head-tie band.',
+      8990.00, 9990.00, 20, '/Categories/iranichadar/irani1.png',
+      '["/Categories/iranichadar/irani1.png"]',
+      'BEST SELLER', 'Full Coverage', 'Black',
+      '[{"name": "Black", "hex": "#000000"}]',
+      '["Standard"]', 'Irani Silk-Nida', 'Live', 1
+    ),
+    (
+      118, 3, 'Comfort Namaz Chadar', 'comfort-namaz-chadar-1',
+      'Pure white breathable cotton prayer chadar with lace trims.',
+      3490.00, 4200.00, 30, '/Categories/namazchadar/namazchaddar.png',
+      '["/Categories/namazchadar/namazchaddar.png"]',
+      'ESSENTIAL', 'Free Size', 'White',
+      '[{"name": "White", "hex": "#FFFFFF"}]',
+      '["Free Size"]', '100% Pure Cotton', 'Live', 1
     );`,
 
   // 3. Seed Offers
@@ -441,19 +596,29 @@ const seedData = [
     (4, 'Blog',    '/blogs',       NULL, 4, 0, 'Live'),
     (5, 'Contact', '/contact',     NULL, 5, 0, 'Live');`,
 
-  // 13. Seed Footer Links (3 groups: Quick Links, Help, Legal)
+  // 13. Seed Footer Links (Groups: Delivery & Returns, Customer Care, Get In Touch, About Us)
   `INSERT IGNORE INTO footer_links (link_id, group_name, label, url, display_order, status) VALUES
-    (1,  'Quick Links', 'Home',           '/',               1, 'Live'),
-    (2,  'Quick Links', 'Shop',           '/collections',    2, 'Live'),
-    (3,  'Quick Links', 'About Us',       '/about',          3, 'Live'),
-    (4,  'Quick Links', 'Blog',           '/blogs',          4, 'Live'),
-    (5,  'Help',        'Contact Us',     '/contact',        1, 'Live'),
-    (6,  'Help',        'Track My Order', '/account/orders', 2, 'Live'),
-    (7,  'Help',        'Size Guide',     '/size-guide',     3, 'Live'),
-    (8,  'Help',        'Custom Orders',  '/custom-orders',  4, 'Live'),
-    (9,  'Legal',       'Privacy Policy', '/privacy',        1, 'Live'),
-    (10, 'Legal',       'Terms of Use',   '/terms',          2, 'Live'),
-    (11, 'Legal',       'Return Policy',  '/returns',        3, 'Live');`,
+    (1,  'Delivery & Returns', 'Free shipping for orders over £120', '/shipping',      1, 'Live'),
+    (2,  'Delivery & Returns', 'Shipping information',             '/shipping-info', 2, 'Live'),
+    (3,  'Delivery & Returns', 'Delivery',                         '/delivery',      3, 'Live'),
+    (4,  'Delivery & Returns', 'Returns & Exchanges',              '/returns',       4, 'Live'),
+    (5,  'Customer Care',      'Gift Card',                        '/gift-cards',    1, 'Live'),
+    (6,  'Customer Care',      'Size guide',                       '/size-guide',    2, 'Live'),
+    (7,  'Customer Care',      'Care & Repair',                    '/care-repair',   3, 'Live'),
+    (8,  'Customer Care',      'Frequently asked questions',        '/faqs',          4, 'Live'),
+    (9,  'Customer Care',      'Contact us',                       '/contact',       5, 'Live'),
+    (10, 'Customer Care',      'Privacy policy',                   '/privacy',       6, 'Live'),
+    (11, 'Customer Care',      'Terms & conditions',               '/terms',         7, 'Live'),
+    (12, 'Get In Touch',       'Message us on WhatsApp',           'https://wa.me/923238399480', 1, 'Live'),
+    (13, 'Get In Touch',       '+92 323 8399480',                  'tel:+923238399480',          2, 'Live'),
+    (14, 'Get In Touch',       'Email us:',                        'mailto:info@lailahijabs.com', 3, 'Live'),
+    (15, 'Get In Touch',       'info@lailahijabs.com',             'mailto:info@lailahijabs.com', 4, 'Live'),
+    (16, 'About Us',           'Our Story',                        '/about',         1, 'Live'),
+    (17, 'About Us',           'Loyalty',                          '/loyalty',       2, 'Live'),
+    (18, 'About Us',           'Visit Us',                         '/locations',     3, 'Live'),
+    (19, 'About Us',           'Careers',                          '/careers',       4, 'Live'),
+    (20, 'About Us',           'Journal',                          '/blogs',         5, 'Live'),
+    (21, 'About Us',           'Affiliates',                       '/affiliates',    6, 'Live');`,
 
   // 14. Seed Site Sections (ALL page sections with full data)
   `INSERT IGNORE INTO site_sections 

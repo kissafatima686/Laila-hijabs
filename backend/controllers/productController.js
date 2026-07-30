@@ -254,6 +254,39 @@ const getBlogs = async (req, res) => {
   }
 };
 
+// 11. Fetch Approved Customer Reviews for Product
+const getProductReviews = async (req, res) => {
+  const { productId } = req.params;
+  try {
+    const [rows] = await pool.query(
+      `SELECT * FROM product_reviews WHERE product_id = ? AND (status = 'Approved' OR status = 'Live') ORDER BY created_at DESC`,
+      [productId]
+    );
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// 12. Submit New Customer Review (Requires Admin Approval)
+const submitProductReview = async (req, res) => {
+  const { productId } = req.params;
+  const { reviewer_name, rating, title, comment } = req.body;
+  if (!reviewer_name || !comment) {
+    return res.status(400).json({ error: 'Reviewer name and comment are required.' });
+  }
+  try {
+    const [result] = await pool.query(
+      `INSERT INTO product_reviews (product_id, reviewer_name, rating, title, comment, status) 
+       VALUES (?, ?, ?, ?, ?, 'Draft')`,
+      [productId, reviewer_name, rating || 5, title || null, comment]
+    );
+    res.status(201).json({ message: 'Review submitted successfully! It will appear once approved by Admin.', reviewId: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = { 
   getProducts, 
   getProductBySlug, 
@@ -264,5 +297,7 @@ module.exports = {
   submitContactMessage, 
   getActiveOffers, 
   getStoreLocations, 
-  getBlogs 
+  getBlogs,
+  getProductReviews,
+  submitProductReview
 };
