@@ -294,7 +294,7 @@ const ValueSliderManagerPage = () => {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button 
                 type="button" 
-                onClick={() => setSlides(prev => prev.map(item => item.key === s.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+                onClick={() => setSlides(prev => prev.map(item => item.key === s.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
                 style={{ 
                   ...btnG, 
                   height: '39px', 

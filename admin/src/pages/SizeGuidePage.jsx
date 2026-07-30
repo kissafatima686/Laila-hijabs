@@ -147,7 +147,7 @@ const SizeGuidePage = () => {
   };
 
   const toggleConversionStatus = (id) => {
-    setConversions(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'Active' ? 'Inactive' : 'Active' } : c));
+    setConversions(prev => prev.map(c => c.id === id ? { ...c, status: (c.status === 'Active' || c.status === 'Live') ? 'Inactive' : 'Active' } : c));
   };
 
   const addLengthRow = () => {
@@ -161,7 +161,7 @@ const SizeGuidePage = () => {
   };
 
   const toggleLengthStatus = (id) => {
-    setLengths(prev => prev.map(l => l.id === id ? { ...l, status: l.status === 'Active' ? 'Inactive' : 'Active' } : l));
+    setLengths(prev => prev.map(l => l.id === id ? { ...l, status: (l.status === 'Active' || l.status === 'Live') ? 'Inactive' : 'Active' } : l));
   };
 
   return (

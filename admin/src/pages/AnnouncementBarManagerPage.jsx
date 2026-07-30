@@ -313,7 +313,7 @@ const AnnouncementBarManagerPage = () => {
             value={s.value} 
             status={s.status} 
             onChangeValue={v => setSlides(prev => prev.map(item => item.key === s.key ? { ...item, value: v } : item))} 
-            onToggleStatus={() => setSlides(prev => prev.map(item => item.key === s.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+            onToggleStatus={() => setSlides(prev => prev.map(item => item.key === s.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
             onEditLabel={() => handleEditLabel(s.key, s.label)} 
             onDelete={() => setSlides(prev => prev.filter(item => item.key !== s.key))} 
           />

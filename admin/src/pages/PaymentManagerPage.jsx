@@ -284,7 +284,7 @@ const PaymentManagerPage = () => {
             value={f.value} 
             status={f.status} 
             onChangeValue={v => setPanel1Fields(p => p.map(item => item.key === f.key ? { ...item, value: v } : item))} 
-            onToggleStatus={() => setPanel1Fields(p => p.map(item => item.key === f.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+            onToggleStatus={() => setPanel1Fields(p => p.map(item => item.key === f.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
             onEditLabel={() => handleEditLabel(setPanel1Fields, f.key, f.label)} 
             onDelete={() => setPanel1Fields(p => p.filter(item => item.key !== f.key))} 
           />
@@ -310,7 +310,7 @@ const PaymentManagerPage = () => {
             value={f.value} 
             status={f.status} 
             onChangeValue={v => setPanel2Fields(p => p.map(item => item.key === f.key ? { ...item, value: v } : item))} 
-            onToggleStatus={() => setPanel2Fields(p => p.map(item => item.key === f.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+            onToggleStatus={() => setPanel2Fields(p => p.map(item => item.key === f.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
             onEditLabel={() => handleEditLabel(setPanel2Fields, f.key, f.label)} 
             onDelete={() => setPanel2Fields(p => p.filter(item => item.key !== f.key))} 
           />
@@ -336,7 +336,7 @@ const PaymentManagerPage = () => {
             value={f.value} 
             status={f.status} 
             onChangeValue={v => setPanel3Fields(p => p.map(item => item.key === f.key ? { ...item, value: v } : item))} 
-            onToggleStatus={() => setPanel3Fields(p => p.map(item => item.key === f.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+            onToggleStatus={() => setPanel3Fields(p => p.map(item => item.key === f.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
             onEditLabel={() => handleEditLabel(setPanel3Fields, f.key, f.label)} 
             onDelete={() => setPanel3Fields(p => p.filter(item => item.key !== f.key))} 
           />
@@ -362,7 +362,7 @@ const PaymentManagerPage = () => {
             value={f.value} 
             status={f.status} 
             onChangeValue={v => setPanel4Fields(p => p.map(item => item.key === f.key ? { ...item, value: v } : item))} 
-            onToggleStatus={() => setPanel4Fields(p => p.map(item => item.key === f.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+            onToggleStatus={() => setPanel4Fields(p => p.map(item => item.key === f.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
             onEditLabel={() => handleEditLabel(setPanel4Fields, f.key, f.label)} 
             onDelete={() => setPanel4Fields(p => p.filter(item => item.key !== f.key))} 
           />

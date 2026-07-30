@@ -279,7 +279,7 @@ const AdminUsersPage = () => {
     fetch(`${API}/module/admin-users/${id}`, { method: 'DELETE' }).then(fetch_);
   };
   const handleToggleStatus = (u) => {
-    const next = u.status === 'Active' ? 'Inactive' : 'Active';
+    const next = (u.status === 'Active' || u.status === 'Live') ? 'Inactive' : 'Active';
     fetch(`${API}/module/admin-users/${u.admin_id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) }).then(fetch_);
   };
 

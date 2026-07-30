@@ -58,15 +58,15 @@ const AdminAffiliateDetails = () => {
 
       <div className="table-container" style={{ marginBottom: '40px' }}>
         <h2 style={{ fontSize: '18px', padding: '20px 24px', margin: 0, borderBottom: '1px solid rgba(242,235,223,0.1)' }}>Recent Commissions (Orders)</h2>
-        <table className="module-table">
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', color: '#F2EBDF' }}>
           <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Sale Amount</th>
-              <th>Commission Rate</th>
-              <th>Commission Amount</th>
-              <th>Status</th>
-              <th>Date</th>
+            <tr style={{ backgroundColor: '#2B3322', borderBottom: '1px solid rgba(184, 147, 91, 0.2)' }}>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Order ID</th>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Sale Amount</th>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Commission Rate</th>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Commission Amount</th>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Status</th>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Date</th>
             </tr>
           </thead>
           <tbody>
@@ -74,13 +74,13 @@ const AdminAffiliateDetails = () => {
               <tr><td colSpan="6" style={{textAlign: 'center', opacity: 0.5}}>No commissions recorded yet.</td></tr>
             ) : (
               commissions.map((c, i) => (
-                <tr key={i}>
-                  <td>#{c.order_id}</td>
-                  <td>Rs. {c.sale_amount}</td>
-                  <td>{c.commission_rate}%</td>
-                  <td>Rs. {c.commission_amount}</td>
-                  <td><span className={`status-pill ${c.status.toLowerCase()}`}>{c.status}</span></td>
-                  <td>{new Date(c.created_at).toLocaleDateString()}</td>
+                <tr key={i} style={{ borderBottom: '1px solid rgba(242, 235, 223, 0.05)', backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(43, 51, 34, 0.3)' }}>
+                  <td style={{ padding: '14px 20px' }}>#{c.order_id}</td>
+                  <td style={{ padding: '14px 20px' }}>Rs. {c.sale_amount}</td>
+                  <td style={{ padding: '14px 20px' }}>{c.commission_rate}%</td>
+                  <td style={{ padding: '14px 20px' }}>Rs. {c.commission_amount}</td>
+                  <td style={{ padding: '14px 20px' }}><span className={`status-pill ${c.status.toLowerCase()}`}>{c.status}</span></td>
+                  <td style={{ padding: '14px 20px' }}>{new Date(c.created_at).toLocaleDateString()}</td>
                 </tr>
               ))
             )}
@@ -90,12 +90,12 @@ const AdminAffiliateDetails = () => {
 
       <div className="table-container">
         <h2 style={{ fontSize: '18px', padding: '20px 24px', margin: 0, borderBottom: '1px solid rgba(242,235,223,0.1)' }}>Recent Click Tracking (Cookies)</h2>
-        <table className="module-table">
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', color: '#F2EBDF' }}>
           <thead>
-            <tr>
-              <th>IP Address</th>
-              <th>Browser / Device</th>
-              <th>Date & Time</th>
+            <tr style={{ backgroundColor: '#2B3322', borderBottom: '1px solid rgba(184, 147, 91, 0.2)' }}>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>IP Address</th>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Browser / Device</th>
+              <th style={{ padding: '14px 20px', fontWeight: '600', color: '#B8935B' }}>Date & Time</th>
             </tr>
           </thead>
           <tbody>
@@ -103,10 +103,10 @@ const AdminAffiliateDetails = () => {
               <tr><td colSpan="3" style={{textAlign: 'center', opacity: 0.5}}>No clicks recorded yet.</td></tr>
             ) : (
               clicks.map((c, i) => (
-                <tr key={i}>
-                  <td>{c.ip_address}</td>
-                  <td>{c.browser}</td>
-                  <td>{new Date(c.created_at).toLocaleString()}</td>
+                <tr key={i} style={{ borderBottom: '1px solid rgba(242, 235, 223, 0.05)', backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(43, 51, 34, 0.3)' }}>
+                  <td style={{ padding: '14px 20px' }}>{c.ip_address}</td>
+                  <td style={{ padding: '14px 20px' }}>{c.browser}</td>
+                  <td style={{ padding: '14px 20px' }}>{new Date(c.created_at).toLocaleString()}</td>
                 </tr>
               ))
             )}

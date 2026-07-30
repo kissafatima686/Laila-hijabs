@@ -210,7 +210,7 @@ const CustomerAccountsManagerPage = () => {
       .then(() => { setShowUserModal(false); fetchUsers(); });
   };
   const handleToggleUserStatus = (user) => {
-    const nextStatus = user.status === 'Active' ? 'Inactive' : 'Active';
+    const nextStatus = (user.status === 'Active' || user.status === 'Live') ? 'Inactive' : 'Active';
     fetch(`${API}/module/users/${user.user_id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

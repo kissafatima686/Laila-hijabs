@@ -109,7 +109,7 @@ const HowWeDoItPage = () => {
 
   const deleteCard = (id) => setCards(prev => prev.filter(c => c.id !== id));
 
-  const toggleStatus = (id) => setCards(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'Active' ? 'Inactive' : 'Active' } : c));
+  const toggleStatus = (id) => setCards(prev => prev.map(c => c.id === id ? { ...c, status: (c.status === 'Active' || c.status === 'Live') ? 'Inactive' : 'Active' } : c));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '50px' }}>

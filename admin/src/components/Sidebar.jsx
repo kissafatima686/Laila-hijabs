@@ -237,8 +237,8 @@ const Sidebar = () => (
     {/* ─── ABOUT BRAND ──────────────────────────────────────── */}
     <SectionLabel label="About Our Brand" />
     <ColGroup label="Brand Story & Mission" icon="section" defaultOpen={false}>
-      <SideLink to="/sections/about_who_we_are" label="Brand Overview & Story" icon="section" indent />
-      <SideLink to="/sections/location_visit_us_section" label="Visit Us Gallery Slider" icon="image" indent />
+      <SideLink to="/brand-overview" label="Brand Overview & Story" icon="section" indent />
+      <SideLink to="/visit-us-slider" label="Visit Us Gallery Slider" icon="image" indent />
     </ColGroup>
 
     <Hr />
@@ -247,7 +247,7 @@ const Sidebar = () => (
     <SectionLabel label="Store Locations" />
     <ColGroup label="Boutique Locations" icon="locations" defaultOpen={false}>
       <SideLink to="/locations" label="Locations Manager" icon="locations" indent />
-      <SideLink to="/sections/location_detail_page" label="Maps, Hours & Contact Details" icon="section" indent />
+      <SideLink to="/location-details" label="Maps, Hours & Contact Details" icon="section" indent />
     </ColGroup>
 
     <Hr />

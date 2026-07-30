@@ -210,7 +210,7 @@ const WishlistManagerPage = () => {
   };
 
   const handleToggleFieldStatus = (key) => {
-    setFields(prev => prev.map(f => f.key === key ? { ...f, status: f.status === 'Active' ? 'Inactive' : 'Active' } : f));
+    setFields(prev => prev.map(f => f.key === key ? { ...f, status: (f.status === 'Active' || f.status === 'Live') ? 'Inactive' : 'Active' } : f));
   };
 
   const handleEditFieldLabel = (key, currentLabel) => {

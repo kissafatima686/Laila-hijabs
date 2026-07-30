@@ -272,7 +272,7 @@ const ValueStripManagerPage = () => {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button 
                 type="button" 
-                onClick={() => setItems(prev => prev.map(it => it.key === item.key ? { ...it, status: it.status === 'Active' ? 'Inactive' : 'Active' } : it))} 
+                onClick={() => setItems(prev => prev.map(it => it.key === item.key ? { ...it, status: (it.status === 'Active' || it.status === 'Live') ? 'Inactive' : 'Active' } : it))} 
                 style={{ 
                   ...btnG, 
                   height: '39px', 

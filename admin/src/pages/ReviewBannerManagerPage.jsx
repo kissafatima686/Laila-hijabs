@@ -325,7 +325,7 @@ const ReviewBannerManagerPage = () => {
             value={f.value} 
             status={f.status} 
             onChangeValue={v => setFields(prev => prev.map(item => item.key === f.key ? { ...item, value: v } : item))} 
-            onToggleStatus={() => setFields(prev => prev.map(item => item.key === f.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+            onToggleStatus={() => setFields(prev => prev.map(item => item.key === f.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
             onEditLabel={() => handleEditLabel(f.key, f.label)} 
             onDelete={() => setFields(prev => prev.filter(item => item.key !== f.key))} 
           />

@@ -138,22 +138,22 @@ const ProductFiltersManagerPage = ({ activeTab: initialTab = 'all' }) => {
   // Fabric CRUD
   const addFabric = () => setFabrics(prev => [...prev, { id: `f_${Date.now()}`, name: 'New Fabric', status: 'Active' }]);
   const deleteFabric = (id) => setFabrics(prev => prev.filter(f => f.id !== id));
-  const toggleFabricStatus = (id) => setFabrics(prev => prev.map(f => f.id === id ? { ...f, status: f.status === 'Active' ? 'Inactive' : 'Active' } : f));
+  const toggleFabricStatus = (id) => setFabrics(prev => prev.map(f => f.id === id ? { ...f, status: (f.status === 'Active' || f.status === 'Live') ? 'Inactive' : 'Active' } : f));
 
   // Size CRUD
   const addSize = () => setSizes(prev => [...prev, { id: `s_${Date.now()}`, name: '3XL', status: 'Active' }]);
   const deleteSize = (id) => setSizes(prev => prev.filter(s => s.id !== id));
-  const toggleSizeStatus = (id) => setSizes(prev => prev.map(s => s.id === id ? { ...s, status: s.status === 'Active' ? 'Inactive' : 'Active' } : s));
+  const toggleSizeStatus = (id) => setSizes(prev => prev.map(s => s.id === id ? { ...s, status: (s.status === 'Active' || s.status === 'Live') ? 'Inactive' : 'Active' } : s));
 
   // Color CRUD
   const addColor = () => setColors(prev => [...prev, { id: `c_${Date.now()}`, name: 'Gold / Beige', hex_color: '#D4AF37', status: 'Active' }]);
   const deleteColor = (id) => setColors(prev => prev.filter(c => c.id !== id));
-  const toggleColorStatus = (id) => setColors(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'Active' ? 'Inactive' : 'Active' } : c));
+  const toggleColorStatus = (id) => setColors(prev => prev.map(c => c.id === id ? { ...c, status: (c.status === 'Active' || c.status === 'Live') ? 'Inactive' : 'Active' } : c));
 
   // Price CRUD
   const addPriceRange = () => setPriceRanges(prev => [...prev, { id: `p_${Date.now()}`, name: 'Rs. 10,000+', min_price: '10000', max_price: '', status: 'Active' }]);
   const deletePriceRange = (id) => setPriceRanges(prev => prev.filter(p => p.id !== id));
-  const togglePriceStatus = (id) => setPriceRanges(prev => prev.map(p => p.id === id ? { ...p, status: p.status === 'Active' ? 'Inactive' : 'Active' } : p));
+  const togglePriceStatus = (id) => setPriceRanges(prev => prev.map(p => p.id === id ? { ...p, status: (p.status === 'Active' || p.status === 'Live') ? 'Inactive' : 'Active' } : p));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '50px' }}>

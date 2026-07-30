@@ -112,6 +112,7 @@ const App = () => (
           {/* ── ABOUT ─────────────────────────────────────────────── */}
           <Route path="/sections/about_stats" element={<SectionEditorPage sectionKey="about_stats" />} />
           <Route path="/sections/about_who_we_are" element={<AboutWhoWeAreManagerPage />} />
+          <Route path="/brand-overview" element={<AboutWhoWeAreManagerPage />} />
           <Route path="/sections/about_mission" element={<SectionEditorPage sectionKey="about_mission" />} />
 
           {/* ── AFFILIATE ─────────────────────────────────────────── */}
@@ -148,7 +149,9 @@ const App = () => (
           <Route path="/locations" element={<GenericModulePage moduleKey="locations" title="Store Locations" description="Individual boutique entries — name, city, address, hours, phone, email, WhatsApp, image, map URL." />} />
           <Route path="/sections/location_page_header" element={<SectionEditorPage sectionKey="location_page_header" />} />
           <Route path="/sections/location_visit_us_section" element={<VisitUsSliderManagerPage />} />
+          <Route path="/visit-us-slider" element={<VisitUsSliderManagerPage />} />
           <Route path="/sections/location_detail_page" element={<LocationDetailsEditorPage />} />
+          <Route path="/location-details" element={<LocationDetailsEditorPage />} />
 
           {/* ── DYNAMIC SECTION FALLBACK ROUTE ── */}
           <Route path="/sections/:sectionKey" element={<SectionEditorPage />} />

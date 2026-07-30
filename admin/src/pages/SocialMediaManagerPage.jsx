@@ -299,7 +299,7 @@ const SocialMediaManagerPage = () => {
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button 
                       type="button" 
-                      onClick={() => setCards(prev => prev.map(item => item.key === c.key ? { ...item, status: item.status === 'Active' ? 'Inactive' : 'Active' } : item))} 
+                      onClick={() => setCards(prev => prev.map(item => item.key === c.key ? { ...item, status: (item.status === 'Active' || item.status === 'Live') ? 'Inactive' : 'Active' } : item))} 
                       style={{ 
                         ...btnG, 
                         flex: 1, 
