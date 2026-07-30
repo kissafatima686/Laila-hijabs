@@ -98,6 +98,7 @@ const CategoriesMegaMenuPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalGroup, setModalGroup] = useState('all_categories'); // 'all_categories' | 'featured_categories' | 'featured_cards'
   const [editItem, setEditItem] = useState(null);
+  const [dbCategories, setDbCategories] = useState([]);
   const [form, setForm] = useState({
     label: '',
     url: '',
@@ -109,16 +110,17 @@ const CategoriesMegaMenuPage = () => {
 
   const fetchItems = () => {
     setLoading(true);
-    fetch(`${API}/module/categories-mega-menu`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setItems(data);
-        } else {
-          setItems([]);
-        }
+    Promise.all([
+      fetch(`${API}/module/categories-mega-menu`).then(res => res.json()),
+      fetch(`${API}/module/categories`).then(res => res.json())
+    ])
+      .then(([itemsData, catsData]) => {
+        if (Array.isArray(itemsData)) setItems(itemsData);
+        else setItems([]);
+        
+        if (Array.isArray(catsData)) setDbCategories(catsData);
       })
-      .catch(err => console.error("Error fetching mega menu items:", err))
+      .catch(err => console.error("Error fetching data:", err))
       .finally(() => setLoading(false));
   };
 
@@ -401,12 +403,29 @@ const CategoriesMegaMenuPage = () => {
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={lStyle}>Title / Label *</label>
-                <input required value={form.label} onChange={e => setForm(p => ({ ...p, label: e.target.value }))} style={iStyle} placeholder="e.g. ABAYAS COLLECTION or ABAYAS" />
+                <select 
+                  required 
+                  value={form.label} 
+                  onChange={e => {
+                    const selectedCat = dbCategories.find(c => c.name === e.target.value);
+                    if (selectedCat) {
+                      setForm(p => ({ ...p, label: selectedCat.name, url: `/categories/${selectedCat.slug}` }));
+                    } else {
+                      setForm(p => ({ ...p, label: e.target.value }));
+                    }
+                  }} 
+                  style={iStyle}
+                >
+                  <option value="" disabled>Select a Category...</option>
+                  {dbCategories.map(cat => (
+                    <option key={cat.category_id} value={cat.name}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
                 <label style={lStyle}>Target URL / Path *</label>
-                <input required value={form.url} onChange={e => setForm(p => ({ ...p, url: e.target.value }))} style={iStyle} placeholder="e.g. /categories/abaya" />
+                <input required readOnly value={form.url} style={{...iStyle, backgroundColor: '#111', color: '#888'}} placeholder="Auto-generated based on category selection" />
               </div>
 
               {modalGroup === 'featured_cards' && (
@@ -425,7 +444,7 @@ const CategoriesMegaMenuPage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={lStyle}>Display Order</label>
-                  <input type="number" value={form.display_order} onChange={e => setForm(p => ({ ...p, display_order: parseInt(e.target.value) || 0 }))} style={iStyle} />
+                  <input type="number" min="0" value={form.display_order} onChange={e => setForm(p => ({ ...p, display_order: parseInt(e.target.value) || 0 }))} style={iStyle} />
                 </div>
                 <div>
                   <label style={lStyle}>Status</label>

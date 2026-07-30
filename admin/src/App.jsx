@@ -42,6 +42,7 @@ import AffiliateProgramManagerPage from './pages/AffiliateProgramManagerPage';
 import BlogsPageManager from './pages/BlogsPageManager';
 import BlogDetailPageEditor from './pages/BlogDetailPageEditor';
 import CustomOrderPageManager from './pages/CustomOrderPageManager';
+import SocialMediaManagerPage from './pages/SocialMediaManagerPage';
 import './App.css';
 
 const App = () => (
@@ -75,6 +76,8 @@ const App = () => (
           <Route path="/how-we-do-it" element={<HowWeDoItPage />} />
           <Route path="/sections/home_trending" element={<TrendingManagerPage />} />
           <Route path="/trending-manager" element={<TrendingManagerPage />} />
+          <Route path="/sections/home_social_media" element={<SocialMediaManagerPage />} />
+          <Route path="/social-media-manager" element={<SocialMediaManagerPage />} />
           <Route path="/sections/home_testimonials_section" element={<SectionEditorPage sectionKey="home_testimonials_section" />} />
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/sections/home_whatsapp_float" element={<SectionEditorPage sectionKey="home_whatsapp_float" />} />

@@ -395,16 +395,14 @@ const ProductsList = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={lStyle}>Price (Rs.) *</label>
-                  <input
-                    type="number" required placeholder="e.g. 2999"
+                  <input type="number" min="0" required placeholder="e.g. 2999"
                     value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})}
                     style={iStyle}
                   />
                 </div>
                 <div>
                   <label style={lStyle}>Stock Quantity</label>
-                  <input
-                    type="number" placeholder="20"
+                  <input type="number" min="0" placeholder="20"
                     value={formData.stock_quantity} onChange={e => setFormData({...formData, stock_quantity: e.target.value})}
                     style={iStyle}
                   />

@@ -576,7 +576,7 @@ const CartManagerPage = () => {
                 </div>
                 <div>
                   <label style={lStyle}>Value</label>
-                  <input type="number" value={couponForm.discount_type === 'percentage' ? couponForm.discount_percentage : couponForm.discount_amount} onChange={e => setCouponForm(p => ({ ...p, [couponForm.discount_type === 'percentage' ? 'discount_percentage' : 'discount_amount']: e.target.value }))} style={iStyle} />
+                  <input type="number" min="0" value={couponForm.discount_type === 'percentage' ? couponForm.discount_percentage : couponForm.discount_amount} onChange={e => setCouponForm(p => ({ ...p, [couponForm.discount_type === 'percentage' ? 'discount_percentage' : 'discount_amount']: e.target.value }))} style={iStyle} />
                 </div>
               </div>
               <div><label style={lStyle}>Description</label><input value={couponForm.description} onChange={e => setCouponForm(p => ({ ...p, description: e.target.value }))} style={iStyle} /></div>

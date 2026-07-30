@@ -21,9 +21,9 @@ export default function ProductManagement() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px', marginTop: '15px' }}>
         <input type="text" placeholder="Product Name" value={product.name} onChange={e => setProduct({...product, name: e.target.value})} required />
         <input type="text" placeholder="Slug" value={product.slug} onChange={e => setProduct({...product, slug: e.target.value})} required />
-        <input type="number" placeholder="Category ID" value={product.category_id} onChange={e => setProduct({...product, category_id: e.target.value})} required />
-        <input type="number" placeholder="Price" value={product.price} onChange={e => setProduct({...product, price: e.target.value})} required />
-        <input type="number" placeholder="Stock Quantity" value={product.stock_quantity} onChange={e => setProduct({...product, stock_quantity: e.target.value})} required />
+        <input type="number" min="0" placeholder="Category ID" value={product.category_id} onChange={e => setProduct({...product, category_id: e.target.value})} required />
+        <input type="number" min="0" placeholder="Price" value={product.price} onChange={e => setProduct({...product, price: e.target.value})} required />
+        <input type="number" min="0" placeholder="Stock Quantity" value={product.stock_quantity} onChange={e => setProduct({...product, stock_quantity: e.target.value})} required />
         <button type="submit" style={{ padding: '10px', background: '#000', color: '#fff', border: 'none', cursor: 'pointer' }}>Save Product</button>
       </form>
     </div>

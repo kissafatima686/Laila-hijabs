@@ -139,7 +139,7 @@ const FAQsPage = () => {
                 </div>
                 <div>
                   <label style={labelStyle}>Display Order</label>
-                  <input type="number" value={form.display_order} onChange={e => setForm(p => ({ ...p, display_order: parseInt(e.target.value) || 0 }))} style={inputStyle} />
+                  <input type="number" min="0" value={form.display_order} onChange={e => setForm(p => ({ ...p, display_order: parseInt(e.target.value) || 0 }))} style={inputStyle} />
                 </div>
               </div>
               <div>

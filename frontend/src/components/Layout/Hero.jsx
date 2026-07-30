@@ -37,11 +37,13 @@ const Hero = () => {
 
   const activeSlide = sliders.length > 0 ? sliders[currentIndex] : null;
 
-  const title = activeSlide ? activeSlide.title : cmsTitle;
-  const subtitle = activeSlide ? activeSlide.subtitle : cmsSubtitle;
-  const bgImage = activeSlide ? activeSlide.image_url : cmsImage;
-  const btnLink = activeSlide ? activeSlide.button_link : cmsBtnLink;
-  const btnText = activeSlide ? (cmsBtnText || 'EXPLORE COLLECTION') : (cmsBtnText || 'EXPLORE COLLECTION');
+  if (!activeSlide) return null;
+
+  const title = activeSlide.title;
+  const subtitle = activeSlide.subtitle;
+  const bgImage = activeSlide.image_url;
+  const btnLink = activeSlide.button_link || '/categories';
+  const btnText = cmsBtnText || 'EXPLORE COLLECTION';
 
   return (
     <section 

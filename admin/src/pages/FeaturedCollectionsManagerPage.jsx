@@ -106,6 +106,7 @@ const FeaturedCollectionsManagerPage = () => {
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editCard, setEditCard] = useState(null);
+  const [dbCategories, setDbCategories] = useState([]);
   const [cardForm, setCardForm] = useState({
     title: '',
     count: '4 DESIGNS',
@@ -116,15 +117,17 @@ const FeaturedCollectionsManagerPage = () => {
   });
 
   const fetchSettings = () => {
-    fetch(`${API}/sections/home_featured_collections`)
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
+    Promise.all([
+      fetch(`${API}/sections/home_featured_collections`).then(res => res.json()),
+      fetch(`${API}/module/categories`).then(res => res.json())
+    ])
+      .then(([settingsData, catsData]) => {
+        if (settingsData) {
           let meta = {};
-          try { meta = typeof data.metadata === 'string' ? JSON.parse(data.metadata) : (data.metadata || {}); } catch(e) {}
+          try { meta = typeof settingsData.metadata === 'string' ? JSON.parse(settingsData.metadata) : (settingsData.metadata || {}); } catch(e) {}
 
           setGlobalSettings({
-            title: data.title || 'SHOP BY CATEGORY',
+            title: settingsData.title || 'SHOP BY CATEGORY',
             is_enabled: meta.is_enabled || 'true',
             slide_speed: meta.slide_speed || '3'
           });
@@ -133,8 +136,11 @@ const FeaturedCollectionsManagerPage = () => {
             setCards(meta.cards);
           }
         }
+        if (Array.isArray(catsData)) {
+          setDbCategories(catsData);
+        }
       })
-      .catch(err => console.error("Error fetching featured collections settings:", err));
+      .catch(err => console.error("Error fetching data:", err));
   };
 
   useEffect(() => {
@@ -256,7 +262,7 @@ const FeaturedCollectionsManagerPage = () => {
           </div>
           <div>
             <label style={lStyle}>SLIDER AUTOPLAY SPEED (SEC)</label>
-            <input type="number" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={{ ...iStyle, padding: '10px 14px', fontSize: '13px' }} placeholder="3" />
+            <input type="number" min="0" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={{ ...iStyle, padding: '10px 14px', fontSize: '13px' }} placeholder="3" />
           </div>
         </div>
       </div>
@@ -403,8 +409,31 @@ const FeaturedCollectionsManagerPage = () => {
             <form onSubmit={handleSaveModalCard} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={lStyle}>Category Title *</label>
-                  <input required value={cardForm.title} onChange={e => setCardForm(p => ({ ...p, title: e.target.value }))} style={iStyle} placeholder="e.g. Jilbab" />
+                  <label style={lStyle}>Target Category (Product Catalog) *</label>
+                  <select 
+                    required 
+                    value={cardForm.title} 
+                    onChange={e => {
+                      const selectedCat = dbCategories.find(c => c.name === e.target.value);
+                      if (selectedCat) {
+                        setCardForm(p => ({ 
+                          ...p, 
+                          title: selectedCat.name, 
+                          path: `/categories/${selectedCat.slug}`,
+                          image_url: selectedCat.image_url || p.image_url,
+                          desc: selectedCat.description || p.desc
+                        }));
+                      } else {
+                        setCardForm(p => ({ ...p, title: e.target.value }));
+                      }
+                    }} 
+                    style={iStyle}
+                  >
+                    <option value="" disabled>Select a Category...</option>
+                    {dbCategories.map(cat => (
+                      <option key={cat.category_id} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label style={lStyle}>Design Count Tag</label>
@@ -422,7 +451,7 @@ const FeaturedCollectionsManagerPage = () => {
                 </div>
                 <div>
                   <label style={lStyle}>Explore Link Path</label>
-                  <input value={cardForm.path} onChange={e => setCardForm(p => ({ ...p, path: e.target.value }))} style={iStyle} placeholder="/categories/jilbab" />
+                  <input readOnly value={cardForm.path} style={{...iStyle, backgroundColor: '#111', color: '#888'}} placeholder="Auto-generated from category selection" />
                 </div>
               </div>
               {cardForm.image_url && (

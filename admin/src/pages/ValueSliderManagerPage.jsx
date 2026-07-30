@@ -248,7 +248,7 @@ const ValueSliderManagerPage = () => {
           </div>
           <div>
             <label style={lStyle}>AUTOPLAY SPEED (SEC)</label>
-            <input type="number" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={iStyle} placeholder="5" />
+            <input type="number" min="0" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={iStyle} placeholder="5" />
           </div>
         </div>
       </div>

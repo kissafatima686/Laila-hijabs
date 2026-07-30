@@ -287,7 +287,7 @@ const AnnouncementBarManagerPage = () => {
           </div>
           <div>
             <label style={lStyle}>ROTATE SPEED (SECONDS)</label>
-            <input type="number" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={iStyle} placeholder="4" />
+            <input type="number" min="0" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={iStyle} placeholder="4" />
           </div>
         </div>
       </div>

@@ -169,6 +169,7 @@ const Sidebar = () => (
     <ColGroup label="Dynamic Showcase" icon="trending" defaultOpen={false}>
       <SideLink to="/testimonials" label="Customer Testimonials" icon="testimonials" indent />
       <SideLink to="/trending-manager" label="Trending Products" icon="trending" indent />
+      <SideLink to="/social-media-manager" label="Social Media Reels" icon="video" indent />
       <SideLink to="/featured-collections-manager" label="Featured Collections" icon="categories" indent />
       <SideLink to="/sections/home_whatsapp_float" label="Floating WhatsApp & Socials" icon="whatsapp" indent />
     </ColGroup>

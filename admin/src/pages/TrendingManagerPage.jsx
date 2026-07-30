@@ -253,7 +253,7 @@ const TrendingManagerPage = () => {
           </div>
           <div>
             <label style={lStyle}>SLIDER AUTOPLAY SPEED (SEC)</label>
-            <input type="number" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={{ ...iStyle, padding: '10px 14px', fontSize: '13px' }} placeholder="3" />
+            <input type="number" min="0" value={globalSettings.slide_speed} onChange={e => setGlobalSettings(s => ({ ...s, slide_speed: e.target.value }))} style={{ ...iStyle, padding: '10px 14px', fontSize: '13px' }} placeholder="3" />
           </div>
         </div>
       </div>
@@ -309,8 +309,7 @@ const TrendingManagerPage = () => {
                   </div>
                   <div>
                     <label style={lStyle}>PRICE (RS.)</label>
-                    <input 
-                      type="number"
+                    <input type="number" min="0"
                       value={c.price} 
                       onChange={e => setCards(prev => prev.map(item => item.key === c.key ? { ...item, price: e.target.value } : item))} 
                       style={iStyle} 
@@ -406,7 +405,7 @@ const TrendingManagerPage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={lStyle}>Price (Rs.) *</label>
-                  <input required type="number" value={cardForm.price} onChange={e => setCardForm(p => ({ ...p, price: e.target.value }))} style={iStyle} placeholder="4990" />
+                  <input required type="number" min="0" value={cardForm.price} onChange={e => setCardForm(p => ({ ...p, price: e.target.value }))} style={iStyle} placeholder="4990" />
                 </div>
                 <div>
                   <label style={lStyle}>Badge Tag</label>
