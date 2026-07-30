@@ -9,6 +9,62 @@ const btnP = { padding: '9px 18px', borderRadius: '8px', backgroundColor: '#B893
 const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer' };
 const btnD = { padding: '7px 10px', borderRadius: '6px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', fontSize: '12px', cursor: 'pointer' };
 
+const TrashIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
+  </svg>
+);
+
+const FieldBox = ({ label, children, active = true, onToggle, onClear }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <label style={lStyle}>{label}</label>
+      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        {onToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            style={{
+              padding: '3px 8px',
+              borderRadius: '6px',
+              backgroundColor: active !== false ? '#3E4930' : 'rgba(239,68,68,0.15)',
+              border: active !== false ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)',
+              color: active !== false ? '#F6F1E3' : '#EF4444',
+              fontSize: '10px',
+              fontWeight: '700',
+              cursor: 'pointer'
+            }}
+          >
+            {active !== false ? 'Active' : 'Inactive'}
+          </button>
+        )}
+        {onClear && (
+          <button
+            type="button"
+            onClick={onClear}
+            style={{
+              padding: '3px 6px',
+              borderRadius: '6px',
+              backgroundColor: 'rgba(239,68,68,0.15)',
+              border: '1px solid rgba(239,68,68,0.35)',
+              color: '#EF4444',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+            title="Clear Field"
+          >
+            <TrashIcon />
+          </button>
+        )}
+      </div>
+    </div>
+    <div style={{ opacity: active !== false ? 1 : 0.5 }}>
+      {children}
+    </div>
+  </div>
+);
+
 const AffiliateProgramManagerPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -275,34 +331,28 @@ const AffiliateProgramManagerPage = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={lStyle}>Tagline / Badge</label>
+              <FieldBox label="Tagline / Badge" active={form.sec1_badge_active} onToggle={() => setForm(p => ({ ...p, sec1_badge_active: p.sec1_badge_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec1_badge: '' }))}>
                 <input value={form.sec1_badge} onChange={e => setForm(p => ({ ...p, sec1_badge: e.target.value }))} style={iStyle} placeholder="Earn With Laila" />
-              </div>
-              <div>
-                <label style={lStyle}>Hero Heading Title *</label>
+              </FieldBox>
+              <FieldBox label="Hero Heading Title *" active={form.sec1_title_active} onToggle={() => setForm(p => ({ ...p, sec1_title_active: p.sec1_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec1_title: '' }))}>
                 <input required value={form.sec1_title} onChange={e => setForm(p => ({ ...p, sec1_title: e.target.value }))} style={iStyle} placeholder="Share the grace, earn on every order." />
-              </div>
+              </FieldBox>
             </div>
 
-            <div>
-              <label style={lStyle}>Hero Body Description *</label>
+            <FieldBox label="Hero Body Description *" active={form.sec1_body_active} onToggle={() => setForm(p => ({ ...p, sec1_body_active: p.sec1_body_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec1_body: '' }))}>
               <textarea rows={3} required value={form.sec1_body} onChange={e => setForm(p => ({ ...p, sec1_body: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="Love Laila Hijabs? Turn your recommendation into income..." />
-            </div>
+            </FieldBox>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={lStyle}>CTA Button Text</label>
+              <FieldBox label="CTA Button Text" active={form.sec1_btn_text_active} onToggle={() => setForm(p => ({ ...p, sec1_btn_text_active: p.sec1_btn_text_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec1_btn_text: '' }))}>
                 <input value={form.sec1_btn_text} onChange={e => setForm(p => ({ ...p, sec1_btn_text: e.target.value }))} style={iStyle} placeholder="Apply Now" />
-              </div>
-              <div>
-                <label style={lStyle}>CTA Button Link</label>
+              </FieldBox>
+              <FieldBox label="CTA Button Link" active={form.sec1_btn_link_active} onToggle={() => setForm(p => ({ ...p, sec1_btn_link_active: p.sec1_btn_link_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec1_btn_link: '' }))}>
                 <input value={form.sec1_btn_link} onChange={e => setForm(p => ({ ...p, sec1_btn_link: e.target.value }))} style={iStyle} placeholder="#apply-form" />
-              </div>
-              <div>
-                <label style={lStyle}>Hero Banner Image URL</label>
+              </FieldBox>
+              <FieldBox label="Hero Banner Image URL" active={form.sec1_image_active} onToggle={() => setForm(p => ({ ...p, sec1_image_active: p.sec1_image_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec1_image: '' }))}>
                 <input value={form.sec1_image} onChange={e => setForm(p => ({ ...p, sec1_image: e.target.value }))} style={iStyle} placeholder="/affiliate-hero.png" />
-              </div>
+              </FieldBox>
             </div>
           </div>
         </div>
@@ -374,14 +424,16 @@ const AffiliateProgramManagerPage = () => {
               {form.steps.map((st, idx) => {
                 const isActive = st.active !== false;
                 return (
-                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto auto', gap: '12px', alignItems: 'center' }}>
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto', gap: '12px', alignItems: 'center' }}>
                     <input value={st.num} onChange={e => handleStepChange(idx, 'num', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B', textAlign: 'center' }} />
                     <input value={st.title} onChange={e => handleStepChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Step Title" />
                     <input value={st.desc} onChange={e => handleStepChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Step Description" />
-                    <button type="button" onClick={() => toggleStepActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                      {isActive ? 'Active' : 'Inactive'}
-                    </button>
-                    <button type="button" onClick={() => removeStep(idx)} style={btnD}>Delete</button>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <button type="button" onClick={() => toggleStepActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                        {isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button type="button" onClick={() => removeStep(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
+                    </div>
                   </div>
                 );
               })}
@@ -429,10 +481,10 @@ const AffiliateProgramManagerPage = () => {
                 return (
                   <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <input value={textVal} onChange={e => handleHighlightChange(idx, e.target.value)} style={iStyle} placeholder={`Highlight ${idx + 1}`} />
-                    <button type="button" onClick={() => toggleHighlightActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                      {isActive ? 'Active' : 'Inactive'}
+                    <button type="button" onClick={() => toggleHighlightActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                      {isActive ? 'Deactivate' : 'Activate'}
                     </button>
-                    <button type="button" onClick={() => removeHighlight(idx)} style={btnD}>Delete</button>
+                    <button type="button" onClick={() => removeHighlight(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
                   </div>
                 );
               })}
@@ -547,10 +599,10 @@ const AffiliateProgramManagerPage = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700' }}>FAQ ITEM #{idx + 1}</span>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button type="button" onClick={() => toggleFaqActive(idx)} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                          {isActive ? 'Active' : 'Inactive'}
+                        <button type="button" onClick={() => toggleFaqActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                          {isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button type="button" onClick={() => removeFaq(idx)} style={btnD}>Delete FAQ</button>
+                        <button type="button" onClick={() => removeFaq(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete FAQ"><TrashIcon /></button>
                       </div>
                     </div>
                     <input value={faq.q} onChange={e => handleFaqChange(idx, 'q', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Question?" />

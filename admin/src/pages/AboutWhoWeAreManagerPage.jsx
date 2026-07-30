@@ -20,6 +20,56 @@ const TrashIcon = () => (
   </svg>
 );
 
+const FieldBox = ({ label, children, active = true, onToggle, onClear }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <label style={lStyle}>{label}</label>
+      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        {onToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            style={{
+              padding: '3px 8px',
+              borderRadius: '6px',
+              backgroundColor: active !== false ? '#3E4930' : 'rgba(239,68,68,0.15)',
+              border: active !== false ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)',
+              color: active !== false ? '#F6F1E3' : '#EF4444',
+              fontSize: '10px',
+              fontWeight: '700',
+              cursor: 'pointer'
+            }}
+          >
+            {active !== false ? 'Active' : 'Inactive'}
+          </button>
+        )}
+        {onClear && (
+          <button
+            type="button"
+            onClick={onClear}
+            style={{
+              padding: '3px 6px',
+              borderRadius: '6px',
+              backgroundColor: 'rgba(239,68,68,0.15)',
+              border: '1px solid rgba(239,68,68,0.35)',
+              color: '#EF4444',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+            title="Clear Field"
+          >
+            <TrashIcon />
+          </button>
+        )}
+      </div>
+    </div>
+    <div style={{ opacity: active !== false ? 1 : 0.5 }}>
+      {children}
+    </div>
+  </div>
+);
+
 const AboutWhoWeAreManagerPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -248,30 +298,25 @@ const AboutWhoWeAreManagerPage = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={lStyle}>Section Badge / Tagline</label>
+              <FieldBox label="Section Badge / Tagline" active={form.badge_text_active} onToggle={() => setForm(p => ({ ...p, badge_text_active: p.badge_text_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, badge_text: '' }))}>
                 <input value={form.badge_text} onChange={e => setForm(p => ({ ...p, badge_text: e.target.value }))} style={iStyle} placeholder="A Legacy of Modest Luxury" />
-              </div>
-              <div>
-                <label style={lStyle}>Main Heading *</label>
+              </FieldBox>
+              <FieldBox label="Main Heading *" active={form.title_active} onToggle={() => setForm(p => ({ ...p, title_active: p.title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, title: '' }))}>
                 <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} style={iStyle} placeholder="Who We Are" />
-              </div>
+              </FieldBox>
             </div>
 
-            <div>
-              <label style={lStyle}>Brand Description Story *</label>
+            <FieldBox label="Brand Description Story *" active={form.body_content_active} onToggle={() => setForm(p => ({ ...p, body_content_active: p.body_content_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, body_content: '' }))}>
               <textarea rows={4} required value={form.body_content} onChange={e => setForm(p => ({ ...p, body_content: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="Laila Hijabs is Pakistan's leading luxury modest fashion house..." />
-            </div>
+            </FieldBox>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={lStyle}>Primary Story Photo URL</label>
+              <FieldBox label="Primary Story Photo URL" active={form.image_url_active} onToggle={() => setForm(p => ({ ...p, image_url_active: p.image_url_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url: '' }))}>
                 <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} style={iStyle} placeholder="/hero1.png" />
-              </div>
-              <div>
-                <label style={lStyle}>Secondary Craftsmanship Photo URL</label>
+              </FieldBox>
+              <FieldBox label="Secondary Craftsmanship Photo URL" active={form.image_url_2_active} onToggle={() => setForm(p => ({ ...p, image_url_2_active: p.image_url_2_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url_2: '' }))}>
                 <input value={form.image_url_2} onChange={e => setForm(p => ({ ...p, image_url_2: e.target.value }))} style={iStyle} placeholder="/hero2.png" />
-              </div>
+              </FieldBox>
             </div>
           </div>
         </div>
@@ -339,12 +384,12 @@ const AboutWhoWeAreManagerPage = () => {
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
                       <input value={v.letter} onChange={e => handleValueChange(idx, 'letter', e.target.value)} style={{ ...iStyle, width: '45px', textAlign: 'center', fontWeight: '800', color: '#B8935B' }} maxLength={2} />
                       <input value={v.title} onChange={e => handleValueChange(idx, 'title', e.target.value)} style={{ ...iStyle, flex: 1, fontWeight: '700' }} placeholder="Value Title" />
-                      <button type="button" onClick={() => handleToggleValueActive(idx)} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                        {isActive ? 'Active' : 'Inactive'}
-                      </button>
-                      <button type="button" onClick={() => handleDeleteValue(idx)} style={{ padding: '5px 8px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', borderRadius: '6px', cursor: 'pointer' }}>
-                        <TrashIcon />
-                      </button>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <button type="button" onClick={() => handleToggleValueActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                          {isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button type="button" onClick={() => handleDeleteValue(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
+                      </div>
                     </div>
                     <textarea rows={2} value={v.desc} onChange={e => handleValueChange(idx, 'desc', e.target.value)} style={{ ...iStyle, resize: 'vertical' }} placeholder="Value description..." />
                   </div>
@@ -385,16 +430,16 @@ const AboutWhoWeAreManagerPage = () => {
               {form.roadmap.map((step, idx) => {
                 const isActive = step.active !== false;
                 return (
-                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '120px 1fr 2fr auto auto', gap: '12px', alignItems: 'center' }}>
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '120px 1fr 2fr auto', gap: '12px', alignItems: 'center' }}>
                     <input value={step.year} onChange={e => handleRoadmapChange(idx, 'year', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B' }} placeholder="Phase / Year" />
                     <input value={step.title} onChange={e => handleRoadmapChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Phase Title" />
                     <input value={step.desc} onChange={e => handleRoadmapChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Phase Details" />
-                    <button type="button" onClick={() => handleToggleRoadmapActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                      {isActive ? 'Active' : 'Inactive'}
-                    </button>
-                    <button type="button" onClick={() => handleDeleteRoadmap(idx)} style={{ padding: '5px 8px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', borderRadius: '6px', cursor: 'pointer' }}>
-                      <TrashIcon />
-                    </button>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <button type="button" onClick={() => handleToggleRoadmapActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                        {isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button type="button" onClick={() => handleDeleteRoadmap(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
+                    </div>
                   </div>
                 );
               })}

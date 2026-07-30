@@ -9,6 +9,12 @@ const btnP = { padding: '9px 18px', borderRadius: '8px', backgroundColor: '#B893
 const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer' };
 const btnD = { padding: '7px 10px', borderRadius: '6px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', fontSize: '12px', cursor: 'pointer' };
 
+const TrashIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
+  </svg>
+);
+
 const CustomOrderPageManager = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -363,14 +369,16 @@ const CustomOrderPageManager = () => {
               {form.steps.map((st, idx) => {
                 const isActive = st.active !== false;
                 return (
-                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto auto', gap: '12px', alignItems: 'center' }}>
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto', gap: '12px', alignItems: 'center' }}>
                     <input value={st.num} onChange={e => handleStepChange(idx, 'num', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B', textAlign: 'center' }} />
                     <input value={st.title} onChange={e => handleStepChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Step Title" />
                     <input value={st.desc} onChange={e => handleStepChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Step Description" />
-                    <button type="button" onClick={() => toggleStepActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                      {isActive ? 'Active' : 'Inactive'}
-                    </button>
-                    <button type="button" onClick={() => removeStep(idx)} style={btnD}>Delete</button>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <button type="button" onClick={() => toggleStepActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                        {isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button type="button" onClick={() => removeStep(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
+                    </div>
                   </div>
                 );
               })}
@@ -413,10 +421,10 @@ const CustomOrderPageManager = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700' }}>PHOTO #{idx + 1}</span>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button type="button" onClick={() => toggleGalleryActive(idx)} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                          {isActive ? 'Active' : 'Inactive'}
+                        <button type="button" onClick={() => toggleGalleryActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                          {isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button type="button" onClick={() => removeGalleryItem(idx)} style={btnD}>Remove</button>
+                        <button type="button" onClick={() => removeGalleryItem(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
                       </div>
                     </div>
                     <input value={g.image_url} onChange={e => handleGalleryChange(idx, 'image_url', e.target.value)} style={iStyle} placeholder="Image URL (e.g. /custom1.png)" />
@@ -468,10 +476,10 @@ const CustomOrderPageManager = () => {
                 return (
                   <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <input value={textVal} onChange={e => handleHighlightChange(idx, e.target.value)} style={iStyle} placeholder={`Highlight ${idx + 1}`} />
-                    <button type="button" onClick={() => toggleHighlightActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                      {isActive ? 'Active' : 'Inactive'}
+                    <button type="button" onClick={() => toggleHighlightActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                      {isActive ? 'Deactivate' : 'Activate'}
                     </button>
-                    <button type="button" onClick={() => removeHighlight(idx)} style={btnD}>Delete</button>
+                    <button type="button" onClick={() => removeHighlight(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
                   </div>
                 );
               })}
@@ -615,10 +623,10 @@ const CustomOrderPageManager = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700' }}>FAQ ITEM #{idx + 1}</span>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button type="button" onClick={() => toggleFaqActive(idx)} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
-                          {isActive ? 'Active' : 'Inactive'}
+                        <button type="button" onClick={() => toggleFaqActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
+                          {isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button type="button" onClick={() => removeFaq(idx)} style={btnD}>Delete FAQ</button>
+                        <button type="button" onClick={() => removeFaq(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete FAQ"><TrashIcon /></button>
                       </div>
                     </div>
                     <input value={faq.q} onChange={e => handleFaqChange(idx, 'q', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Question?" />

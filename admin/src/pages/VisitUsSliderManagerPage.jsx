@@ -21,6 +21,56 @@ const TrashIcon = () => (
   </svg>
 );
 
+const FieldBox = ({ label, children, active = true, onToggle, onClear }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <label style={lStyle}>{label}</label>
+      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        {onToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            style={{
+              padding: '3px 8px',
+              borderRadius: '6px',
+              backgroundColor: active !== false ? '#3E4930' : 'rgba(239,68,68,0.15)',
+              border: active !== false ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)',
+              color: active !== false ? '#F6F1E3' : '#EF4444',
+              fontSize: '10px',
+              fontWeight: '700',
+              cursor: 'pointer'
+            }}
+          >
+            {active !== false ? 'Active' : 'Inactive'}
+          </button>
+        )}
+        {onClear && (
+          <button
+            type="button"
+            onClick={onClear}
+            style={{
+              padding: '3px 6px',
+              borderRadius: '6px',
+              backgroundColor: 'rgba(239,68,68,0.15)',
+              border: '1px solid rgba(239,68,68,0.35)',
+              color: '#EF4444',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+            title="Clear Field"
+          >
+            <TrashIcon />
+          </button>
+        )}
+      </div>
+    </div>
+    <div style={{ opacity: active !== false ? 1 : 0.5 }}>
+      {children}
+    </div>
+  </div>
+);
+
 const VisitUsSliderManagerPage = () => {
   const [locations, setLocations] = useState([]);
   const [sectionHeader, setSectionHeader] = useState({
@@ -203,27 +253,22 @@ const VisitUsSliderManagerPage = () => {
 
         <form onSubmit={handleSaveHeader} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <div>
-              <label style={lStyle}>Section Badge Tag</label>
+            <FieldBox label="Section Badge Tag" active={sectionHeader.badge_active} onToggle={() => setSectionHeader(p => ({ ...p, badge_active: p.badge_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, badge_text: '' }))}>
               <input value={sectionHeader.badge_text} onChange={e => setSectionHeader(p => ({ ...p, badge_text: e.target.value }))} style={iStyle} placeholder="VISIT US" />
-            </div>
-            <div>
-              <label style={lStyle}>"View Location Details" Button Label</label>
+            </FieldBox>
+            <FieldBox label='"View Location Details" Button Label' active={sectionHeader.button_active} onToggle={() => setSectionHeader(p => ({ ...p, button_active: p.button_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, button_text: '' }))}>
               <input value={sectionHeader.button_text} onChange={e => setSectionHeader(p => ({ ...p, button_text: e.target.value }))} style={iStyle} placeholder="View Location Details" />
-            </div>
+            </FieldBox>
           </div>
-          <div>
-            <label style={lStyle}>Main Heading Title *</label>
+          <FieldBox label="Main Heading Title *" active={sectionHeader.title_active} onToggle={() => setSectionHeader(p => ({ ...p, title_active: p.title_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, title: '' }))}>
             <input required value={sectionHeader.title} onChange={e => setSectionHeader(p => ({ ...p, title: e.target.value }))} style={iStyle} placeholder="Prefer to see the fabric in person?" />
-          </div>
-          <div>
-            <label style={lStyle}>Subtitle Tagline</label>
+          </FieldBox>
+          <FieldBox label="Subtitle Tagline" active={sectionHeader.subtitle_active} onToggle={() => setSectionHeader(p => ({ ...p, subtitle_active: p.subtitle_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, subtitle: '' }))}>
             <input value={sectionHeader.subtitle} onChange={e => setSectionHeader(p => ({ ...p, subtitle: e.target.value }))} style={iStyle} placeholder="Our studio welcomes visits by appointment." />
-          </div>
-          <div>
-            <label style={lStyle}>Body Content Description</label>
+          </FieldBox>
+          <FieldBox label="Body Content Description" active={sectionHeader.body_active} onToggle={() => setSectionHeader(p => ({ ...p, body_active: p.body_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, body_content: '' }))}>
             <textarea rows={2} value={sectionHeader.body_content} onChange={e => setSectionHeader(p => ({ ...p, body_content: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="If you're not close by, our team is just as happy to guide you over WhatsApp..." />
-          </div>
+          </FieldBox>
         </form>
       </div>
 
