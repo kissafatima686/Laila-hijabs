@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import * as FaIcons from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 
 const SECTION_CONFIGS = {
@@ -292,6 +293,14 @@ const SECTION_CONFIGS = {
       { key: 'categories', label: 'Filter Categories (comma separated)', type: 'csv' }
     ]
   },
+  gift_card: {
+    label: 'Gift Card & How We Do It',
+    fields: ['title', 'subtitle', 'body_content', 'button_text', 'button_link'],
+    hideCustomFields: true,
+    metaKeys: [
+      { key: 'icon_grid', label: 'Feature Icons & Text', type: 'array', subfields: ['icon_name', 'text'] }
+    ]
+  },
 
   // ─── PAGE SETTINGS ────────────────────────────────────────────────────────────
   account_page_settings: {
@@ -429,6 +438,14 @@ const labelStyle = {
 };
 
 // ─── Array Sub-editor ──────────────────────────────────────────────────────────
+const AVAILABLE_ICONS = [
+  'FaCut', 'FaUserTie', 'FaTools', 'FaStore', 'FaDesktop', 
+  'FaGift', 'FaCreditCard', 'FaShippingFast', 'FaUndo', 
+  'FaHeadset', 'FaShoppingBag', 'FaTag', 'FaHeart', 
+  'FaStar', 'FaTshirt', 'FaTruck', 'FaBoxOpen', 
+  'FaMapMarkerAlt', 'FaInstagram', 'FaFacebook', 'FaTiktok'
+];
+
 const ArrayEditor = ({ items = [], subfields, onChange }) => {
   const addRow = () => {
     const empty = {};
@@ -445,16 +462,54 @@ const ArrayEditor = ({ items = [], subfields, onChange }) => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {items.map((row, i) => (
         <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-          {subfields.map(field => (
-            <div key={field} style={{ flex: 1, minWidth: '120px' }}>
-              <input
-                placeholder={field}
-                value={row[field] || ''}
-                onChange={(e) => updateRow(i, field, e.target.value)}
-                style={{ ...inputStyle, fontSize: '12px', padding: '8px 12px' }}
-              />
-            </div>
-          ))}
+          {subfields.map(field => {
+            const isTextArea = ['desc', 'description', 'text', 'content', 'a', 'answer'].includes(field.toLowerCase());
+            const isIconField = field.toLowerCase().includes('icon');
+            
+            return (
+              <div key={field} style={{ flex: 1, minWidth: '120px' }}>
+                {isIconField ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ 
+                      width: '36px', height: '36px', borderRadius: '8px', 
+                      backgroundColor: '#182012', border: '1px solid #B8935B',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#B8935B', fontSize: '16px', flexShrink: 0
+                    }}>
+                      {(() => {
+                        const IconComponent = FaIcons[row[field]] || FaIcons.FaRegCircle;
+                        return <IconComponent />;
+                      })()}
+                    </div>
+                    <select
+                      value={row[field] || ''}
+                      onChange={(e) => updateRow(i, field, e.target.value)}
+                      style={{ ...inputStyle, fontSize: '12px', padding: '8px 12px' }}
+                    >
+                      <option value="">Select Icon...</option>
+                      {AVAILABLE_ICONS.map(icon => (
+                        <option key={icon} value={icon}>{icon.replace('Fa', '')}</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : isTextArea ? (
+                  <textarea
+                    placeholder={field}
+                    value={row[field] || ''}
+                    onChange={(e) => updateRow(i, field, e.target.value)}
+                    style={{ ...inputStyle, fontSize: '12px', padding: '8px 12px', resize: 'vertical', minHeight: '60px' }}
+                  />
+                ) : (
+                  <input
+                    placeholder={field}
+                    value={row[field] || ''}
+                    onChange={(e) => updateRow(i, field, e.target.value)}
+                    style={{ ...inputStyle, fontSize: '12px', padding: '8px 12px' }}
+                  />
+                )}
+              </div>
+            );
+          })}
           <button onClick={() => removeRow(i)} style={{
             background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)',
             color: '#EF4444', borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', fontSize: '12px', flexShrink: 0
@@ -475,7 +530,15 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
   const params = useParams();
   const sectionKey = propSectionKey || params?.sectionKey;
   const [activeSectionKey, setActiveSectionKey] = useState(sectionKey);
-  const [config, setConfig] = useState(SECTION_CONFIGS[sectionKey] || { label: sectionKey, fields: ['title', 'subtitle', 'body_content', 'image_url', 'button_text', 'button_link'], metaKeys: [] });
+  const fallbackConfig = { 
+    label: (sectionKey || '').replace(/_/g, ' ').toUpperCase(), 
+    fields: ['title', 'subtitle', 'body_content'], 
+    hideCustomFields: true,
+    metaKeys: [
+      { key: 'content_blocks', label: 'Content Blocks (Subheadings & Text)', type: 'array', subfields: ['subheading', 'text'] }
+    ] 
+  };
+  const [config, setConfig] = useState(SECTION_CONFIGS[sectionKey] || fallbackConfig);
   const [data, setData] = useState(null);
   const [form, setForm] = useState({});
   const [metaForm, setMetaForm] = useState({});
@@ -500,7 +563,15 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
     setLoading(true);
     setError(null);
     const targetKey = activeSectionKey || sectionKey;
-    const currentConfig = SECTION_CONFIGS[targetKey] || { label: targetKey, fields: ['title', 'subtitle', 'body_content', 'image_url', 'button_text', 'button_link'], metaKeys: [] };
+    const currentFallback = { 
+      label: targetKey.replace(/_/g, ' ').toUpperCase(), 
+      fields: ['title', 'subtitle', 'body_content'], 
+      hideCustomFields: true,
+      metaKeys: [
+        { key: 'content_blocks', label: 'Content Blocks (Subheadings & Text)', type: 'array', subfields: ['subheading', 'text'] }
+      ] 
+    };
+    const currentConfig = SECTION_CONFIGS[targetKey] || currentFallback;
     setConfig(currentConfig);
 
     fetch(`http://localhost:5000/api/admin/sections/${targetKey}`)
@@ -607,7 +678,9 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
         SECTION_CONFIGS[cleanKey] = {
           label: newSectionForm.title,
           fields: newSectionForm.fields,
-          metaKeys: []
+          metaKeys: [
+            { key: 'content_blocks', label: 'Content Blocks (Subheadings & Text)', type: 'array', subfields: ['subheading', 'text'] }
+          ]
         };
         setShowNewSectionModal(false);
         setActiveSectionKey(cleanKey);
@@ -723,6 +796,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
             </div>
 
             {/* Custom Text Fields & Columns Section */}
+            {!config.hideCustomFields && (
             <div style={{ backgroundColor: '#222C1A', borderRadius: '16px', padding: '24px', border: '1px solid rgba(184,147,91,0.3)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#F6F1E3' }}>
@@ -759,6 +833,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
                 </div>
               )}
             </div>
+            )}
 
             {/* Metadata / Dynamic Config Fields */}
             {config.metaKeys && config.metaKeys.length > 0 && (
@@ -981,6 +1056,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
             )}
 
             {/* Live Preview Card */}
+            {!config.hideCustomFields && (
             <div style={{ backgroundColor: '#182012', borderRadius: '16px', padding: '24px', border: '1px solid rgba(184,147,91,0.2)' }}>
               <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', fontWeight: '700', color: '#F6F1E3', borderBottom: '1px solid rgba(184,147,91,0.1)', paddingBottom: '12px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8935B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Content Preview</span>
@@ -1020,6 +1096,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
                 )}
               </div>
             </div>
+            )}
 
             {/* Last Updated */}
             {data?.updated_at && (

@@ -6,18 +6,23 @@ const {
   getCategories, 
   createOrder, 
   submitCustomOrder, 
-  submitAffiliateApplication, 
   submitContactMessage, 
   getActiveOffers, 
   getStoreLocations, 
   getBlogs,
   getProductReviews,
-  submitProductReview
+  submitProductReview,
+  getHomepageSections,
+  getProductsByDisplaySection
 } = require('../controllers/productController');
+
+// Homepage Sections
+router.get('/homepage/sections', getHomepageSections);
 
 // Categories & Products
 router.get('/categories', getCategories);
 router.get('/products', getProducts);
+router.get('/products/display/:slug', getProductsByDisplaySection);
 router.get('/products/:slug', getProductBySlug);
 
 // Customer Checkout Order
@@ -26,8 +31,7 @@ router.post('/orders', createOrder);
 // Custom Bespoke Tailoring Orders Form (CustomOrdersPage.jsx)
 router.post('/custom-orders', submitCustomOrder);
 
-// Affiliate Application Form (Affiliatepage.jsx)
-router.post('/affiliate/apply', submitAffiliateApplication);
+// Affiliate Application Form now handled by affiliateRoutes.js
 
 // Contact Us Form (ContactUs.jsx)
 router.post('/contact', submitContactMessage);

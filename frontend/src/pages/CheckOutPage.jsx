@@ -71,14 +71,65 @@ const CheckoutPage = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const [processing, setProcessing] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       return;
     }
-    navigate('/payment');
+
+    setProcessing(true);
+    try {
+      // Get affiliate_code from cookies if it exists
+      const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      };
+      
+      const affiliateCode = getCookie('affiliate_code');
+
+      const payload = {
+        recipient_name: `${formData.firstName} ${formData.lastName}`,
+        recipient_phone: formData.phone,
+        shipping_address: formData.address,
+        city: formData.city,
+        postal_code: formData.postcode,
+        payment_method: 'WhatsApp Confirmation',
+        items: cartItems.map(item => ({
+          product_id: item.id || item.product_id,
+          quantity: item.quantity,
+          price: item.price,
+          color: item.color,
+          size: item.size
+        })),
+        total_amount: cartTotal,
+        affiliate_code: affiliateCode
+      };
+
+      const res = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        // Navigate to payment page and pass order data
+        navigate('/payment', { state: { orderDetails: { ...formData, orderId: data.orderId, cartItems, cartTotal } } });
+      } else {
+        alert(data.error || 'Failed to place order');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during checkout.');
+    }
+    setProcessing(false);
   };
 
   return (
@@ -245,7 +296,9 @@ const CheckoutPage = () => {
               <span>Rs. {cartTotal.toLocaleString()}</span>
             </div>
 
-            <button type="submit" className="payment-btn">{paymentButtonText}</button>
+            <button type="submit" className="payment-button" disabled={processing} style={{ opacity: processing ? 0.7 : 1 }}>
+              {processing ? 'Processing...' : paymentButtonText}
+            </button>
             
             <Link to="/cart" className="back-to-cart-link">
               {returnCartText}

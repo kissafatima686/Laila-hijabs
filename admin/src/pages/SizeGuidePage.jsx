@@ -6,6 +6,7 @@ const iStyle = { width: '100%', padding: '8px 12px', borderRadius: '8px', backgr
 const lStyle = { fontSize: '10px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '4px' };
 const cardStyle = { backgroundColor: '#222C1A', borderRadius: '16px', padding: '22px', border: '1px solid rgba(184,147,91,0.3)' };
 const btnPrimary = { padding: '9px 18px', borderRadius: '8px', backgroundColor: '#B8935B', border: 'none', color: '#1A2010', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
+const btnGhost = { padding: '9px 18px', borderRadius: '8px', backgroundColor: 'transparent', border: '1px solid #B8935B', color: '#B8935B', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
 
 // Standard 3-button action style rules matching screenshot
 const btnStatus = { 

@@ -4,6 +4,8 @@ require("dotenv").config();
 const { testConnection } = require("./config/db");
 const adminRoutes = require("./routes/adminRoutes");
 const productRoutes = require("./routes/productRoutes");
+const affiliateRoutes = require("./routes/affiliateRoutes");
+const affiliateControllers = require("./controllers/affiliateControllers");
 const { getSectionByKey, getAllSections, subscribeNewsletter } = require("./controllers/adminControllers");
 
 const app = express();
@@ -15,6 +17,10 @@ app.use(express.json());
 // API Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api", productRoutes);
+app.use("/api/affiliate", affiliateRoutes);
+
+// Referral Link Route
+app.get("/ref/:affiliateCode", affiliateControllers.handleReferralClick);
 
 // ─── Public CMS Sections (read-only for frontend) ──────────────────────────────
 // Frontend components call GET /api/sections to load all dynamic content globally

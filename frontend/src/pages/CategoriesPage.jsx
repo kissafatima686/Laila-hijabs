@@ -198,7 +198,7 @@ const CategoriesPage = () => {
               <select
                 key={section.title}
                 className="native-filter-select"
-                value={selectedFilters[section.title][0] || ""}
+                value={selectedFilters[section.title]?.[0] || ""}
                 onChange={(e) => handleSelectChange(section.title, e.target.value)}
               >
                 <option value="">{section.title}</option>
@@ -233,7 +233,7 @@ const CategoriesPage = () => {
                   <label className="sidebar-filter-opt" key={i}>
                     <input 
                       type="checkbox" 
-                      checked={selectedFilters[section.title].includes(opt)}
+                      checked={selectedFilters[section.title]?.includes(opt) || false}
                       onChange={() => handleCheckboxChange(section.title, opt)}
                     /> 
                     <span>{opt}</span>

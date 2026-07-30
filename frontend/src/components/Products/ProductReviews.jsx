@@ -94,6 +94,7 @@ const ProductReviews = ({ product }) => {
 
     const newReview = {
       id: Date.now(),
+      productId: product.id,
       author: formData.author.trim(),
       date: new Date().toISOString().split('T')[0],
       rating: Number(formData.rating),
@@ -132,8 +133,10 @@ const ProductReviews = ({ product }) => {
   };
 
   // Filter & Sort Logic
+  const productReviews = reviews.filter(r => String(r.productId) === String(product.id));
+  
   const getFilteredReviews = () => {
-    let list = [...reviews];
+    let list = [...productReviews];
 
     if (onlyPhotos) {
       list = list.filter(r => Boolean(r.parcelImage));
@@ -155,16 +158,16 @@ const ProductReviews = ({ product }) => {
   const filteredReviews = getFilteredReviews();
 
   // Statistics calculation
-  const totalReviews = reviews.length;
+  const totalReviews = productReviews.length;
   const avgRating = totalReviews > 0 
-    ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews).toFixed(1)
+    ? (productReviews.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews).toFixed(1)
     : 0;
 
   const starCounts = [5, 4, 3, 2, 1].map(star => ({
     star,
-    count: reviews.filter(r => r.rating === star).length,
+    count: productReviews.filter(r => r.rating === star).length,
     percentage: totalReviews > 0 
-      ? Math.round((reviews.filter(r => r.rating === star).length / totalReviews) * 100)
+      ? Math.round((productReviews.filter(r => r.rating === star).length / totalReviews) * 100)
       : 0
   }));
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const API = 'http://localhost:5000/api/admin';
 
@@ -91,10 +92,31 @@ const MODULE_FIELDS = {
     { key: 'full_name', label: 'Applicant Name', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' },
     { key: 'phone', label: 'Phone', type: 'text' },
-    { key: 'platform', label: 'Platform (Instagram/TikTok...)', type: 'text' },
+    { key: 'instagram_handle', label: 'Instagram / TikTok Handle', type: 'text' },
     { key: 'followers', label: 'Followers Count', type: 'text' },
-    { key: 'message', label: 'Application Message', type: 'textarea' },
+    { key: 'promo_strategy', label: 'Application Message', type: 'textarea' },
     { key: 'status', label: 'Status', type: 'select', options: ['Pending', 'Approved', 'Rejected'] },
+  ],
+  'approved-affiliates': [
+    { key: 'user_id', label: 'User ID', type: 'number', required: true },
+    { key: 'affiliate_code', label: 'Affiliate Code', type: 'text', required: true },
+    { key: 'affiliate_link', label: 'Referral Link', type: 'text' },
+    { key: 'commission_rate', label: 'Commission Rate (%)', type: 'number' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Approved', 'Suspended'] },
+  ],
+  commissions: [
+    { key: 'affiliate_id', label: 'Affiliate ID', type: 'number', required: true },
+    { key: 'order_id', label: 'Order ID', type: 'number', required: true },
+    { key: 'sale_amount', label: 'Sale Amount', type: 'number' },
+    { key: 'commission_rate', label: 'Commission Rate (%)', type: 'number' },
+    { key: 'commission_amount', label: 'Commission Amount', type: 'number' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Pending', 'Approved', 'Rejected', 'Paid'] },
+  ],
+  payouts: [
+    { key: 'affiliate_id', label: 'Affiliate ID', type: 'number', required: true },
+    { key: 'amount', label: 'Payout Amount', type: 'number' },
+    { key: 'payment_method', label: 'Payment Method', type: 'text' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Paid', 'Pending'] },
   ],
   messages: [
     { key: 'name', label: 'Sender Name', type: 'text' },
@@ -185,7 +207,8 @@ const Field = ({ field, value, onChange }) => {
   return (
     <div><label style={lStyle}>{field.label}{field.required && ' *'}</label>
       <input type={field.type || 'text'} required={field.required} value={value || ''}
-        onChange={e => onChange(field.key, e.target.value)} style={iStyle} placeholder={field.placeholder} /></div>
+        onChange={e => onChange(field.key, e.target.value)} style={iStyle} placeholder={field.placeholder} 
+        min={field.type === 'number' ? "0" : undefined} /></div>
   );
 };
 
@@ -251,9 +274,25 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
   const handleToggleStatus = (item) => {
     const id = getItemId(item);
     const current = item.status || 'Live';
-    const statuses = ['Live', 'Active', 'Approved'];
-    const next = statuses.includes(current) ? 'Draft' : 'Live';
-    fetch(`${API}/module/${moduleKey}/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) }).then(fetchItems);
+    
+    let next;
+    let targetModule = moduleKey;
+
+    if (moduleKey === 'approved-affiliates') {
+        // Actual affiliates (table: affiliates)
+        next = current === 'Approved' ? 'Suspended' : 'Approved';
+        // Wait, the API table_map has 'approved-affiliates' mapped to 'affiliates'.
+        // So we DO NOT need to override targetModule in frontend, the backend handles it!
+    } else if (moduleKey === 'affiliates') {
+        // Affiliate applications (table: affiliate_applications)
+        // If it's Pending or Rejected, clicking toggles it to Approved. If Approved, toggles to Rejected (or Pending).
+        next = current === 'Approved' ? 'Rejected' : 'Approved';
+    } else {
+        const statuses = ['Live', 'Active', 'Approved'];
+        next = statuses.includes(current) ? 'Draft' : 'Live';
+    }
+
+    fetch(`${API}/module/${targetModule}/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) }).then(fetchItems);
   };
 
   const handleDelete = (item) => {
@@ -294,7 +333,7 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
         <input type="text" placeholder={`Search ${title.toLowerCase()}...`} value={search} onChange={e => setSearch(e.target.value)}
           style={{ ...iStyle, width: '260px' }} />
-        {['All', 'Live', 'Draft', 'Pending', 'Active', 'Approved'].map(s => (
+        {['All', 'Live', 'Draft', 'Pending', 'Active', 'Approved', 'Rejected', 'Paid'].map(s => (
           <button key={s} onClick={() => setFilterStatus(s)} style={{ padding: '7px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', border: filterStatus === s ? '1px solid #B8935B' : '1px solid rgba(184,147,91,0.25)', backgroundColor: filterStatus === s ? '#B8935B' : 'transparent', color: filterStatus === s ? '#1A2010' : '#E7D9C9', transition: 'all 0.15s' }}>
             {s}
           </button>
@@ -356,6 +395,12 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
                           <button onClick={() => handleToggleStatus(item)} style={{ ...btnG, fontSize: '11px', whiteSpace: 'nowrap' }}>
                             {['Live', 'Active', 'Approved'].includes(item.status) ? 'Deactivate' : 'Activate'}
                           </button>
+                          {/* View Affiliate Activity */}
+                          {moduleKey === 'approved-affiliates' && (
+                            <Link to={`/affiliate-details/${item.affiliate_id}`} style={{ ...btnG, textDecoration: 'none', backgroundColor: '#B8935B', color: '#1A2010', borderColor: '#B8935B' }} title="View Activity">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Activity
+                            </Link>
+                          )}
                           {/* Edit */}
                           <button onClick={() => openEdit(item)} style={btnG} title="Edit">
                             <EditIcon />

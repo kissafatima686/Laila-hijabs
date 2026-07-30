@@ -33,6 +33,8 @@ import FeaturedCollectionsManagerPage from './pages/FeaturedCollectionsManagerPa
 import HowWeDoItPage from './pages/HowWeDoItPage';
 import OffersManagerPage from './pages/OffersManagerPage';
 import OffersBundlesPageManager from './pages/OffersBundlesPageManager';
+import AdminAffiliateDetails from './pages/AdminAffiliateDetails';
+import AdminPayouts from './pages/AdminPayouts';
 import LocationDetailsEditorPage from './pages/LocationDetailsEditorPage';
 import VisitUsSliderManagerPage from './pages/VisitUsSliderManagerPage';
 import AboutWhoWeAreManagerPage from './pages/AboutWhoWeAreManagerPage';
@@ -111,6 +113,10 @@ const App = () => (
 
           {/* ── AFFILIATE ─────────────────────────────────────────── */}
           <Route path="/affiliates" element={<GenericModulePage moduleKey="affiliates" title="Affiliate Applications" description="Ambassador applications submitted via the Affiliate Program page." />} />
+          <Route path="/approved-affiliates" element={<GenericModulePage moduleKey="approved-affiliates" title="Approved Affiliates" description="Manage active affiliates and their referral links." />} />
+          <Route path="/affiliate-details/:id" element={<AdminAffiliateDetails />} />
+          <Route path="/commissions" element={<GenericModulePage moduleKey="commissions" title="Commissions" description="Manage affiliate commissions generated from orders." />} />
+          <Route path="/payouts" element={<AdminPayouts />} />
           <Route path="/sections/affiliate_program_settings" element={<AffiliateProgramManagerPage />} />
 
           {/* ── CONTACT ───────────────────────────────────────────── */}

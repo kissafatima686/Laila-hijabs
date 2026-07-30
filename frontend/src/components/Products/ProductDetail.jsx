@@ -397,13 +397,12 @@ const ProductDetail = () => {
                           <div className="size-selection-block">
                             <div className="size-header-line">
                               <span className="block-label">SELECT SIZE</span>
-                              <button 
-                                type="button" 
+                              <Link 
+                                to="/size-guide"
                                 className="size-guide-link"
-                                onClick={() => setShowSizeChart(true)}
                               >
                                 SIZE GUIDE
-                              </button>
+                              </Link>
                             </div>
 
                             <div className="size-boxes-grid">
@@ -440,8 +439,7 @@ const ProductDetail = () => {
               })}
             </div>
           </div>
-
-          </div>)}
+          )}
 
           {/* Standalone Color & Size Selector Block Above Cart Button */}
           {(!product || !product.bundle_attributes || !(typeof product.bundle_attributes === 'string' ? JSON.parse(product.bundle_attributes) : product.bundle_attributes).isActive) && (<div className="product-quick-selection-block" style={{ margin: '20px 0 24px 0' }}>
@@ -470,13 +468,12 @@ const ProductDetail = () => {
             <div className="size-selection-block">
               <div className="size-header-line">
                 <span className="block-label">SELECT SIZE</span>
-                <button 
-                  type="button" 
-                  className="size-guide-link"
-                  onClick={() => setShowSizeChart(true)}
-                >
-                  SIZE GUIDE
-                </button>
+                                <Link 
+                                  to="/size-guide"
+                                  className="size-guide-link"
+                                >
+                                  SIZE GUIDE
+                                </Link>
               </div>
 
               <div className="size-boxes-grid">
@@ -502,8 +499,7 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
-
-          </div>)}
+          )}
 
           {/* Action Buttons */}
           <div className="cta-buttons-group">
@@ -787,7 +783,7 @@ const ProductDetail = () => {
               <h3 className="pillar-modal-title">{activePillar.headline}</h3>
               <p className="pillar-modal-text">{activePillar.description}</p>
               <div className="pillar-modal-actions">
-                <Link to="/our-story" onClick={() => setActivePillar(null)} className="pillar-action-btn">
+                <Link to="/gift-card" onClick={() => setActivePillar(null)} className="pillar-action-btn">
                   OUR STORY
                 </Link>
                 <button type="button" onClick={() => setActivePillar(null)} className="pillar-close-btn">

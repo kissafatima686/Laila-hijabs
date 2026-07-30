@@ -8,6 +8,13 @@ const createTables = [
     slug VARCHAR(100) UNIQUE NOT NULL,
     description VARCHAR(500),
     image_url VARCHAR(255),
+    banner_image VARCHAR(255),
+    hero_title VARCHAR(255),
+    hero_description VARCHAR(500),
+    seo_title VARCHAR(255),
+    seo_description VARCHAR(500),
+    status ENUM('Active', 'Draft') DEFAULT 'Active',
+    display_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
@@ -32,22 +39,142 @@ const createTables = [
     category_id INT,
     name VARCHAR(150) NOT NULL,
     slug VARCHAR(150) UNIQUE NOT NULL,
-    description TEXT,
+    sku VARCHAR(100) UNIQUE,
+    short_description VARCHAR(500),
+    long_description TEXT,
+    care_instructions TEXT,
+    fabric_details TEXT,
     price DECIMAL(10, 2) NOT NULL,
-    compare_at_price DECIMAL(10, 2) DEFAULT NULL,
-    stock_quantity INT DEFAULT 0,
-    image_url VARCHAR(500),
-    thumbnails JSON DEFAULT NULL,
-    badge VARCHAR(50) DEFAULT 'NEW IN',
-    fit_type VARCHAR(50) DEFAULT 'Regular Fit',
-    color VARCHAR(50) DEFAULT 'Black',
-    color_swatches JSON DEFAULT NULL,
-    sizes JSON DEFAULT NULL,
-    fabric_type VARCHAR(100) DEFAULT 'Premium Nida',
+    sale_price DECIMAL(10, 2) DEFAULT NULL,
+    stock INT DEFAULT 0,
     status ENUM('Live', 'Draft') DEFAULT 'Live',
     is_featured TINYINT(1) DEFAULT 0,
+    is_new_arrival TINYINT(1) DEFAULT 0,
+    seo_title VARCHAR(255),
+    meta_description VARCHAR(500),
+    keywords VARCHAR(255),
+    canonical_url VARCHAR(255),
+    size_guide_id INT,
+    bundle_attributes JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3a. Category Filters
+  `CREATE TABLE IF NOT EXISTS category_filters (
+    filter_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT NOT NULL,
+    filter_name VARCHAR(100) NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3b. Product Images
+  `CREATE TABLE IF NOT EXISTS product_images (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    is_main TINYINT(1) DEFAULT 0,
+    display_order INT DEFAULT 0,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3c. Colors Table
+  `CREATE TABLE IF NOT EXISTS colors (
+    color_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    hex_code VARCHAR(20) NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3d. Product Variants
+  `CREATE TABLE IF NOT EXISTS product_variants (
+    variant_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    color_id INT NOT NULL,
+    sku VARCHAR(100),
+    stock_quantity INT DEFAULT 0,
+    image_url VARCHAR(500),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (color_id) REFERENCES colors(color_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3e. Sizes Table
+  `CREATE TABLE IF NOT EXISTS sizes (
+    size_id INT AUTO_INCREMENT PRIMARY KEY,
+    size_name VARCHAR(20) NOT NULL,
+    display_order INT DEFAULT 0
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3f. Product Sizes
+  `CREATE TABLE IF NOT EXISTS product_sizes (
+    product_id INT NOT NULL,
+    size_id INT NOT NULL,
+    PRIMARY KEY (product_id, size_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (size_id) REFERENCES sizes(size_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3g. Specification Groups
+  `CREATE TABLE IF NOT EXISTS specification_groups (
+    group_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3h. Specifications
+  `CREATE TABLE IF NOT EXISTS specifications (
+    spec_id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    spec_name VARCHAR(100) NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES specification_groups(group_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3i. Product Specifications
+  `CREATE TABLE IF NOT EXISTS product_specifications (
+    product_id INT NOT NULL,
+    spec_id INT NOT NULL,
+    value VARCHAR(255) NOT NULL,
+    PRIMARY KEY (product_id, spec_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (spec_id) REFERENCES specifications(spec_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3j. Customizations
+  `CREATE TABLE IF NOT EXISTS customizations (
+    customization_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    options_json JSON
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3k. Product Customizations
+  `CREATE TABLE IF NOT EXISTS product_customizations (
+    product_id INT NOT NULL,
+    customization_id INT NOT NULL,
+    PRIMARY KEY (product_id, customization_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (customization_id) REFERENCES customizations(customization_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3l. Size Guides
+  `CREATE TABLE IF NOT EXISTS size_guides (
+    guide_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    guide_type VARCHAR(50)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3m. Product FAQs
+  `CREATE TABLE IF NOT EXISTS product_faqs (
+    product_id INT NOT NULL,
+    faq_id INT NOT NULL,
+    PRIMARY KEY (product_id, faq_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 3n. Related Products\n  CREATE TABLE IF NOT EXISTS product_sections (\n    section_id INT AUTO_INCREMENT PRIMARY KEY,\n    section_name VARCHAR(100) NOT NULL,\n    section_key VARCHAR(100) UNIQUE NOT NULL,\n    default_display_order INT DEFAULT 0,\n    status ENUM(\'Active\', \'Inactive\') DEFAULT \'Active\',\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  CREATE TABLE IF NOT EXISTS product_section_mapping (\n    mapping_id INT AUTO_INCREMENT PRIMARY KEY,\n    product_id INT NOT NULL,\n    section_id INT NOT NULL,\n    is_visible ENUM(\'Y\', \'N\') DEFAULT \'Y\',\n    display_order INT DEFAULT 0,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,\n    FOREIGN KEY (section_id) REFERENCES product_sections(section_id) ON DELETE CASCADE,\n    UNIQUE KEY product_section_unique (product_id, section_id)\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  CREATE TABLE IF NOT EXISTS website_sections (\n    section_id INT AUTO_INCREMENT PRIMARY KEY,\n    section_key VARCHAR(100) UNIQUE NOT NULL,\n    section_name VARCHAR(100) NOT NULL,\n    display_order INT DEFAULT 0,\n    status ENUM(\'Active\', \'Inactive\') DEFAULT \'Active\',\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  // 3o. Related Products
+  `CREATE TABLE IF NOT EXISTS related_products (
+    product_id INT NOT NULL,
+    related_id INT NOT NULL,
+    PRIMARY KEY (product_id, related_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (related_id) REFERENCES products(product_id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
   // 4. Product Reviews Table
@@ -323,6 +450,8 @@ const createTables = [
     parent_id INT DEFAULT NULL,
     display_order INT DEFAULT 0,
     is_highlighted TINYINT(1) DEFAULT 0,
+    badge_text VARCHAR(50) DEFAULT NULL,
+    badge_color VARCHAR(20) DEFAULT NULL,
     status ENUM('Live', 'Draft') DEFAULT 'Live',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
@@ -336,185 +465,135 @@ const createTables = [
     display_order INT DEFAULT 0,
     status ENUM('Live', 'Draft') DEFAULT 'Live',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 25. Commission Plans Table
+  `CREATE TABLE IF NOT EXISTS commission_plans (
+    plan_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    commission_rate DECIMAL(5, 2) NOT NULL,
+    description VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 26. Affiliates Table
+  `CREATE TABLE IF NOT EXISTS affiliates (
+    affiliate_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNIQUE NOT NULL,
+    affiliate_code VARCHAR(50) UNIQUE NOT NULL,
+    affiliate_link VARCHAR(255),
+    plan_id INT,
+    status ENUM('Pending', 'Approved', 'Rejected', 'Suspended') DEFAULT 'Approved',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (plan_id) REFERENCES commission_plans(plan_id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 27. Affiliate Clicks Table
+  `CREATE TABLE IF NOT EXISTS affiliate_clicks (
+    click_id INT AUTO_INCREMENT PRIMARY KEY,
+    affiliate_id INT NOT NULL,
+    ip_address VARCHAR(45),
+    browser VARCHAR(255),
+    device VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (affiliate_id) REFERENCES affiliates(affiliate_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 28. Commissions Table
+  `CREATE TABLE IF NOT EXISTS commissions (
+    commission_id INT AUTO_INCREMENT PRIMARY KEY,
+    affiliate_id INT NOT NULL,
+    order_id INT NOT NULL,
+    sale_amount DECIMAL(10, 2) NOT NULL,
+    commission_rate DECIMAL(5, 2) NOT NULL,
+    commission_amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('Pending', 'Approved', 'Rejected', 'Paid') DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (affiliate_id) REFERENCES affiliates(affiliate_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+  // 29. Payouts Table
+  `CREATE TABLE IF NOT EXISTS payouts (
+    payout_id INT AUTO_INCREMENT PRIMARY KEY,
+    affiliate_id INT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_method ENUM('Bank Transfer', 'EasyPaisa', 'JazzCash', 'PayPal') NOT NULL,
+    status ENUM('Pending', 'Paid') DEFAULT 'Paid',
+    paid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (affiliate_id) REFERENCES affiliates(affiliate_id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
 ];
 
 const seedData = [
   // 1. Seed Categories
-  `INSERT IGNORE INTO categories (category_id, name, slug, description, image_url) VALUES 
-    (1, 'Abayas', 'abayas', 'Structured yet soft silhouettes tailored generously for daily grace and formal Eid gatherings.', '/Categories/abaya/abaya1.png'),
-    (2, 'Hijabs', 'hijabs', 'Premium fabrics crafted with hand-rolled edges for everyday and formal elegance.', '/Categories/hijabs/hijab1.png'),
-    (3, 'Irani Chadar', 'irani-chadar', 'Traditional flowing chadar providing full coverage with an elegant drape.', '/Categories/iranichadar/irani1.png'),
-    (4, 'Jilbab', 'jilbab', 'Classic overhead and two-piece jilbabs designed for comfort and modesty.', '/Categories/jilbab/jilbab.png'),
-    (5, 'Namaz Chadar', 'namaz-chadar', 'Breathable and comfortable prayer chadar for your daily devotions.', '/Categories/namazchadar/namazchaddar.png'),
-    (6, 'Round Chadar', 'round-chadar', 'Classic round chadar ensuring perfect coverage with premium nida fabric.', '/Categories/roundchadar/round1.png');`,
+  `INSERT IGNORE INTO categories (category_id, name, slug, description, image_url, hero_title, hero_description, status) VALUES 
+    (1, 'Abayas', 'abayas', 'Structured yet soft silhouettes tailored generously for daily grace and formal Eid gatherings.', '/Categories/abaya/abaya1.png', 'Elegant Everyday Abayas', 'Designed with premium fabrics...', 'Active'),
+    (2, 'Hijabs', 'hijabs', 'Premium fabrics crafted with hand-rolled edges for everyday and formal elegance.', '/Categories/hijabs/hijab1.png', 'Premium Hijabs', 'Hand-rolled edges for everyday elegance.', 'Active'),
+    (3, 'Irani Chadar', 'irani-chadar', 'Traditional flowing chadar providing full coverage with an elegant drape.', '/Categories/iranichadar/irani1.png', 'Irani Chadar Collection', 'Traditional flowing chadar providing full coverage.', 'Active'),
+    (4, 'Jilbab', 'jilbab', 'Classic overhead and two-piece jilbabs designed for comfort and modesty.', '/Categories/jilbab/jilbab.png', 'Modest Jilbabs', 'Classic overhead and two-piece jilbabs.', 'Active'),
+    (5, 'Namaz Chadar', 'namaz-chadar', 'Breathable and comfortable prayer chadar for your daily devotions.', '/Categories/namazchadar/namazchaddar.png', 'Prayer Wear', 'Breathable prayer chadar for your daily devotions.', 'Active'),
+    (6, 'Round Chadar', 'round-chadar', 'Classic round chadar ensuring perfect coverage with premium nida fabric.', '/Categories/roundchadar/round1.png', 'Round Chadar', 'Classic round chadar ensuring perfect coverage.', 'Active');`,
 
-  // 2. Seed Products
+  // 1a. Seed Category Filters
+  `INSERT IGNORE INTO category_filters (filter_id, category_id, filter_name) VALUES
+    (1, 1, 'Fabric'), (2, 1, 'Color'), (3, 1, 'Size'), (4, 1, 'Price'), (5, 1, 'Occasion'),
+    (6, 2, 'Fabric'), (7, 2, 'Color'), (8, 2, 'Length');`,
+
+  // 2. Seed Products (New Modular Structure)
+  `INSERT IGNORE INTO size_guides (guide_id, name, guide_type) VALUES 
+    (1, 'Abaya Size Guide', 'Abaya'), (2, 'Hijab Size Guide', 'Hijab');`,
+
+  `INSERT IGNORE INTO colors (color_id, name, hex_code) VALUES
+    (1, 'Black', '#000000'), (2, 'Burgundy', '#722F37'), (3, 'Olive', '#5C6B44'), (4, 'Ivory', '#FFFFF0'), (5, 'Dusty Rose', '#DCAE96');`,
+
+  `INSERT IGNORE INTO sizes (size_id, size_name, display_order) VALUES
+    (1, 'XXS', 1), (2, 'XS', 2), (3, 'S', 3), (4, 'M', 4), (5, 'L', 5), (6, 'XL', 6), (7, 'XXL', 7), (8, 'One Size', 8);`,
+
+  `INSERT IGNORE INTO specification_groups (group_id, name) VALUES
+    (1, 'Abaya Specifications'), (2, 'Hijab Specifications');`,
+
+  `INSERT IGNORE INTO specifications (spec_id, group_id, spec_name) VALUES
+    (1, 1, 'Length'), (2, 1, 'Sleeve'), (3, 1, 'Neck Style'), (4, 1, 'Fabric'), (5, 1, 'Pocket'),
+    (6, 2, 'Length'), (7, 2, 'Width'), (8, 2, 'Fabric');`,
+
+  `INSERT IGNORE INTO customizations (customization_id, name, options_json) VALUES
+    (1, 'Length Adjustment', '["YES"]'), (2, 'Extra Sleeve', '["YES"]'), (3, 'Custom Size', '["YES"]'), (4, 'Embroidery', '["YES"]');`,
+
   `INSERT IGNORE INTO products 
-    (product_id, category_id, name, slug, description, price, compare_at_price, stock_quantity, image_url, thumbnails, badge, fit_type, color, color_swatches, sizes, fabric_type, status, is_featured) 
+    (product_id, category_id, name, slug, sku, short_description, price, sale_price, stock, status, is_featured, is_new_arrival, size_guide_id) 
   VALUES 
-    (
-      101, 1, 'LAMIA OPEN KAFTAN SET', 'lamia-open-kaftan-set', 
-      'Two-piece kaftan set with an inner layer and flowing open kaftan.',
-      9900.00, 11500.00, 20, '/hero2.png',
-      '["/hero2.png", "/hero1.png"]',
-      'NEW IN', 'Regular Fit', 'Burgundy',
-      '[{"name": "Burgundy", "hex": "#722F37"}, {"name": "Olive", "hex": "#5C6B44"}]',
-      '["S", "M", "L", "XL"]', 'Premium Nida-Silk', 'Live', 1
-    ),
-    (
-      102, 2, 'Premium Nida Abaya', 'premium-nida-abaya-1',
-      'Classic black Saudi abaya crafted from smooth, high-grade Korean Nida fabric.',
-      5990.00, 6990.00, 25, '/Categories/abaya/abaya1.png',
-      '["/Categories/abaya/abaya1.png"]',
-      'BEST SELLER', 'Saudi Fit', 'Black',
-      '[{"name": "Black", "hex": "#000000"}]',
-      '["XS", "S", "M", "L", "XL"]', 'Korean Nida', 'Live', 1
-    ),
-    (
-      103, 2, 'Everyday Abaya', 'everyday-abaya-2',
-      'Beige casual modest dress abaya designed for everyday comfort.',
-      4990.00, 5800.00, 30, '/Categories/abaya/abaya2.png',
-      '["/Categories/abaya/abaya2.png"]',
-      'NEW IN', 'Regular Fit', 'Beige',
-      '[{"name": "Beige", "hex": "#F5F5DC"}]',
-      '["S", "M", "L"]', 'Soft Linen Nida', 'Live', 1
-    ),
-    (
-      104, 2, 'Classic Black Abaya', 'classic-black-abaya-3',
-      'Timeless front-closed black abaya with clean stitching and elegant drape.',
-      5490.00, 6200.00, 18, '/Categories/abaya/abaya3.png',
-      '["/Categories/abaya/abaya3.png"]',
-      'ESSENTIAL', 'Classic Fit', 'Black',
-      '[{"name": "Black", "hex": "#000000"}]',
-      '["S", "M", "L", "XL"]', 'Premium Nida', 'Live', 1
-    ),
-    (
-      105, 2, 'Elegant Abaya', 'elegant-abaya-4',
-      'Dusty rose chiffon overlay abaya for special dinners and formal gatherings.',
-      6490.00, 7500.00, 15, '/Categories/abaya/abaya4.png',
-      '["/Categories/abaya/abaya4.png"]',
-      'NEW IN', 'Flared Fit', 'Dusty Rose',
-      '[{"name": "Dusty Rose", "hex": "#DCAE96"}]',
-      '["S", "M", "L"]', 'Chiffon Overlay', 'Live', 1
-    ),
-    (
-      106, 2, 'Luxury Occasion Abaya', 'luxury-occasion-abaya-5',
-      'Olive green festive abaya with subtle gold threading and embroidered cuffs.',
-      7490.00, 8900.00, 12, '/Categories/abaya/abaya5.png',
-      '["/Categories/abaya/abaya5.png"]',
-      'LIMITED EDITION', 'Saudi Fit', 'Olive',
-      '[{"name": "Olive", "hex": "#5C6B44"}]',
-      '["S", "M", "L", "XL"]', 'Silk Nida', 'Live', 1
-    ),
-    (
-      107, 2, 'STRUCTURED DAY ABAYA', 'structured-day-abaya',
-      'Tailored olive day abaya featuring structured lapels and pop-button closure.',
-      5990.00, 6800.00, 22, '/hero2.png',
-      '["/hero2.png"]',
-      'FEATURED', 'Straight Fit', 'Olive',
-      '[{"name": "Olive", "hex": "#5C6B44"}]',
-      '["S", "M", "L"]', 'Structured Crepe', 'Live', 1
-    ),
-    (
-      108, 2, 'IVORY CHIFFON ABAYA', 'ivory-chiffon-abaya',
-      'Flowing ivory chiffon abaya with inner slip for serene bridal and formal wear.',
-      6490.00, 7200.00, 14, '/hero2.png',
-      '["/hero2.png"]',
-      'NEW IN', 'Loose Fit', 'Ivory',
-      '[{"name": "Ivory", "hex": "#FFFFF0"}]',
-      '["S", "M", "L"]', 'Pure Chiffon', 'Live', 1
-    ),
-    (
-      109, 2, 'GOLD-TRIM EID ABAYA', 'gold-trim-eid-abaya',
-      'Festive black abaya adorned with rich gold braid trimming along the sleeves.',
-      7490.00, 8500.00, 16, '/hero2.png',
-      '["/hero2.png"]',
-      'LIMITED EDITION', 'Saudi Fit', 'Black',
-      '[{"name": "Black", "hex": "#000000"}]',
-      '["S", "M", "L", "XL"]', 'Luxury Nida', 'Live', 1
-    ),
-    (
-      110, 2, 'DUSTY ROSE OPEN ABAYA', 'dusty-rose-open-abaya',
-      'Open-front dusty rose kimono abaya paired with belt tie.',
-      6890.00, 7900.00, 20, '/hero2.png',
-      '["/hero2.png"]',
-      'BEST SELLER', 'Open Fit', 'Dusty Rose',
-      '[{"name": "Dusty Rose", "hex": "#DCAE96"}]',
-      '["S", "M", "L"]', 'Satin-Finish Crepe', 'Live', 1
-    ),
-    (
-      111, 3, 'Premium Chiffon Hijab', 'premium-chiffon-hijab-1',
-      'Breathable lightweight chiffon hijab in dusty rose with hand-rolled hems.',
-      2400.00, 2900.00, 50, '/Categories/hijabs/hijab1.png',
-      '["/Categories/hijabs/hijab1.png"]',
-      'ESSENTIAL', 'One Size', 'Dusty Rose',
-      '[{"name": "Dusty Rose", "hex": "#DCAE96"}]',
-      '["One Size"]', 'Georgette Chiffon', 'Live', 1
-    ),
-    (
-      112, 3, 'Everyday Jersey Hijab', 'everyday-jersey-hijab-2',
-      'Non-slip 4-way stretch cotton jersey hijab for maximum comfort.',
-      2200.00, 2600.00, 60, '/Categories/hijabs/hijab2.png',
-      '["/Categories/hijabs/hijab2.png"]',
-      'BEST SELLER', 'One Size', 'Olive',
-      '[{"name": "Olive", "hex": "#5C6B44"}]',
-      '["One Size"]', 'Cotton Jersey', 'Live', 1
-    ),
-    (
-      113, 3, 'EMBROIDERED CHIFFON HIJAB', 'embroidered-chiffon-hijab',
-      'Delicate embroidery edging along chiffon wrap.',
-      2500.00, 3000.00, 35, '/hero2.png',
-      '["/hero2.png"]',
-      'NEW IN', 'One Size', 'Rose Gold',
-      '[{"name": "Rose Gold", "hex": "#B76E79"}]',
-      '["One Size"]', 'Embroidered Chiffon', 'Live', 1
-    ),
-    (
-      114, 3, 'EVERYDAY MODAL HIJAB', 'everyday-modal-hijab',
-      'Silky breathable modal hijab wrap in deep black.',
-      1800.00, 2200.00, 40, '/hero2.png',
-      '["/hero2.png"]',
-      'ESSENTIAL', 'One Size', 'Black',
-      '[{"name": "Black", "hex": "#000000"}]',
-      '["One Size"]', 'Premium Modal', 'Live', 1
-    ),
-    (
-      115, 2, 'Two Piece Jilbab Set', 'two-piece-jilbab-1',
-      'Full-coverage 2-piece overhead khimar and flared maxi skirt set.',
-      6990.00, 7990.00, 15, '/Categories/jilbab/jilbab.png',
-      '["/Categories/jilbab/jilbab.png"]',
-      'FEATURED', 'Full Fit', 'Black',
-      '[{"name": "Black", "hex": "#000000"}]',
-      '["Free Size"]', 'Micro-Nida', 'Live', 1
-    ),
-    (
-      116, 2, 'Overhead Jilbab', 'overhead-jilbab-2',
-      'One-piece tie-head olive jilbab offering complete modest coverage.',
-      6490.00, 7400.00, 18, '/Categories/jilbab/jilbab2.png',
-      '["/Categories/jilbab/jilbab2.png"]',
-      'NEW IN', 'Full Fit', 'Olive',
-      '[{"name": "Olive", "hex": "#5C6B44"}]',
-      '["Free Size"]', 'Soft Crepe', 'Live', 1
-    ),
-    (
-      117, 2, 'Classic Irani Chadar', 'classic-irani-chadar-1',
-      'Traditional full-length black Irani chadar with arm-slits and head-tie band.',
-      8990.00, 9990.00, 20, '/Categories/iranichadar/irani1.png',
-      '["/Categories/iranichadar/irani1.png"]',
-      'BEST SELLER', 'Full Coverage', 'Black',
-      '[{"name": "Black", "hex": "#000000"}]',
-      '["Standard"]', 'Irani Silk-Nida', 'Live', 1
-    ),
-    (
-      118, 3, 'Comfort Namaz Chadar', 'comfort-namaz-chadar-1',
-      'Pure white breathable cotton prayer chadar with lace trims.',
-      3490.00, 4200.00, 30, '/Categories/namazchadar/namazchaddar.png',
-      '["/Categories/namazchadar/namazchaddar.png"]',
-      'ESSENTIAL', 'Free Size', 'White',
-      '[{"name": "White", "hex": "#FFFFFF"}]',
-      '["Free Size"]', '100% Pure Cotton', 'Live', 1
-    );`,
+    (101, 1, 'LAMIA OPEN KAFTAN SET', 'lamia-open-kaftan-set', 'KAFTAN-101', 'Two-piece kaftan set with an inner layer and flowing open kaftan.', 11500.00, 9900.00, 20, 'Live', 1, 1, 1),
+    (102, 1, 'Premium Nida Abaya', 'premium-nida-abaya-1', 'ABAYA-102', 'Classic black Saudi abaya crafted from smooth, high-grade Korean Nida fabric.', 6990.00, 5990.00, 25, 'Live', 1, 0, 1),
+    (111, 2, 'Premium Chiffon Hijab', 'premium-chiffon-hijab-1', 'HIJAB-111', 'Breathable lightweight chiffon hijab in dusty rose with hand-rolled hems.', 2900.00, 2400.00, 50, 'Live', 1, 0, 2);`,
+
+  `INSERT IGNORE INTO product_images (product_id, image_url, is_main, display_order) VALUES
+    (101, '/hero2.png', 1, 1), (101, '/hero1.png', 0, 2),
+    (102, '/Categories/abaya/abaya1.png', 1, 1),
+    (111, '/Categories/hijabs/hijab1.png', 1, 1);`,
+
+  `INSERT IGNORE INTO product_variants (variant_id, product_id, color_id, image_url, stock_quantity, sku) VALUES
+    (1, 101, 2, '/hero2.png', 10, 'KAFTAN-101-BUR'),
+    (2, 101, 3, '/hero1.png', 10, 'KAFTAN-101-OLI'),
+    (3, 102, 1, '/Categories/abaya/abaya1.png', 25, 'ABAYA-102-BLK'),
+    (4, 111, 5, '/Categories/hijabs/hijab1.png', 50, 'HIJAB-111-ROS');`,
+
+  `INSERT IGNORE INTO product_sizes (product_id, size_id) VALUES
+    (101, 3), (101, 4), (101, 5), (101, 6),
+    (102, 2), (102, 3), (102, 4), (102, 5), (102, 6),
+    (111, 8);`,
+
+  `INSERT IGNORE INTO product_specifications (product_id, spec_id, value) VALUES
+    (101, 4, 'Premium Nida-Silk'), (101, 2, 'Stand collar'), (101, 5, 'Side pockets'),
+    (102, 4, 'Korean Nida'), (102, 2, 'Fitted Sleeve'),
+    (111, 8, 'Georgette Chiffon'), (111, 6, '180cm'), (111, 7, '70cm');`,
+
+  `INSERT IGNORE INTO product_customizations (product_id, customization_id) VALUES
+    (101, 1), (101, 3), (102, 1), (102, 3), (111, 4);`,
+
+  `INSERT IGNORE INTO related_products (product_id, related_id) VALUES
+    (101, 102);`,
 
   // 3. Seed Offers
   `INSERT IGNORE INTO offers (offer_id, title, subtitle, promo_code, discount_percentage, min_order_amount, status) VALUES
@@ -887,7 +966,14 @@ const seedData = [
       NULL, NULL, NULL,
       '{"section_contact_label": "Location & Contact Details", "map_section_label": "Find Us on Google Maps", "full_address_label": "Full Address", "opening_hours_label": "Opening Hours", "phone_label": "Phone & Support", "email_label": "Email Address", "get_directions_btn": "Get Directions"}'
     )
-  ;`
+  ;`,
+
+  // 15. Seed Commission Plans
+  `INSERT IGNORE INTO commission_plans (plan_id, name, commission_rate, description) VALUES
+    (1, 'Bronze', 5.00, 'New affiliates'),
+    (2, 'Silver', 10.00, 'Standard affiliates'),
+    (3, 'Gold', 15.00, 'High-performing affiliates'),
+    (4, 'VIP', 20.00, 'Influencers or strategic partners');`
 ];
 
 module.exports = { createTables, seedData };

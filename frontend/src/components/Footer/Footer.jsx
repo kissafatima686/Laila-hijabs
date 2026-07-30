@@ -54,7 +54,8 @@ const Footer = () => {
               <li><Link to="/visit-us" className="footer-link">Visit Us</Link></li>
               <li><Link to="/careers" className="footer-link">Careers</Link></li>
               <li><Link to="/journal" className="footer-link">Journal</Link></li>
-              <li><Link to="/affiliate-program" className="footer-link">Affiliates</Link></li>
+              <li><Link to="/affiliate-program" className="footer-link">Affiliate Program</Link></li>
+              <li><Link to="/affiliate/login" className="footer-link">Affiliate Login</Link></li>
             </ul>
           </div>
 

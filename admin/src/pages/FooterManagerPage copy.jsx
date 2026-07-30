@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * Full CRUD page for managing the Footer — sourced directly from Footer.jsx:
@@ -41,7 +40,6 @@ const LinkListManager = ({ groupName, items, onSave, onDelete, onToggle }) => {
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [form, setForm] = useState({ label: '', url: '', status: 'Live' });
-  const navigate = useNavigate();
 
   const openAdd = () => { setForm({ label: '', url: '', status: 'Live' }); setEditItem(null); setShowModal(true); };
   const openEdit = (item) => { setForm({ label: item.label, url: item.url, status: item.status || 'Live' }); setEditItem(item); setShowModal(true); };
@@ -77,42 +75,23 @@ const LinkListManager = ({ groupName, items, onSave, onDelete, onToggle }) => {
                 {item.status === 'Live' ? 'Hide' : 'Show'}
               </button>
               {item.url && item.url.startsWith('/') && (
-                <button
+                <a
+                  href={`/admin#${item.url}`}
                   onClick={(e) => {
                     e.preventDefault();
-                    
-                    // Dynamically parse the slug from the url
-                    const segments = item.url.split('/').filter(Boolean);
-                    const slug = segments[segments.length - 1] || '';
-                    
-                    // Route to the appropriate admin editor based on slug or exact match
-                    let targetRoute = '/sections/footer_settings';
-                    
-                    // Handle exact and multi-path matches from App.jsx
-                    if (['/about', '/our-story'].includes(item.url)) targetRoute = '/sections/about_who_we_are';
-                    else if (['/contact-us', '/contact'].includes(item.url)) targetRoute = '/sections/contact_main_section';
-                    else if (['/faqs', '/faq'].includes(item.url)) targetRoute = '/faqs';
-                    else if (item.url === '/size-guide') targetRoute = '/size-guide';
-                    else if (['/locations', '/visit-us'].includes(item.url)) targetRoute = '/locations';
-                    else if (['/blogs', '/journal'].includes(item.url)) targetRoute = '/sections/blogs_page_header';
-                    else if (['/affiliate', '/affiliate-program'].includes(item.url)) targetRoute = '/sections/affiliate_program_settings';
-                    else if (['/gift-card', '/gift-cards'].includes(item.url)) targetRoute = '/sections/gift_card';
-                    else if (item.url === '/custom-orders') targetRoute = '/sections/custom_orders_settings';
-                    else if (item.url === '/offers') targetRoute = '/offers';
-                    else if (item.url.startsWith('/Products/')) targetRoute = '/products';
-                    else if (slug) {
-                      // Generic mapping: replace hyphens with underscores for section keys
-                      targetRoute = `/sections/${slug.replace(/-/g, '_')}`;
-                    }
-
-                    navigate(targetRoute);
+                    window.location.href = item.url === '/about' ? '/sections/about_who_we_are' :
+                                          item.url === '/contact' ? '/sections/contact_main_section' :
+                                          item.url === '/faqs' ? '/faqs' :
+                                          item.url === '/size-guide' ? '/size-guide' :
+                                          item.url === '/locations' ? '/locations' :
+                                          item.url === '/blogs' ? '/blogs' : '/sections/footer_settings';
                   }}
-                  style={{ ...btnG, padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', background: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', cursor: 'pointer' }}
+                  style={{ ...btnG, padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
                   title="Edit Page Content"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                   Edit Page
-                </button>
+                </a>
               )}
               <button onClick={() => openEdit(item)} style={{ ...btnG, padding: '5px 10px' }} title="Edit Link Details"><EditIcon /></button>
               <button onClick={() => onDelete(item.link_id)} style={{ ...btnD, padding: '5px 10px' }} title="Delete Link"><TrashIcon /></button>

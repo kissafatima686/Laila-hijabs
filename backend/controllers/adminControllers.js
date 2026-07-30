@@ -207,6 +207,9 @@ const TABLE_MAP = {
   'orders': { table: 'orders', key: 'order_id' },
   'custom-orders': { table: 'custom_orders', key: 'custom_order_id' },
   'affiliates': { table: 'affiliate_applications', key: 'application_id' },
+  'approved-affiliates': { table: 'affiliates', key: 'affiliate_id' },
+  'commissions': { table: 'commissions', key: 'commission_id' },
+  'payouts': { table: 'payouts', key: 'payout_id' },
   'offers': { table: 'offers', key: 'offer_id' },
   'locations': { table: 'store_locations', key: 'location_id' },
   'blogs': { table: 'blogs', key: 'blog_id' },
@@ -232,6 +235,17 @@ const getModuleItems = async (req, res) => {
   if (!config) return res.status(400).json({ error: 'Invalid module' });
   try {
     const [rows] = await pool.query(`SELECT * FROM \`${config.table}\` ORDER BY created_at DESC`);
+    
+    // Attach filters to categories
+    if (req.params.moduleName === 'categories') {
+      const [filters] = await pool.query(`SELECT * FROM category_filters`);
+      const formatted = rows.map(cat => ({
+        ...cat,
+        filters: filters.filter(f => f.category_id === cat.category_id).map(f => f.filter_name)
+      }));
+      return res.status(200).json(formatted);
+    }
+    
     res.status(200).json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -242,6 +256,16 @@ const createModuleItem = async (req, res) => {
   const config = TABLE_MAP[req.params.moduleName];
   if (!config) return res.status(400).json({ error: 'Invalid module' });
   let bodyData = { ...req.body };
+  
+  // Intercept category filters
+  let categoryFilters = [];
+  if (req.params.moduleName === 'categories') {
+    if (bodyData.filters !== undefined) {
+      categoryFilters = bodyData.filters;
+      delete bodyData.filters;
+    }
+  }
+  
   if (req.params.moduleName === 'wishlists') {
     if (!('user_id' in bodyData)) bodyData.user_id = null;
     if (!('product_id' in bodyData)) bodyData.product_id = null;
@@ -252,6 +276,13 @@ const createModuleItem = async (req, res) => {
   try {
     const sql = `INSERT INTO \`${config.table}\` (${fields.map(f => `\`${f}\``).join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`;
     const [result] = await pool.query(sql, values);
+    
+    if (req.params.moduleName === 'categories' && categoryFilters.length > 0) {
+      for (let f of categoryFilters) {
+        await pool.query(`INSERT INTO category_filters (category_id, filter_name) VALUES (?, ?)`, [result.insertId, f]);
+      }
+    }
+    
     res.status(201).json({ message: 'Item created!', id: result.insertId });
   } catch (err) {
     console.error("createModuleItem error:", err);
@@ -262,12 +293,71 @@ const createModuleItem = async (req, res) => {
 const updateModuleItem = async (req, res) => {
   const config = TABLE_MAP[req.params.moduleName];
   if (!config) return res.status(400).json({ error: 'Invalid module' });
-  const fields = Object.keys(req.body);
-  const values = Object.values(req.body);
-  if (fields.length === 0) return res.status(400).json({ error: 'No data provided' });
+  let bodyData = { ...req.body };
+  
+  // Intercept category filters
+  let categoryFilters = undefined;
+  if (req.params.moduleName === 'categories') {
+    if (bodyData.filters !== undefined) {
+      categoryFilters = bodyData.filters;
+      delete bodyData.filters;
+    }
+  }
+
+  // Intercept Affiliate Approvals
+  if (req.params.moduleName === 'affiliates' && bodyData.status === 'Approved') {
+    try {
+      const crypto = require("crypto");
+      const bcrypt = require("bcryptjs");
+      const [appRes] = await pool.query(`SELECT * FROM affiliate_applications WHERE application_id = ?`, [req.params.id]);
+      if (appRes.length > 0) {
+        const app = appRes[0];
+        if (app.status === 'Pending') {
+          const tempPassword = crypto.randomBytes(4).toString('hex');
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(tempPassword, salt);
+          const affiliateCode = `LHAF-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+          
+          const affiliateLink = `http://localhost:5000/api/affiliate/ref/${affiliateCode}`;
+          
+          let user_id;
+          const [userRes] = await pool.query(`SELECT * FROM users WHERE email = ?`, [app.email]);
+          if (userRes.length > 0) {
+              user_id = userRes[0].user_id;
+          } else {
+              const [newUserRes] = await pool.query(
+                  `INSERT INTO users (full_name, email, password_hash, phone, role) VALUES (?, ?, ?, ?, ?)`,
+                  [app.full_name, app.email, hashedPassword, app.phone, 'customer']
+              );
+              user_id = newUserRes.insertId;
+          }
+          await pool.query(
+              `INSERT INTO affiliates (user_id, affiliate_code, affiliate_link, plan_id, status) VALUES (?, ?, ?, ?, 'Approved')`,
+              [user_id, affiliateCode, affiliateLink, 1]
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Error generating affiliate record:", e);
+    }
+  }
+  
+  const fields = Object.keys(bodyData);
+  const values = Object.values(bodyData);
+  if (fields.length === 0 && categoryFilters === undefined) return res.status(400).json({ error: 'No data provided' });
   try {
-    const setClause = fields.map(f => `\`${f}\` = ?`).join(', ');
-    await pool.query(`UPDATE \`${config.table}\` SET ${setClause} WHERE \`${config.key}\` = ?`, [...values, req.params.id]);
+    if (fields.length > 0) {
+      const setClause = fields.map(f => `\`${f}\` = ?`).join(', ');
+      await pool.query(`UPDATE \`${config.table}\` SET ${setClause} WHERE \`${config.key}\` = ?`, [...values, req.params.id]);
+    }
+    
+    if (req.params.moduleName === 'categories' && categoryFilters !== undefined) {
+      await pool.query(`DELETE FROM category_filters WHERE category_id = ?`, [req.params.id]);
+      for (let f of categoryFilters) {
+        await pool.query(`INSERT INTO category_filters (category_id, filter_name) VALUES (?, ?)`, [req.params.id, f]);
+      }
+    }
+    
     res.status(200).json({ message: 'Item updated!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -278,6 +368,47 @@ const toggleModuleItemStatus = async (req, res) => {
   const config = TABLE_MAP[req.params.moduleName];
   if (!config) return res.status(400).json({ error: 'Invalid module' });
   const { status } = req.body;
+
+  // Intercept Affiliate Approvals
+  if (req.params.moduleName === 'affiliates' && status === 'Approved') {
+    try {
+      const crypto = require("crypto");
+      const bcrypt = require("bcryptjs");
+      const [appRes] = await pool.query(`SELECT * FROM affiliate_applications WHERE application_id = ?`, [req.params.id]);
+      if (appRes.length > 0) {
+        const app = appRes[0];
+        // Only generate the affiliate account if it isn't ALREADY approved 
+        // (this allows re-approving applications that were rejected or broken previously)
+        if (app.status !== 'Approved') {
+          const tempPassword = crypto.randomBytes(4).toString('hex');
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(tempPassword, salt);
+          const affiliateCode = `LHAF-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+          
+          const affiliateLink = `http://localhost:5000/api/affiliate/ref/${affiliateCode}`;
+          
+          let user_id;
+          const [userRes] = await pool.query(`SELECT * FROM users WHERE email = ?`, [app.email]);
+          if (userRes.length > 0) {
+              user_id = userRes[0].user_id;
+          } else {
+              const [newUserRes] = await pool.query(
+                  `INSERT INTO users (full_name, email, password_hash, phone, role) VALUES (?, ?, ?, ?, ?)`,
+                  [app.full_name, app.email, hashedPassword, app.phone, 'customer']
+              );
+              user_id = newUserRes.insertId;
+          }
+          await pool.query(
+              `INSERT INTO affiliates (user_id, affiliate_code, affiliate_link, plan_id, status) VALUES (?, ?, ?, ?, 'Approved')`,
+              [user_id, affiliateCode, affiliateLink, 1]
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Error generating affiliate record:", e);
+    }
+  }
+
   try {
     await pool.query(`UPDATE \`${config.table}\` SET status = ? WHERE \`${config.key}\` = ?`, [status || 'Live', req.params.id]);
     res.status(200).json({ message: 'Status updated!' });
@@ -298,6 +429,82 @@ const deleteModuleItem = async (req, res) => {
 };
 
 // ─── SITE SECTIONS CMS (Page Content Editor) ─────────────────────────────────
+
+const getAdminAffiliateDetails = async (req, res) => {
+  try {
+    const affiliate_id = req.params.id;
+    const [affiliates] = await pool.query(
+      `SELECT a.*, u.full_name, u.email, u.phone 
+       FROM affiliates a 
+       JOIN users u ON a.user_id = u.user_id 
+       WHERE a.affiliate_id = ?`, 
+      [affiliate_id]
+    );
+    if (affiliates.length === 0) return res.status(404).json({ error: 'Affiliate not found' });
+    
+    const affiliate = affiliates[0];
+    
+    const [clicksRes] = await pool.query(`SELECT COUNT(*) as count FROM affiliate_clicks WHERE affiliate_id = ?`, [affiliate_id]);
+    const [commissionsRes] = await pool.query(`
+      SELECT 
+        COUNT(*) as sales,
+        SUM(CASE WHEN status = 'Pending' THEN commission_amount ELSE 0 END) as pending,
+        SUM(CASE WHEN status = 'Paid' THEN commission_amount ELSE 0 END) as paid
+      FROM commissions WHERE affiliate_id = ?
+    `, [affiliate_id]);
+    
+    const [commissionsList] = await pool.query(`SELECT * FROM commissions WHERE affiliate_id = ? ORDER BY created_at DESC LIMIT 20`, [affiliate_id]);
+    const [clicksList] = await pool.query(`SELECT ip_address, browser, created_at FROM affiliate_clicks WHERE affiliate_id = ? ORDER BY created_at DESC LIMIT 20`, [affiliate_id]);
+
+    res.status(200).json({
+      affiliate,
+      stats: {
+        totalClicks: clicksRes[0].count,
+        totalOrders: commissionsRes[0].sales || 0,
+        pendingCommission: commissionsRes[0].pending || 0,
+        paidCommission: commissionsRes[0].paid || 0
+      },
+      commissions: commissionsList,
+      clicks: clicksList
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getPayoutsSummary = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT a.affiliate_id, a.affiliate_code, u.full_name, u.email, u.phone,
+             SUM(c.commission_amount) as pending_amount
+      FROM affiliates a
+      JOIN users u ON a.user_id = u.user_id
+      LEFT JOIN commissions c ON a.affiliate_id = c.affiliate_id AND c.status = 'Pending'
+      GROUP BY a.affiliate_id, a.affiliate_code, u.full_name, u.email, u.phone
+      ORDER BY pending_amount DESC
+    `);
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const processPayout = async (req, res) => {
+  try {
+    const { affiliate_id, amount, payment_method } = req.body;
+    await pool.query(
+      `INSERT INTO payouts (affiliate_id, amount, payment_method, status) VALUES (?, ?, ?, 'Paid')`,
+      [affiliate_id, amount, payment_method]
+    );
+    await pool.query(
+      `UPDATE commissions SET status = 'Paid' WHERE affiliate_id = ? AND status = 'Pending'`,
+      [affiliate_id]
+    );
+    res.status(200).json({ message: 'Payout processed' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const getAllSections = async (req, res) => {
   try {
@@ -388,7 +595,26 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-// ─── PRODUCTS ────────────────────────────────────────────────────────────────
+// ─── MODULAR PRODUCTS ────────────────────────────────────────────────────────────────
+
+
+const getDisplaySections = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`SELECT * FROM display_sections ORDER BY display_section_id ASC`);
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getProductSections = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`SELECT * FROM product_sections ORDER BY default_display_order ASC`);
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const getAllProducts = async (req, res) => {
   try {
@@ -399,35 +625,249 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-const addProduct = async (req, res) => {
-  const { name, price, category_id, fabric_type, description, image_url, stock_quantity, badge, color, sizes, color_swatches, thumbnails } = req.body;
+const getAdminProductDetails = async (req, res) => {
   try {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    const [result] = await pool.query(
-      `INSERT INTO products (name, slug, price, category_id, fabric_type, description, image_url, stock_quantity, badge, color, sizes, color_swatches, thumbnails, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Live')`,
-      [name, slug, price || 0, category_id || 1, fabric_type || 'Premium Nida', description || null, image_url || null, stock_quantity || 0, badge || 'NEW IN', color || 'Black',
-       sizes ? JSON.stringify(sizes) : '["S","M","L","XL"]',
-       color_swatches ? JSON.stringify(color_swatches) : null,
-       thumbnails ? JSON.stringify(thumbnails) : null]
-    );
-    res.status(201).json({ message: 'Product added', id: result.insertId });
+    const { id } = req.params;
+    const [prod] = await pool.query(`SELECT * FROM products WHERE product_id = ?`, [id]);
+    if (prod.length === 0) return res.status(404).json({ error: 'Product not found' });
+    
+    const [images] = await pool.query(`SELECT image_url, is_main, display_order FROM product_images WHERE product_id = ? ORDER BY display_order`, [id]);
+    const [variants] = await pool.query(`SELECT pv.color_id, pv.sku, pv.stock_quantity, pv.image_url, c.name as color_name, c.hex_code FROM product_variants pv JOIN colors c ON pv.color_id = c.color_id WHERE pv.product_id = ?`, [id]);
+    const [sizes] = await pool.query(`SELECT size_id FROM product_sizes WHERE product_id = ?`, [id]);
+    const [specs] = await pool.query(`SELECT spec_id, value FROM product_specifications WHERE product_id = ?`, [id]);
+    const [customizations] = await pool.query(`SELECT customization_id FROM product_customizations WHERE product_id = ?`, [id]);
+    const [sections] = await pool.query(`SELECT section_id, is_visible, display_order FROM product_section_mapping WHERE product_id = ? ORDER BY display_order ASC`, [id]);
+    
+    // NEW: Gallery and Display Mapping
+    const [gallery] = await pool.query(`
+      SELECT pg.*, pvg.color_id as variant_id 
+      FROM product_gallery pg 
+      LEFT JOIN product_variant_gallery pvg ON pg.gallery_id = pvg.gallery_id 
+      WHERE pg.product_id = ? 
+      ORDER BY pg.display_order ASC`, [id]);
+      
+    const [displaySections] = await pool.query(`SELECT display_section_id FROM product_display WHERE product_id = ?`, [id]);
+    
+    res.status(200).json({
+      ...prod[0],
+      images: gallery, // sending it as images temporarily or gallery
+      gallery: gallery,
+      variants,
+      sizes: sizes.map(s => s.size_id),
+      specifications: specs,
+      customizations: customizations.map(c => c.customization_id),
+      sections: sections,
+      display_sections: displaySections.map(d => d.display_section_id)
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-const updateProduct = async (req, res) => {
-  const { id } = req.params;
-  const fields = Object.keys(req.body);
-  const values = Object.values(req.body);
-  if (fields.length === 0) return res.status(400).json({ error: 'No data provided' });
+const addProduct = async (req, res) => {
+  const connection = await pool.getConnection();
   try {
-    const setClause = fields.map(f => `\`${f}\` = ?`).join(', ');
-    await pool.query(`UPDATE products SET ${setClause} WHERE product_id = ?`, [...values, id]);
+    await connection.beginTransaction();
+    const { 
+      name, slug, category_id, sku, price, sale_price, stock, 
+      short_description, long_description, care_instructions, fabric_details,
+      is_featured, is_new_arrival, seo_title, meta_description, keywords, canonical_url, size_guide_id, bundle_attributes,
+      images, variants, sizes, specifications, customizations, sections,
+      gallery, display_sections
+    } = req.body;
+    
+    const pSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    const [prodRes] = await connection.query(
+      `INSERT INTO products 
+        (name, slug, category_id, sku, price, sale_price, stock, 
+         short_description, long_description, care_instructions, fabric_details, 
+         is_featured, is_new_arrival, seo_title, meta_description, keywords, canonical_url, size_guide_id, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Live')`,
+      [name, pSlug, category_id || null, sku || null, price || 0, sale_price || null, stock || 0,
+       short_description || null, long_description || null, care_instructions || null, fabric_details || null,
+       is_featured ? 1 : 0, is_new_arrival ? 1 : 0, seo_title || null, meta_description || null, keywords || null, canonical_url || null, size_guide_id || null]
+    );
+
+    const pid = prodRes.insertId;
+
+    if (gallery && gallery.length > 0) {
+      for (let i = 0; i < gallery.length; i++) {
+        let g = gallery[i];
+        const [gRes] = await connection.query(
+          `INSERT INTO product_gallery (product_id, media_type, image_title, image_url, thumbnail_url, alt_text, display_order, is_featured) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
+          [pid, g.media_type || 'image', g.image_title || null, g.image_url, g.thumbnail_url || null, g.alt_text || null, i, g.is_featured ? 1 : 0]
+        );
+        if (g.variant_id) {
+          await connection.query(`INSERT INTO product_variant_gallery (color_id, gallery_id, display_order) VALUES (?, ?, ?)`, 
+            [g.variant_id, gRes.insertId, i]);
+        }
+      }
+    } else if (images && images.length > 0) {
+      // Legacy fallback
+      for (let i = 0; i < images.length; i++) {
+        await connection.query(`INSERT INTO product_gallery (product_id, image_url, is_featured, display_order) VALUES (?, ?, ?, ?)`, 
+          [pid, images[i].image_url, i === 0 ? 1 : 0, i]);
+      }
+    }
+
+    if (display_sections && display_sections.length > 0) {
+      for (let d of display_sections) {
+        await connection.query(`INSERT INTO product_display (product_id, display_section_id) VALUES (?, ?)`, [pid, d]);
+      }
+    }
+
+    if (variants && variants.length > 0) {
+      for (let v of variants) {
+        await connection.query(`INSERT INTO product_variants (product_id, color_id, sku, stock_quantity, image_url) VALUES (?, ?, ?, ?, ?)`, 
+          [pid, v.color_id, v.sku || null, v.stock_quantity || 0, v.image_url || null]);
+      }
+    }
+
+    if (sizes && sizes.length > 0) {
+      for (let s of sizes) {
+        await connection.query(`INSERT INTO product_sizes (product_id, size_id) VALUES (?, ?)`, [pid, s]);
+      }
+    }
+
+    if (specifications && specifications.length > 0) {
+      for (let spec of specifications) {
+        await connection.query(`INSERT INTO product_specifications (product_id, spec_id, value) VALUES (?, ?, ?)`, [pid, spec.spec_id, spec.value]);
+      }
+    }
+
+    if (customizations && customizations.length > 0) {
+      for (let c of customizations) {
+        await connection.query(`INSERT INTO product_customizations (product_id, customization_id) VALUES (?, ?)`, [pid, c]);
+      }
+    }
+
+    if (sections && sections.length > 0) {
+      for (let s of sections) {
+        await connection.query(`INSERT INTO product_section_mapping (product_id, section_id, is_visible, display_order) VALUES (?, ?, ?, ?)`, 
+          [pid, s.section_id, s.is_visible || 'Y', s.display_order || 0]);
+      }
+    } else {
+      // If none provided, insert defaults
+      const [allSections] = await connection.query(`SELECT section_id, default_display_order FROM product_sections`);
+      for (let s of allSections) {
+         await connection.query(`INSERT INTO product_section_mapping (product_id, section_id, is_visible, display_order) VALUES (?, ?, 'Y', ?)`, 
+           [pid, s.section_id, s.default_display_order]);
+      }
+    }
+
+    await connection.commit();
+    res.status(201).json({ message: 'Product added', id: pid });
+  } catch (err) {
+    await connection.rollback();
+    res.status(500).json({ error: err.message });
+  } finally {
+    connection.release();
+  }
+};
+
+const updateProduct = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const pid = req.params.id;
+    const { 
+      name, slug, category_id, sku, price, sale_price, stock, 
+      short_description, long_description, care_instructions, fabric_details,
+      is_featured, is_new_arrival, seo_title, meta_description, keywords, canonical_url, size_guide_id, bundle_attributes,
+      images, variants, sizes, specifications, customizations, sections,
+      gallery, display_sections
+    } = req.body;
+    
+    const pSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    await connection.query(
+      `UPDATE products SET 
+        name=?, slug=?, category_id=?, sku=?, price=?, sale_price=?, stock=?, 
+        short_description=?, long_description=?, care_instructions=?, fabric_details=?, 
+        is_featured=?, is_new_arrival=?, seo_title=?, meta_description=?, keywords=?, canonical_url=?, size_guide_id=?, bundle_attributes=?
+          WHERE product_id=?`,
+      [name, pSlug, category_id || null, sku || null, price || 0, sale_price || null, stock || 0,
+       short_description || null, long_description || null, care_instructions || null, fabric_details || null,
+       is_featured ? 1 : 0, is_new_arrival ? 1 : 0, seo_title || null, meta_description || null, keywords || null, canonical_url || null, size_guide_id || null, pid]
+    );
+
+    // Delete and recreate relations
+    if (gallery !== undefined) {
+      await connection.query(`DELETE FROM product_gallery WHERE product_id=?`, [pid]);
+      for (let i = 0; i < gallery.length; i++) {
+        let g = gallery[i];
+        const [gRes] = await connection.query(
+          `INSERT INTO product_gallery (product_id, media_type, image_title, image_url, thumbnail_url, alt_text, display_order, is_featured) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
+          [pid, g.media_type || 'image', g.image_title || null, g.image_url, g.thumbnail_url || null, g.alt_text || null, i, g.is_featured ? 1 : 0]
+        );
+        if (g.variant_id) {
+          await connection.query(`INSERT INTO product_variant_gallery (color_id, gallery_id, display_order) VALUES (?, ?, ?)`, 
+            [g.variant_id, gRes.insertId, i]);
+        }
+      }
+    } else if (images !== undefined) {
+      // Legacy fallback
+      await connection.query(`DELETE FROM product_gallery WHERE product_id=?`, [pid]);
+      for (let i = 0; i < images.length; i++) {
+        await connection.query(`INSERT INTO product_gallery (product_id, image_url, is_featured, display_order) VALUES (?, ?, ?, ?)`, 
+          [pid, images[i].image_url, i === 0 ? 1 : 0, i]);
+      }
+    }
+
+    if (display_sections !== undefined) {
+      await connection.query(`DELETE FROM product_display WHERE product_id=?`, [pid]);
+      for (let d of display_sections) {
+        await connection.query(`INSERT INTO product_display (product_id, display_section_id) VALUES (?, ?)`, [pid, d]);
+      }
+    }
+
+    if (variants !== undefined) {
+      await connection.query(`DELETE FROM product_variants WHERE product_id=?`, [pid]);
+      for (let v of variants) {
+        await connection.query(`INSERT INTO product_variants (product_id, color_id, sku, stock_quantity, image_url) VALUES (?, ?, ?, ?, ?)`, 
+          [pid, v.color_id, v.sku || null, v.stock_quantity || 0, v.image_url || null]);
+      }
+    }
+
+    if (sizes !== undefined) {
+      await connection.query(`DELETE FROM product_sizes WHERE product_id=?`, [pid]);
+      for (let s of sizes) {
+        await connection.query(`INSERT INTO product_sizes (product_id, size_id) VALUES (?, ?)`, [pid, s]);
+      }
+    }
+
+    if (specifications !== undefined) {
+      await connection.query(`DELETE FROM product_specifications WHERE product_id=?`, [pid]);
+      for (let spec of specifications) {
+        await connection.query(`INSERT INTO product_specifications (product_id, spec_id, value) VALUES (?, ?, ?)`, [pid, spec.spec_id, spec.value]);
+      }
+    }
+
+    if (customizations !== undefined) {
+      await connection.query(`DELETE FROM product_customizations WHERE product_id=?`, [pid]);
+      for (let c of customizations) {
+        await connection.query(`INSERT INTO product_customizations (product_id, customization_id) VALUES (?, ?)`, [pid, c]);
+      }
+    }
+
+    if (sections !== undefined) {
+      await connection.query(`DELETE FROM product_section_mapping WHERE product_id=?`, [pid]);
+      for (let s of sections) {
+        await connection.query(`INSERT INTO product_section_mapping (product_id, section_id, is_visible, display_order) VALUES (?, ?, ?, ?)`, 
+          [pid, s.section_id, s.is_visible || 'Y', s.display_order || 0]);
+      }
+    }
+
+    await connection.commit();
     res.status(200).json({ message: 'Product updated' });
   } catch (err) {
+    await connection.rollback();
     res.status(500).json({ error: err.message });
+  } finally {
+    connection.release();
   }
 };
 
@@ -468,8 +908,15 @@ module.exports = {
   getAllOrders,
   updateOrderStatus,
   getAllProducts,
+  getAdminProductDetails,
   addProduct,
   updateProduct,
   deleteProduct,
-  subscribeNewsletter
+  getAdminProductDetails,
+  getProductSections,
+  getDisplaySections,
+  subscribeNewsletter,
+  getAdminAffiliateDetails,
+  getPayoutsSummary,
+  processPayout
 };

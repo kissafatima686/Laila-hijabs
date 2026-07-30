@@ -11,14 +11,14 @@ const parseJsonField = (field, fallback = []) => {
   }
 };
 
-// 1. Get products
+// 1. Get products (Modular)
 const getProducts = async (req, res) => {
   try {
     const { category, search, featured, badge } = req.query;
     let sql = `SELECT p.*, c.name as category_name, c.slug as category_slug 
                FROM products p 
                LEFT JOIN categories c ON p.category_id = c.category_id 
-               WHERE 1=1`;
+               WHERE p.status = 'Active'`;
     const params = [];
 
     if (category) {
@@ -28,42 +28,86 @@ const getProducts = async (req, res) => {
     if (featured === 'true' || featured === '1') {
       sql += ` AND p.is_featured = 1`;
     }
-    if (badge) {
-      sql += ` AND p.badge = ?`;
-      params.push(badge);
-    }
     if (search) {
-      sql += ` AND (p.name LIKE ? OR p.description LIKE ? OR p.fabric_type LIKE ?)`;
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      sql += ` AND (p.name LIKE ? OR p.short_description LIKE ?)`;
+      params.push(`%${search}%`, `%${search}%`);
     }
 
     sql += ` ORDER BY p.created_at DESC`;
 
     const [rows] = await pool.query(sql, params);
 
-    const formatted = rows.map(prod => ({
-      id: prod.product_id,
-      product_id: prod.product_id,
-      name: prod.name,
-      slug: prod.slug,
-      category: prod.category_name || 'ABAYAS',
-      category_slug: prod.category_slug,
-      price: parseFloat(prod.price),
-      compare_at_price: prod.compare_at_price ? parseFloat(prod.compare_at_price) : null,
-      description: prod.description,
-      image: prod.image_url,
-      image_url: prod.image_url,
-      thumbnails: parseJsonField(prod.thumbnails, [prod.image_url]),
-      badge: prod.badge,
-      fitType: prod.fit_type,
-      color: prod.color,
-      colorSwatches: parseJsonField(prod.color_swatches, [{ name: prod.color || "Black", hex: "#000000" }]),
-      sizes: parseJsonField(prod.sizes, ["XXS", "XS", "S", "M", "L", "XL", "XXL"]),
-      material: prod.fabric_type,
-      fabric: prod.fabric_type,
-      stock_quantity: prod.stock_quantity,
-      is_featured: prod.is_featured === 1
-    }));
+    // Fetch related modular data for all fetched products
+    const productIds = rows.map(r => r.product_id);
+    let imagesMap = {}, variantsMap = {}, sizesMap = {}, specsMap = {};
+
+    if (productIds.length > 0) {
+      const [images] = await pool.query(`SELECT * FROM product_images WHERE product_id IN (?) ORDER BY display_order`, [productIds]);
+      images.forEach(img => {
+        if(!imagesMap[img.product_id]) imagesMap[img.product_id] = [];
+        imagesMap[img.product_id].push(img.image_url);
+      });
+
+      const [variants] = await pool.query(`
+        SELECT pv.*, c.name as color_name, c.hex_code 
+        FROM product_variants pv 
+        JOIN colors c ON pv.color_id = c.color_id 
+        WHERE pv.product_id IN (?)`, [productIds]);
+      variants.forEach(v => {
+        if(!variantsMap[v.product_id]) variantsMap[v.product_id] = [];
+        variantsMap[v.product_id].push({ name: v.color_name, hex: v.hex_code, stock: v.stock_quantity, sku: v.sku, image: v.image_url, variant_id: v.variant_id });
+      });
+
+      const [sizes] = await pool.query(`
+        SELECT ps.product_id, s.size_name 
+        FROM product_sizes ps 
+        JOIN sizes s ON ps.size_id = s.size_id 
+        WHERE ps.product_id IN (?) ORDER BY s.display_order`, [productIds]);
+      sizes.forEach(s => {
+        if(!sizesMap[s.product_id]) sizesMap[s.product_id] = [];
+        sizesMap[s.product_id].push(s.size_name);
+      });
+      
+      const [specs] = await pool.query(`
+        SELECT ps.product_id, s.spec_name, ps.value 
+        FROM product_specifications ps 
+        JOIN specifications s ON ps.spec_id = s.spec_id 
+        WHERE ps.product_id IN (?) AND UPPER(s.spec_name) = 'FABRIC'`, [productIds]);
+      specs.forEach(s => {
+        specsMap[s.product_id] = s.value;
+      });
+    }
+
+    const formatted = rows.map(prod => {
+      const pImages = imagesMap[prod.product_id] || [];
+      const pVariants = variantsMap[prod.product_id] || [];
+      const pSizes = sizesMap[prod.product_id] || [];
+      const fabric = specsMap[prod.product_id] || 'Premium Blend';
+      const totalStock = pVariants.reduce((sum, v) => sum + v.stock, prod.stock || 0);
+
+      return {
+        id: prod.product_id,
+        product_id: prod.product_id,
+        name: prod.name,
+        slug: prod.slug,
+        category: prod.category_name || 'ABAYAS',
+        category_slug: prod.category_slug,
+        price: parseFloat(prod.price),
+        compare_at_price: prod.sale_price ? parseFloat(prod.price) : null, // Assuming sale_price acts like price and price acts like compare
+        description: prod.short_description,
+        image: pImages.length > 0 ? pImages[0] : null,
+        image_url: pImages.length > 0 ? pImages[0] : null,
+        thumbnails: pImages,
+        badge: prod.is_new_arrival ? 'NEW IN' : '',
+        colorSwatches: pVariants,
+        variants: pVariants,
+        sizes: pSizes,
+        material: fabric,
+        fabric: fabric,
+        stock_quantity: totalStock,
+        is_featured: prod.is_featured === 1
+      };
+    });
 
     res.status(200).json(formatted);
   } catch (err) {
@@ -72,7 +116,7 @@ const getProducts = async (req, res) => {
   }
 };
 
-// 2. Get single product by slug/id with reviews
+// 2. Get single product by slug/id (Modular)
 const getProductBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -80,7 +124,7 @@ const getProductBySlug = async (req, res) => {
       `SELECT p.*, c.name as category_name, c.slug as category_slug 
        FROM products p 
        LEFT JOIN categories c ON p.category_id = c.category_id 
-       WHERE p.slug = ? OR p.product_id = ?`,
+       WHERE (p.slug = ? OR p.product_id = ?) AND p.status = 'Active'`,
       [slug, slug]
     );
 
@@ -89,38 +133,119 @@ const getProductBySlug = async (req, res) => {
     }
 
     const prod = rows[0];
+    const pid = prod.product_id;
+
+    // Fetch Gallery
+    const [galleryRaw] = await pool.query(
+      `SELECT pg.*, pvg.variant_id 
+       FROM product_gallery pg 
+       LEFT JOIN product_variant_gallery pvg ON pg.gallery_id = pvg.gallery_id 
+       WHERE pg.product_id = ? AND pg.status = 'Published' 
+       ORDER BY pg.display_order ASC`, [pid]
+    );
+    const imgUrls = galleryRaw.map(g => g.image_url);
+    const gallery = galleryRaw;
+
+    // Fetch Variants
+    const [variants] = await pool.query(`
+      SELECT pv.*, c.name as color_name, c.hex_code 
+      FROM product_variants pv 
+      JOIN colors c ON pv.color_id = c.color_id 
+      WHERE pv.product_id = ?`, [pid]);
+      
+    const pVariants = variants.map(v => ({ name: v.color_name, hex: v.hex_code, stock: v.stock_quantity, sku: v.sku, image: v.image_url }));
+
+    // Fetch Sizes
+    const [sizes] = await pool.query(`
+      SELECT s.size_name 
+      FROM product_sizes ps 
+      JOIN sizes s ON ps.size_id = s.size_id 
+      WHERE ps.product_id = ? ORDER BY s.display_order`, [pid]);
+    const pSizes = sizes.map(s => s.size_name);
+
+    // Fetch Specifications
+    const [specs] = await pool.query(`
+      SELECT sg.name as group_name, s.spec_name, ps.value 
+      FROM product_specifications ps 
+      JOIN specifications s ON ps.spec_id = s.spec_id 
+      JOIN specification_groups sg ON s.group_id = sg.group_id
+      WHERE ps.product_id = ?`, [pid]);
+      
+    const specMap = {};
+    specs.forEach(s => {
+      if(!specMap[s.group_name]) specMap[s.group_name] = {};
+      specMap[s.group_name][s.spec_name] = s.value;
+    });
+
+    // Fetch Customizations
+    const [customs] = await pool.query(`
+      SELECT c.name, c.options_json 
+      FROM product_customizations pc 
+      JOIN customizations c ON pc.customization_id = c.customization_id 
+      WHERE pc.product_id = ?`, [pid]);
+
+    // Fetch Size Guide
+    let sizeGuide = null;
+    if (prod.size_guide_id) {
+       const [sg] = await pool.query(`SELECT * FROM size_guides WHERE guide_id = ?`, [prod.size_guide_id]);
+       if(sg.length > 0) sizeGuide = sg[0];
+    }
+
+    // Fetch Sections
+    const [sections] = await pool.query(
+      `SELECT ps.section_key, ps.section_name 
+       FROM product_section_mapping psm
+       JOIN product_sections ps ON ps.section_id = psm.section_id
+       WHERE psm.product_id = ? AND psm.is_visible = 'Y'
+       ORDER BY psm.display_order ASC`,
+      [pid]
+    );
 
     const [reviews] = await pool.query(
       `SELECT review_id, reviewer_name, rating, title, comment, created_at 
        FROM product_reviews 
        WHERE product_id = ? AND status = 'Live' 
        ORDER BY created_at DESC`,
-      [prod.product_id]
+      [pid]
     );
 
+    const totalStock = pVariants.reduce((sum, v) => sum + v.stock, prod.stock || 0);
+
     const formatted = {
-      id: prod.product_id,
-      product_id: prod.product_id,
+      id: pid,
+      product_id: pid,
       name: prod.name,
       slug: prod.slug,
       category: prod.category_name || 'ABAYAS',
       category_slug: prod.category_slug,
       price: parseFloat(prod.price),
-      compare_at_price: prod.compare_at_price ? parseFloat(prod.compare_at_price) : null,
-      description: prod.description,
-      image: prod.image_url,
-      image_url: prod.image_url,
-      thumbnails: parseJsonField(prod.thumbnails, [prod.image_url]),
-      badge: prod.badge,
-      fitType: prod.fit_type,
-      color: prod.color,
-      colorSwatches: parseJsonField(prod.color_swatches, [{ name: prod.color || "Black", hex: "#000000" }]),
-      sizes: parseJsonField(prod.sizes, ["XXS", "XS", "S", "M", "L", "XL", "XXL"]),
-      material: prod.fabric_type,
-      fabric: prod.fabric_type,
-      stock_quantity: prod.stock_quantity,
+      sale_price: prod.sale_price ? parseFloat(prod.sale_price) : null,
+      compare_at_price: prod.sale_price ? parseFloat(prod.price) : null,
+      description: prod.short_description,
+      long_description: prod.long_description,
+      care_instructions: prod.care_instructions,
+      fabric_details: prod.fabric_details,
+      image: imgUrls.length > 0 ? imgUrls[0] : null,
+      image_url: imgUrls.length > 0 ? imgUrls[0] : null,
+      thumbnails: imgUrls,
+      gallery: gallery,
+      badge: prod.is_new_arrival ? 'NEW IN' : '',
+      colorSwatches: pVariants,
+      variants: pVariants,
+      sizes: pSizes,
+      specifications: specMap,
+      customizations: customs.map(c => ({ name: c.name, options: JSON.parse(c.options_json || '[]') })),
+      size_guide: sizeGuide,
+      stock_quantity: totalStock,
       is_featured: prod.is_featured === 1,
-      reviews: reviews
+      seo: {
+        title: prod.seo_title,
+        description: prod.meta_description,
+        keywords: prod.keywords
+      },
+      reviews: reviews,
+      sections: sections,
+      bundle_attributes: prod.bundle_attributes
     };
 
     res.status(200).json(formatted);
@@ -133,8 +258,17 @@ const getProductBySlug = async (req, res) => {
 // 3. Get all categories
 const getCategories = async (req, res) => {
   try {
-    const [rows] = await pool.query(`SELECT * FROM categories ORDER BY name ASC`);
-    res.status(200).json(rows);
+    const [categories] = await pool.query(`SELECT * FROM categories ORDER BY display_order ASC, name ASC`);
+    const [filters] = await pool.query(`SELECT * FROM category_filters`);
+    
+    const formatted = categories.map(cat => {
+      return {
+        ...cat,
+        filters: filters.filter(f => f.category_id === cat.category_id).map(f => f.filter_name)
+      };
+    });
+
+    res.status(200).json(formatted);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -162,6 +296,38 @@ const createOrder = async (req, res) => {
           `INSERT INTO order_items (order_id, product_id, quantity, unit_price, selected_color, selected_size) 
            VALUES (?, ?, ?, ?, ?, ?)`,
           [orderId, item.product_id || item.id, item.quantity || 1, item.price, item.color || null, item.size || null]
+        );
+      }
+    }
+    // Check for Affiliate Code
+    let affiliate_code = req.body.affiliate_code;
+    if (!affiliate_code && req.headers.cookie) {
+      const cookies = req.headers.cookie.split(';').map(c => c.trim());
+      for (const cookie of cookies) {
+        if (cookie.startsWith('affiliate_code=')) {
+          affiliate_code = cookie.split('=')[1];
+          break;
+        }
+      }
+    }
+
+    if (affiliate_code) {
+      const [affiliates] = await connection.query(
+        `SELECT a.affiliate_id, COALESCE(a.commission_rate, p.commission_rate, 10.00) as commission_rate
+         FROM affiliates a 
+         LEFT JOIN commission_plans p ON a.plan_id = p.plan_id 
+         WHERE a.affiliate_code = ? AND a.status = 'Approved'`,
+        [affiliate_code]
+      );
+
+      if (affiliates.length > 0) {
+        const affiliate = affiliates[0];
+        const commission_amount = (total_amount * affiliate.commission_rate) / 100;
+
+        await connection.query(
+          `INSERT INTO commissions (affiliate_id, order_id, sale_amount, commission_rate, commission_amount, status) 
+           VALUES (?, ?, ?, ?, ?, 'Pending')`,
+          [affiliate.affiliate_id, orderId, total_amount, affiliate.commission_rate, commission_amount]
         );
       }
     }
@@ -287,6 +453,88 @@ const submitProductReview = async (req, res) => {
   }
 };
 
+// 13. Fetch Website Homepage Sections
+const getHomepageSections = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT section_key, section_name FROM website_sections WHERE status = 'Active' ORDER BY display_order ASC`
+    );
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+const getProductsByDisplaySection = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    
+    // Join products with product_display and display_sections
+    const [rows] = await pool.query(`
+      SELECT p.*, c.name as category_name, c.slug as category_slug 
+      FROM products p
+      JOIN product_display pd ON p.product_id = pd.product_id
+      JOIN display_sections ds ON ds.display_section_id = pd.display_section_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      WHERE ds.slug = ? AND pd.status = 'Published'
+      ORDER BY pd.sort_order ASC
+    `, [slug]);
+
+    if (rows.length === 0) {
+       return res.status(200).json([]); // No products for this section
+    }
+
+    const productIds = rows.map(r => r.product_id);
+    let imagesMap = {}, variantsMap = {};
+
+    if (productIds.length > 0) {
+      const [images] = await pool.query(`SELECT * FROM product_gallery WHERE product_id IN (?) ORDER BY display_order`, [productIds]);
+      images.forEach(img => {
+        if(!imagesMap[img.product_id]) imagesMap[img.product_id] = [];
+        imagesMap[img.product_id].push(img.image_url);
+      });
+
+      const [variants] = await pool.query(`
+        SELECT pv.*, c.name as color_name, c.hex_code 
+        FROM product_variants pv 
+        JOIN colors c ON pv.color_id = c.color_id 
+        WHERE pv.product_id IN (?)`, [productIds]);
+      variants.forEach(v => {
+        if(!variantsMap[v.product_id]) variantsMap[v.product_id] = [];
+        variantsMap[v.product_id].push({ name: v.color_name, hex: v.hex_code, stock: v.stock_quantity, sku: v.sku, image: v.image_url });
+      });
+    }
+
+    const formatted = rows.map(prod => {
+      const pImages = imagesMap[prod.product_id] || [];
+      const pVariants = variantsMap[prod.product_id] || [];
+      const totalStock = pVariants.reduce((sum, v) => sum + v.stock, prod.stock || 0);
+
+      return {
+        id: prod.product_id,
+        product_id: prod.product_id,
+        name: prod.name,
+        slug: prod.slug,
+        category: prod.category_name || 'ABAYAS',
+        price: parseFloat(prod.price),
+        compare_at_price: prod.sale_price ? parseFloat(prod.price) : null,
+        description: prod.short_description,
+        image: pImages.length > 0 ? pImages[0] : null,
+        thumbnails: pImages,
+        badge: prod.is_new_arrival ? 'NEW IN' : '',
+        colorSwatches: pVariants,
+        stock_quantity: totalStock,
+      };
+    });
+
+    res.status(200).json(formatted);
+  } catch (err) {
+    console.error('Error getting products by display section:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = { 
   getProducts, 
   getProductBySlug, 
@@ -299,5 +547,7 @@ module.exports = {
   getStoreLocations, 
   getBlogs,
   getProductReviews,
-  submitProductReview
+  submitProductReview,
+  getHomepageSections,
+  getProductsByDisplaySection
 };

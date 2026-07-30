@@ -226,6 +226,9 @@ const Sidebar = () => (
     <ColGroup label="Affiliate Management" icon="affiliates" defaultOpen={false}>
       <SideLink to="/sections/affiliate_program_settings" label="Program Information & Banners" icon="section" indent />
       <SideLink to="/affiliates" label="Affiliate Applications" icon="affiliates" indent />
+      <SideLink to="/approved-affiliates" label="Approved Affiliates" icon="affiliates" indent />
+      <SideLink to="/commissions" label="Commissions" icon="orders" indent />
+      <SideLink to="/payouts" label="Payouts" icon="orders" indent />
     </ColGroup>
 
     <Hr />

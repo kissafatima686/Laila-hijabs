@@ -10,22 +10,14 @@ import AboutUsPage from './pages/AboutUsPage';
 import BlogsPage from './pages/BlogsPage';
 import AffiliatePage from './pages/Affiliatepage';
 import SizeGuide from './pages/SizeGuide';
-import TermsConditions from './components/Footer/TermsConditions';
-import PrivacyPolicy from './components/Footer/PrivacyPolicy';
+import DynamicTextPage from './components/Footer/DynamicTextPage';
 import ContactUs from './components/Footer/ContactUs';
 import FAQ from './components/Footer/FAQ';
 import GiftCard from "./components/GiftCard/HowWeDoIt";
-import CareRepair from './components/Footer/CareRepair';
-import OurStory from './components/Footer/AboutUs/OurStory';
-import Loyalty from "./components/Footer/AboutUs/Loyalty";
-import VisitUs from "./components/Footer/AboutUs/VisitUs";
-import Careers from "./components/Footer/AboutUs/Careers";
-import Journal from "./components/Footer/AboutUs/Journal";
 import AffiliateProgram from "./pages/Affiliatepage";
-import FreeShipping from "./components/Footer/DeliverynReturn/FreeShipping";
-import ShippingInfo from "./components/Footer/DeliverynReturn/ShippingInfo";
-import Delivery from "./components/Footer/DeliverynReturn/Delivery";
-import ReturnsExchanges from "./components/Footer/DeliverynReturn/ReturnsExchanges";
+import OurStory from './components/Footer/AboutUs/OurStory';
+import AffiliateLogin from "./pages/AffiliateLogin";
+import AffiliateDashboard from "./pages/AffiliateDashboard";
 import ProductDetail from "./components/Products/ProductDetail";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckOutPage";
@@ -67,24 +59,27 @@ function App() {
               <Route path="/blogs" element={<BlogsPage />} />
               <Route path="/blogs/:blogId" element={<BlogDetailPage />} />
               <Route path="/affiliate" element={<AffiliatePage />} /> 
+              <Route path="/affiliate/login" element={<AffiliateLogin />} />
+              <Route path="/affiliate/dashboard" element={<AffiliateDashboard />} />
               <Route path="/size-guide" element={<SizeGuide />} />
-              <Route path="/terms-conditions" element={<TermsConditions />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-conditions" element={<DynamicTextPage sectionKey="terms_conditions" fallbackTitle="Terms & Conditions" />} />
+              <Route path="/privacy-policy" element={<DynamicTextPage sectionKey="privacy_policy" fallbackTitle="Privacy Policy" />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/gift-card" element={<GiftCard />} />
-              <Route path="/care-repair" element={<CareRepair />} />
+              <Route path="/gift-cards" element={<GiftCard />} />
+              <Route path="/care-repair" element={<DynamicTextPage sectionKey="care_repair" fallbackTitle="Care & Repair" />} />
               <Route path="/our-story" element={<OurStory />} />
-              <Route path="/loyalty" element={<Loyalty />} />
-              <Route path="/visit-us" element={<VisitUs />} />
+              <Route path="/loyalty" element={<DynamicTextPage sectionKey="loyalty" fallbackTitle="Loyalty Program" />} />
+              <Route path="/visit-us" element={<DynamicTextPage sectionKey="visit_us" fallbackTitle="Visit Us" />} />
               <Route path="/location/:id" element={<LocationDetailPage />} />
-              <Route path="/careers" element={<Careers />} /> 
-              <Route path="/journal" element={<Journal />} />  
+              <Route path="/careers" element={<DynamicTextPage sectionKey="careers" fallbackTitle="Careers" />} /> 
+              <Route path="/journal" element={<DynamicTextPage sectionKey="blogs_page_header" fallbackTitle="Journal" />} />  
               <Route path="/affiliate-program" element={<AffiliateProgram />} />
-              <Route path="/free-shipping" element={<FreeShipping />} />
-              <Route path="/shipping-info" element={<ShippingInfo />} />
-              <Route path="/delivery" element={<Delivery />} />
-              <Route path="/returns-exchanges" element={<ReturnsExchanges />} /> 
+              <Route path="/free-shipping" element={<DynamicTextPage sectionKey="free_shipping" fallbackTitle="Free Shipping" />} />
+              <Route path="/shipping-info" element={<DynamicTextPage sectionKey="shipping_info" fallbackTitle="Shipping Information" />} />
+              <Route path="/delivery" element={<DynamicTextPage sectionKey="delivery" fallbackTitle="Delivery" />} />
+              <Route path="/returns-exchanges" element={<DynamicTextPage sectionKey="returns_exchanges" fallbackTitle="Returns & Exchanges" />} /> 
               <Route path="/Products/:slug" element={<ProductDetail />} />
               <Route path="/Products/:slug/gallery" element={<ProductGalleryPage />} />
               <Route path="/cart" element={<CartPage />} />
