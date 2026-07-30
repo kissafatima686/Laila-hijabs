@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
  *  - Panel 5: Active Coupon & Discount Codes Table (Full CRUD)
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

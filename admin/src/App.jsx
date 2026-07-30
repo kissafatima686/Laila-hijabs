@@ -125,10 +125,6 @@ const App = () => (
 
           {/* ── CONTACT ───────────────────────────────────────────── */}
           <Route path="/messages" element={<GenericModulePage moduleKey="messages" title="Contact Messages" description="Customer enquiries submitted from the Contact Us form." />} />
-          <Route path="/sections/contact_main_section" element={<SectionEditorPage sectionKey="contact_main_section" />} />
-          <Route path="/sections/contact_channels" element={<SectionEditorPage sectionKey="contact_channels" />} />
-          <Route path="/sections/contact_hours" element={<SectionEditorPage sectionKey="contact_hours" />} />
-          <Route path="/sections/contact_faq" element={<SectionEditorPage sectionKey="contact_faq" />} />
 
           {/* ── PAGES ─────────────────────────────────────────────── */}
           <Route path="/sections/account_page_settings" element={<SectionEditorPage sectionKey="account_page_settings" />} />

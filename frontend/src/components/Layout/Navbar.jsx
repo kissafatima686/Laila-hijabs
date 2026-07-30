@@ -42,7 +42,7 @@ const Navbar = () => {
   const [dbCategories, setDbCategories] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/admin/module/navbar-links')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/module/navbar-links')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -54,7 +54,7 @@ const Navbar = () => {
       })
       .catch(err => console.error("Failed to fetch navbar links", err));
 
-    fetch('http://localhost:5000/api/admin/module/categories-mega-menu')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/module/categories-mega-menu')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -63,7 +63,7 @@ const Navbar = () => {
       })
       .catch(err => console.error("Failed to fetch mega menu items", err));
 
-    fetch('http://localhost:5000/api/admin/module/categories')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/module/categories')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

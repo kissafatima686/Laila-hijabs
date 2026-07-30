@@ -16,7 +16,7 @@ const AffiliateDashboard = () => {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/affiliate/dashboard?affiliate_id=${affiliate.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/affiliate/dashboard?affiliate_id=${affiliate.id}`);
         if (response.ok) {
           const data = await response.json();
           setDashboardData({ ...data, code: affiliate.code });
@@ -30,7 +30,7 @@ const AffiliateDashboard = () => {
 
   if (!dashboardData) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading Dashboard...</div>;
 
-  const refLink = `http://localhost:5000/api/affiliate/ref/${dashboardData.code}`; // Using backend redirect
+  const refLink = `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/affiliate/ref/${dashboardData.code}`; // Using backend redirect
 
   return (
     <div className="account-page">

@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
  *  - Panel 2: Customer Testimonials Cards (with "+ Add Testimonial" on top, 3-button action row [ Deactivate / Activate ] [ Edit Icon ] [ Trash Icon ] on every review)
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
  *  - Panel 3: Featured Category Pictures / Cards (Column 3 & 4)
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

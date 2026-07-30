@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
  *  - Section 2: Category Search Keywords Manager (Full CRUD: Add, Edit, Delete, Activate/Deactivate)
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

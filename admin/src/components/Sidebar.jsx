@@ -260,12 +260,6 @@ const Sidebar = () => (
 
     {/* ─── ORDERS, INBOX & CONTACT ────────────────────────────── */}
     <SectionLabel label="Orders, Inbox & Contact" />
-    <ColGroup label="Contact Page Settings" icon="section" defaultOpen={false}>
-      <SideLink to="/sections/contact_main_section" label="Contact Form & Info" icon="section" indent />
-      <SideLink to="/sections/contact_channels" label="Support Channels" icon="whatsapp" indent />
-      <SideLink to="/sections/contact_hours" label="Business Hours" icon="section" indent />
-      <SideLink to="/sections/contact_faq" label="Contact FAQs" icon="faqs" indent />
-    </ColGroup>
     <SideLink to="/orders" label="Customer Orders" icon="orders" />
     <SideLink to="/messages" label="Contact Form Messages" icon="messages" />
 

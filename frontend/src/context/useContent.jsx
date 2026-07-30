@@ -7,7 +7,7 @@ export function ContentProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const fetchSections = () => {
-    fetch('http://localhost:5000/api/admin/sections')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/sections')
       .then((res) => res.json())
       .then((data) => {
         const map = {};

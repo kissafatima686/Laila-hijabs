@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#182012', border: '1px solid rgba(184,147,91,0.5)', color: '#F6F1E3', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
 const lStyle = { fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
@@ -156,6 +156,29 @@ const BlogsPageManager = () => {
     }).then(fetchData);
   };
 
+  const handleCreateBlog = () => {
+    const title = prompt('Enter New Blog Title:');
+    if (!title) return;
+    fetch(`${API}/module/blogs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        category: 'Styling Guides',
+        excerpt: 'Short summary of the new article...',
+        content: 'Full body text of the new blog post.',
+        status: 'Draft',
+        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      })
+    }).then(fetchData);
+  };
+
+  const handleDeleteBlog = (art) => {
+    const artId = art.blog_id || art.id;
+    if (!window.confirm(`Delete article "${art.title}" permanently?`)) return;
+    fetch(`${API}/module/blogs/${artId}`, { method: 'DELETE' }).then(fetchData);
+  };
+
   if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#E7D9C9' }}>Loading Blogs Page Manager...</div>;
 
   return (
@@ -171,6 +194,7 @@ const BlogsPageManager = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button type="button" onClick={handleCreateBlog} style={btnG}>+ Add New Blog Article</button>
           {saved && <span style={{ fontSize: '12px', color: '#22c55e', fontWeight: '600', padding: '7px 14px', borderRadius: '8px', backgroundColor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}>Saved All Sections!</span>}
           <button onClick={handleSave} disabled={saving} style={btnP}>
             {saving ? 'Saving...' : 'Save Blogs Page'}
@@ -277,11 +301,12 @@ const BlogsPageManager = () => {
                           </span>
                         </td>
                         <td style={{ padding: '12px 16px' }}>
-                          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <button type="button" onClick={() => handleToggleArticleStatus(art)} style={{ ...btnG, fontSize: '11px', padding: '5px 10px' }}>
                               {isLive ? 'Deactivate' : 'Activate'}
                             </button>
                             <a href="/blogs" style={{ ...btnG, padding: '5px 8px', textDecoration: 'none' }} title="Edit Article Content"><EditIcon /></a>
+                            <button type="button" onClick={() => handleDeleteBlog(art)} style={{ ...btnD, padding: '5px 8px' }} title="Delete Article"><TrashIcon /></button>
                           </div>
                         </td>
                       </tr>

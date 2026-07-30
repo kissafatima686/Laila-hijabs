@@ -574,7 +574,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
     const currentConfig = SECTION_CONFIGS[targetKey] || currentFallback;
     setConfig(currentConfig);
 
-    fetch(`http://localhost:5000/api/admin/sections/${targetKey}`)
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/admin/sections/${targetKey}`)
       .then(r => r.json())
       .then(d => {
         setData(d);
@@ -632,7 +632,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
     const payload = { ...form, metadata: Object.keys(builtMeta).length > 0 ? builtMeta : null };
     const targetKey = activeSectionKey || sectionKey;
 
-    fetch(`http://localhost:5000/api/admin/sections/${targetKey}`, {
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/admin/sections/${targetKey}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -669,7 +669,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
       metadata: { custom_fields: [] }
     };
 
-    fetch(`http://localhost:5000/api/admin/sections/${cleanKey}`, {
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/admin/sections/${cleanKey}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -692,7 +692,7 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
   const handleDeleteSection = () => {
     const targetKey = activeSectionKey || sectionKey;
     if (!window.confirm(`Are you sure you want to delete section "${targetKey}"?`)) return;
-    fetch(`http://localhost:5000/api/admin/sections/${targetKey}`, {
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/admin/sections/${targetKey}`, {
       method: 'DELETE'
     })
       .then(() => {

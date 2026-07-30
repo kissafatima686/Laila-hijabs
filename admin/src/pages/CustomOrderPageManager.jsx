@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#182012', border: '1px solid rgba(184,147,91,0.5)', color: '#F6F1E3', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
 const lStyle = { fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
@@ -201,6 +201,14 @@ const CustomOrderPageManager = () => {
     });
   };
 
+  const addStep = () => setForm(p => ({ ...p, steps: [...p.steps, { num: `0${p.steps.length + 1}`, title: 'New Step', desc: 'Step description...', active: true }] }));
+  const removeStep = (idx) => setForm(p => ({ ...p, steps: p.steps.filter((_, i) => i !== idx) }));
+  const toggleStepActive = (idx) => setForm(p => {
+    const copy = [...p.steps];
+    copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
+    return { ...p, steps: copy };
+  });
+
   const handleGalleryChange = (idx, field, val) => {
     setForm(p => {
       const copy = [...p.gallery];
@@ -209,16 +217,30 @@ const CustomOrderPageManager = () => {
     });
   };
 
-  const addGalleryItem = () => setForm(p => ({ ...p, gallery: [...p.gallery, { image_url: '/hero1.png', label: 'New Custom Design' }] }));
+  const addGalleryItem = () => setForm(p => ({ ...p, gallery: [...p.gallery, { image_url: '/hero1.png', label: 'New Custom Design', active: true }] }));
   const removeGalleryItem = (idx) => setForm(p => ({ ...p, gallery: p.gallery.filter((_, i) => i !== idx) }));
+  const toggleGalleryActive = (idx) => setForm(p => {
+    const copy = [...p.gallery];
+    copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
+    return { ...p, gallery: copy };
+  });
 
   const handleHighlightChange = (idx, val) => {
     setForm(p => {
       const copy = [...p.highlights];
-      copy[idx] = val;
+      copy[idx] = typeof copy[idx] === 'object' ? { ...copy[idx], text: val } : { text: val, active: true };
       return { ...p, highlights: copy };
     });
   };
+
+  const addHighlight = () => setForm(p => ({ ...p, highlights: [...p.highlights, { text: 'New Highlight', active: true }] }));
+  const removeHighlight = (idx) => setForm(p => ({ ...p, highlights: p.highlights.filter((_, i) => i !== idx) }));
+  const toggleHighlightActive = (idx) => setForm(p => {
+    const copy = [...p.highlights];
+    const item = typeof copy[idx] === 'object' ? copy[idx] : { text: copy[idx], active: true };
+    copy[idx] = { ...item, active: item.active === false ? true : false };
+    return { ...p, highlights: copy };
+  });
 
   const handleFaqChange = (idx, field, val) => {
     setForm(p => {
@@ -228,8 +250,13 @@ const CustomOrderPageManager = () => {
     });
   };
 
-  const addFaq = () => setForm(p => ({ ...p, faqs: [...p.faqs, { q: '', a: '' }] }));
+  const addFaq = () => setForm(p => ({ ...p, faqs: [...p.faqs, { q: '', a: '', active: true }] }));
   const removeFaq = (idx) => setForm(p => ({ ...p, faqs: p.faqs.filter((_, i) => i !== idx) }));
+  const toggleFaqActive = (idx) => setForm(p => {
+    const copy = [...p.faqs];
+    copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
+    return { ...p, faqs: copy };
+  });
 
   if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#E7D9C9' }}>Loading Custom Order Page Manager...</div>;
 
@@ -310,11 +337,14 @@ const CustomOrderPageManager = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
             <div>
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 2 OF 6</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>How It Works — Four Steps</h3>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>How It Works — Steps</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec2_active: !p.sec2_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec2_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec2_active ? '#F6F1E3' : '#EF4444', border: form.sec2_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-              {form.sec2_active ? 'Deactivate Section' : 'Activate Section'}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button type="button" onClick={addStep} style={btnG}>+ Add Step</button>
+              <button type="button" onClick={() => setForm(p => ({ ...p, sec2_active: !p.sec2_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec2_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec2_active ? '#F6F1E3' : '#EF4444', border: form.sec2_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                {form.sec2_active ? 'Deactivate Section' : 'Activate Section'}
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -330,13 +360,20 @@ const CustomOrderPageManager = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {form.steps.map((st, idx) => (
-                <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: '1px solid rgba(184,147,91,0.3)', display: 'grid', gridTemplateColumns: '80px 1fr 2fr', gap: '12px', alignItems: 'center' }}>
-                  <input value={st.num} onChange={e => handleStepChange(idx, 'num', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B', textAlign: 'center' }} />
-                  <input value={st.title} onChange={e => handleStepChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Step Title" />
-                  <input value={st.desc} onChange={e => handleStepChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Step Description" />
-                </div>
-              ))}
+              {form.steps.map((st, idx) => {
+                const isActive = st.active !== false;
+                return (
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto auto', gap: '12px', alignItems: 'center' }}>
+                    <input value={st.num} onChange={e => handleStepChange(idx, 'num', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B', textAlign: 'center' }} />
+                    <input value={st.title} onChange={e => handleStepChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Step Title" />
+                    <input value={st.desc} onChange={e => handleStepChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Step Description" />
+                    <button type="button" onClick={() => toggleStepActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
+                      {isActive ? 'Active' : 'Inactive'}
+                    </button>
+                    <button type="button" onClick={() => removeStep(idx)} style={btnD}>Delete</button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -369,16 +406,24 @@ const CustomOrderPageManager = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
-              {form.gallery.map((g, idx) => (
-                <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '14px', border: '1px solid rgba(184,147,91,0.3)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700' }}>PHOTO #{idx + 1}</span>
-                    <button type="button" onClick={() => removeGalleryItem(idx)} style={btnD}>Remove</button>
+              {form.gallery.map((g, idx) => {
+                const isActive = g.active !== false;
+                return (
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '14px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700' }}>PHOTO #{idx + 1}</span>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <button type="button" onClick={() => toggleGalleryActive(idx)} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
+                          {isActive ? 'Active' : 'Inactive'}
+                        </button>
+                        <button type="button" onClick={() => removeGalleryItem(idx)} style={btnD}>Remove</button>
+                      </div>
+                    </div>
+                    <input value={g.image_url} onChange={e => handleGalleryChange(idx, 'image_url', e.target.value)} style={iStyle} placeholder="Image URL (e.g. /custom1.png)" />
+                    <input value={g.label} onChange={e => handleGalleryChange(idx, 'label', e.target.value)} style={iStyle} placeholder="Design Title / Label" />
                   </div>
-                  <input value={g.image_url} onChange={e => handleGalleryChange(idx, 'image_url', e.target.value)} style={iStyle} placeholder="Image URL (e.g. /custom1.png)" />
-                  <input value={g.label} onChange={e => handleGalleryChange(idx, 'label', e.target.value)} style={iStyle} placeholder="Design Title / Label" />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -390,9 +435,12 @@ const CustomOrderPageManager = () => {
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 4 OF 6</span>
               <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>Tell Us What You Need — Form Intro & Highlights</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec4_active: !p.sec4_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec4_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec4_active ? '#F6F1E3' : '#EF4444', border: form.sec4_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-              {form.sec4_active ? 'Deactivate Section' : 'Activate Section'}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button type="button" onClick={addHighlight} style={btnG}>+ Add Highlight</button>
+              <button type="button" onClick={() => setForm(p => ({ ...p, sec4_active: !p.sec4_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec4_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec4_active ? '#F6F1E3' : '#EF4444', border: form.sec4_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                {form.sec4_active ? 'Deactivate Section' : 'Activate Section'}
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -413,10 +461,20 @@ const CustomOrderPageManager = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={lStyle}>3 Custom Service Highlights</label>
-              {form.highlights.map((hl, idx) => (
-                <input key={idx} value={hl} onChange={e => handleHighlightChange(idx, e.target.value)} style={iStyle} placeholder={`Highlight ${idx + 1}`} />
-              ))}
+              <label style={lStyle}>Custom Service Highlights</label>
+              {form.highlights.map((hl, idx) => {
+                const textVal = typeof hl === 'object' ? hl.text : hl;
+                const isActive = typeof hl === 'object' ? hl.active !== false : true;
+                return (
+                  <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input value={textVal} onChange={e => handleHighlightChange(idx, e.target.value)} style={iStyle} placeholder={`Highlight ${idx + 1}`} />
+                    <button type="button" onClick={() => toggleHighlightActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
+                      {isActive ? 'Active' : 'Inactive'}
+                    </button>
+                    <button type="button" onClick={() => removeHighlight(idx)} style={btnD}>Delete</button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -550,22 +608,24 @@ const CustomOrderPageManager = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {form.faqs.map((faq, idx) => (
-                <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: '1px solid rgba(184,147,91,0.3)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700' }}>FAQ ITEM #{idx + 1}</span>
-                    <button type="button" onClick={() => removeFaq(idx)} style={btnD}>Delete FAQ</button>
+              {form.faqs.map((faq, idx) => {
+                const isActive = faq.active !== false;
+                return (
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700' }}>FAQ ITEM #{idx + 1}</span>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <button type="button" onClick={() => toggleFaqActive(idx)} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
+                          {isActive ? 'Active' : 'Inactive'}
+                        </button>
+                        <button type="button" onClick={() => removeFaq(idx)} style={btnD}>Delete FAQ</button>
+                      </div>
+                    </div>
+                    <input value={faq.q} onChange={e => handleFaqChange(idx, 'q', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Question?" />
+                    <textarea rows={2} value={faq.a} onChange={e => handleFaqChange(idx, 'a', e.target.value)} style={{ ...iStyle, resize: 'vertical' }} placeholder="Answer..." />
                   </div>
-                  <div>
-                    <label style={lStyle}>Question</label>
-                    <input value={faq.q} onChange={e => handleFaqChange(idx, 'q', e.target.value)} style={iStyle} placeholder="FAQ Question" />
-                  </div>
-                  <div>
-                    <label style={lStyle}>Answer</label>
-                    <textarea rows={2} value={faq.a} onChange={e => handleFaqChange(idx, 'a', e.target.value)} style={{ ...iStyle, resize: 'vertical' }} placeholder="FAQ Answer..." />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

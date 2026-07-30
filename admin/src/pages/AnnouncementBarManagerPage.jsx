@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
  *  - Panel 2: Announcement Bar Text Slides (with "+ Add More Field" on top, 3-button action row [ Deactivate / Activate ] [ Edit Icon ] [ Trash Icon ] on every slide right side, and "Save Changes" on bottom)
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

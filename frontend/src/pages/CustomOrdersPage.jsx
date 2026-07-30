@@ -22,6 +22,7 @@ const CustomOrdersPage = () => {
   });
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
+  const [processing, setProcessing] = useState(false);
 
   const fabricOptions = [
     "Nida Crepe",
@@ -51,8 +52,10 @@ const CustomOrdersPage = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setProcessing(true);
+
     let message = `* NEW CUSTOM ORDER REQUEST - LAILA HIJABS*\n\n`;
     message += `*Customer:* ${name || 'N/A'}\n`;
     message += `*WhatsApp:* ${phone || 'N/A'}\n`;
@@ -77,6 +80,30 @@ const CustomOrdersPage = () => {
     if (file) message += `*Reference Image:* ${file.name} (Ready to send)\n\n`;
     message += `Please let me know how to proceed. Thank you!`;
 
+    try {
+      const payload = {
+        name: name || 'N/A',
+        whatsapp_number: phone || 'N/A',
+        garment_type: garmentType,
+        fabric_preference: fabricType,
+        color_preference: color || 'N/A',
+        standard_size: size,
+        custom_measurements: hasMeasurements ? JSON.stringify(measurements) : null,
+        description: description,
+        reference_image_url: file ? file.name : null,
+        status: 'Pending'
+      };
+
+      await fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/module/custom_orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error('Failed to save custom order to database:', err);
+    }
+
+    setProcessing(false);
     const whatsappUrl = `https://wa.me/923238399480?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };

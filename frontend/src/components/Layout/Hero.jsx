@@ -16,7 +16,7 @@ const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/admin/module/sliders')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/module/sliders')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

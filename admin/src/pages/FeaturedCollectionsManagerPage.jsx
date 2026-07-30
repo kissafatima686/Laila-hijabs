@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
  *             and 3-button action row [ Deactivate / Activate ] [ Edit Icon ] [ Trash Icon ] on every card.
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

@@ -7,7 +7,7 @@ const AllCategoriesPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/categories')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/categories')
       .then(res => res.json())
       .then(data => {
         const formatted = data.map(cat => ({

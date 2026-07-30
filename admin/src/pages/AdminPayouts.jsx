@@ -10,7 +10,7 @@ const AdminPayouts = () => {
 
   const fetchPayoutsData = () => {
     setLoading(true);
-    fetch('http://localhost:5000/api/admin/payouts/summary')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/payouts/summary')
       .then(res => res.json())
       .then(data => {
         setAffiliates(data);
@@ -27,7 +27,7 @@ const AdminPayouts = () => {
     
     setProcessing(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/payouts/process`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/admin/payouts/process`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ affiliate_id: affiliateId, amount: amount, payment_method: 'Manual Bank Transfer' })

@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
  *  (Each Panel has "+ Add More Field" on top, 3-button action row [ Deactivate / Activate ] [ Edit Icon ] [ Trash Icon ] on every field right side, and "Save Changes" on bottom)
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

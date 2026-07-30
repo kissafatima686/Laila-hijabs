@@ -1,6 +1,15 @@
 services:
   - type: web
-    name: laila-hijabs
+    name: laila-hijabs-frontend
     env: static
+    rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+
+  - type: web
+    name: laila-hijabs-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#182012', border: '1px solid rgba(184,147,91,0.5)', color: '#F6F1E3', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
 const lStyle = { fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
@@ -156,10 +156,54 @@ const AboutWhoWeAreManagerPage = () => {
     });
   };
 
+  const handleAddValue = () => {
+    setForm(p => ({
+      ...p,
+      values: [...p.values, { letter: 'V', title: 'New Value', desc: 'Description of the new brand value.', active: true }]
+    }));
+  };
+
+  const handleDeleteValue = (idx) => {
+    setForm(p => ({
+      ...p,
+      values: p.values.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleToggleValueActive = (idx) => {
+    setForm(p => {
+      const copy = [...p.values];
+      copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
+      return { ...p, values: copy };
+    });
+  };
+
   const handleRoadmapChange = (idx, field, val) => {
     setForm(p => {
       const copy = [...p.roadmap];
       copy[idx] = { ...copy[idx], [field]: val };
+      return { ...p, roadmap: copy };
+    });
+  };
+
+  const handleAddRoadmap = () => {
+    setForm(p => ({
+      ...p,
+      roadmap: [...p.roadmap, { year: '2027', title: 'New Phase', desc: 'Phase details...', active: true }]
+    }));
+  };
+
+  const handleDeleteRoadmap = (idx) => {
+    setForm(p => ({
+      ...p,
+      roadmap: p.roadmap.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleToggleRoadmapActive = (idx) => {
+    setForm(p => {
+      const copy = [...p.roadmap];
+      copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
       return { ...p, roadmap: copy };
     });
   };
@@ -265,11 +309,14 @@ const AboutWhoWeAreManagerPage = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
             <div>
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 3 OF 5</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>What We Stand For — Core Values (E.C.I.R)</h3>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>What We Stand For — Core Values</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec3_active: !p.sec3_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec3_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec3_active ? '#F6F1E3' : '#EF4444', border: form.sec3_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-              {form.sec3_active ? 'Deactivate Section' : 'Activate Section'}
-            </button>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button type="button" onClick={handleAddValue} style={btnG}>+ Add Value</button>
+              <button type="button" onClick={() => setForm(p => ({ ...p, sec3_active: !p.sec3_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec3_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec3_active ? '#F6F1E3' : '#EF4444', border: form.sec3_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                {form.sec3_active ? 'Deactivate Section' : 'Activate Section'}
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -285,15 +332,24 @@ const AboutWhoWeAreManagerPage = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              {form.values.map((v, idx) => (
-                <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: '1px solid rgba(184,147,91,0.3)' }}>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                    <input value={v.letter} onChange={e => handleValueChange(idx, 'letter', e.target.value)} style={{ ...iStyle, width: '45px', textAlign: 'center', fontWeight: '800', color: '#B8935B' }} maxLength={2} />
-                    <input value={v.title} onChange={e => handleValueChange(idx, 'title', e.target.value)} style={{ ...iStyle, flex: 1, fontWeight: '700' }} placeholder="Value Title" />
+              {form.values.map((v, idx) => {
+                const isActive = v.active !== false;
+                return (
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65 }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                      <input value={v.letter} onChange={e => handleValueChange(idx, 'letter', e.target.value)} style={{ ...iStyle, width: '45px', textAlign: 'center', fontWeight: '800', color: '#B8935B' }} maxLength={2} />
+                      <input value={v.title} onChange={e => handleValueChange(idx, 'title', e.target.value)} style={{ ...iStyle, flex: 1, fontWeight: '700' }} placeholder="Value Title" />
+                      <button type="button" onClick={() => handleToggleValueActive(idx)} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
+                        {isActive ? 'Active' : 'Inactive'}
+                      </button>
+                      <button type="button" onClick={() => handleDeleteValue(idx)} style={{ padding: '5px 8px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', borderRadius: '6px', cursor: 'pointer' }}>
+                        <TrashIcon />
+                      </button>
+                    </div>
+                    <textarea rows={2} value={v.desc} onChange={e => handleValueChange(idx, 'desc', e.target.value)} style={{ ...iStyle, resize: 'vertical' }} placeholder="Value description..." />
                   </div>
-                  <textarea rows={2} value={v.desc} onChange={e => handleValueChange(idx, 'desc', e.target.value)} style={{ ...iStyle, resize: 'vertical' }} placeholder="Value description..." />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -305,9 +361,12 @@ const AboutWhoWeAreManagerPage = () => {
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 4 OF 5</span>
               <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>Where We're Headed — Brand Roadmap</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec4_active: !p.sec4_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec4_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec4_active ? '#F6F1E3' : '#EF4444', border: form.sec4_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-              {form.sec4_active ? 'Deactivate Section' : 'Activate Section'}
-            </button>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button type="button" onClick={handleAddRoadmap} style={btnG}>+ Add Phase</button>
+              <button type="button" onClick={() => setForm(p => ({ ...p, sec4_active: !p.sec4_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec4_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec4_active ? '#F6F1E3' : '#EF4444', border: form.sec4_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                {form.sec4_active ? 'Deactivate Section' : 'Activate Section'}
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -323,13 +382,22 @@ const AboutWhoWeAreManagerPage = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {form.roadmap.map((step, idx) => (
-                <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: '1px solid rgba(184,147,91,0.3)', display: 'grid', gridTemplateColumns: '120px 1fr 2fr', gap: '12px', alignItems: 'center' }}>
-                  <input value={step.year} onChange={e => handleRoadmapChange(idx, 'year', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B' }} placeholder="Phase / Year" />
-                  <input value={step.title} onChange={e => handleRoadmapChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Phase Title" />
-                  <input value={step.desc} onChange={e => handleRoadmapChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Phase Details" />
-                </div>
-              ))}
+              {form.roadmap.map((step, idx) => {
+                const isActive = step.active !== false;
+                return (
+                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '120px 1fr 2fr auto auto', gap: '12px', alignItems: 'center' }}>
+                    <input value={step.year} onChange={e => handleRoadmapChange(idx, 'year', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B' }} placeholder="Phase / Year" />
+                    <input value={step.title} onChange={e => handleRoadmapChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Phase Title" />
+                    <input value={step.desc} onChange={e => handleRoadmapChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Phase Details" />
+                    <button type="button" onClick={() => handleToggleRoadmapActive(idx)} style={{ padding: '6px 10px', borderRadius: '6px', backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: isActive ? '#22c55e' : '#EF4444', border: '1px solid currentColor', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>
+                      {isActive ? 'Active' : 'Inactive'}
+                    </button>
+                    <button type="button" onClick={() => handleDeleteRoadmap(idx)} style={{ padding: '5px 8px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', borderRadius: '6px', cursor: 'pointer' }}>
+                      <TrashIcon />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://localhost:5000/api/admin';
+const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',

@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
  *  4. Page Header CMS Settings (Title, Subtitle, Welcome Back User Text)
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

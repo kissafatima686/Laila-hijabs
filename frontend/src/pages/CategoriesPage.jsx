@@ -16,10 +16,10 @@ const CategoriesPage = () => {
     setLoading(true);
     
     // Fetch categories and products simultaneously
-    const catUrl = `http://localhost:5000/api/categories`;
+    const catUrl = `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/categories`;
     const prodUrl = categoryId 
-      ? `http://localhost:5000/api/products?category=${categoryId}`
-      : `http://localhost:5000/api/products`;
+      ? `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/products?category=${categoryId}`
+      : `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/products`;
       
     Promise.all([
       fetch(catUrl).then(res => res.json()),

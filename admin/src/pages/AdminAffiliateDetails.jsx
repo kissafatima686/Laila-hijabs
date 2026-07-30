@@ -7,7 +7,7 @@ const AdminAffiliateDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/admin/affiliate-details/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/admin/affiliate-details/${id}`)
       .then(res => res.json())
       .then(result => {
         setData(result);

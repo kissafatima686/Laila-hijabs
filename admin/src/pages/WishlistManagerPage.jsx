@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
  *  - Panel 2: Customer Wishlist Items CRUD
  */
 
-const API = 'http://localhost:5000/api/admin';
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
 const iStyle = { 
   width: '100%', 

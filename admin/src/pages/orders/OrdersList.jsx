@@ -6,7 +6,7 @@ const OrdersList = () => {
 
   const fetchOrders = () => {
     setLoading(true);
-    fetch('http://localhost:5000/api/admin/orders')
+    fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/orders')
       .then(res => res.json())
       .then(data => setOrders(Array.isArray(data) ? data : []))
       .catch(() => {})
@@ -18,7 +18,7 @@ const OrdersList = () => {
   }, []);
 
   const handleUpdateStatus = (orderId, newStatus) => {
-    fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/admin/orders/${orderId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ order_status: newStatus })

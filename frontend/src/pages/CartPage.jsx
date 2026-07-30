@@ -62,7 +62,7 @@ const CartPage = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/module/coupons');
+      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/module/coupons');
       const data = await res.json();
       const activeCoupons = Array.isArray(data) ? data : [];
       const found = activeCoupons.find(c => c.code && c.code.toUpperCase() === code && (c.status || 'Active') === 'Active');
