@@ -65,23 +65,31 @@ function App() {
               <Route path="/affiliate/dashboard" element={<AffiliateDashboard />} />
               <Route path="/size-guide" element={<SizeGuide />} />
               <Route path="/terms-conditions" element={<DynamicTextPage sectionKey="terms_conditions" fallbackTitle="Terms & Conditions" />} />
+              <Route path="/terms" element={<DynamicTextPage sectionKey="terms_conditions" fallbackTitle="Terms & Conditions" />} />
               <Route path="/privacy-policy" element={<DynamicTextPage sectionKey="privacy_policy" fallbackTitle="Privacy Policy" />} />
+              <Route path="/privacy" element={<DynamicTextPage sectionKey="privacy_policy" fallbackTitle="Privacy Policy" />} />
               <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/contact" element={<ContactUs />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/faqs" element={<FAQ />} />
               <Route path="/gift-card" element={<GiftCard />} />
               <Route path="/gift-cards" element={<GiftCard />} />
               <Route path="/care-repair" element={<DynamicTextPage sectionKey="care_repair" fallbackTitle="Care & Repair" />} />
               <Route path="/our-story" element={<OurStory />} />
               <Route path="/loyalty" element={<DynamicTextPage sectionKey="loyalty" fallbackTitle="Loyalty Program" />} />
               <Route path="/visit-us" element={<DynamicTextPage sectionKey="visit_us" fallbackTitle="Visit Us" />} />
+              <Route path="/locations" element={<DynamicTextPage sectionKey="visit_us" fallbackTitle="Visit Us" />} />
               <Route path="/location/:id" element={<LocationDetailPage />} />
               <Route path="/careers" element={<DynamicTextPage sectionKey="careers" fallbackTitle="Careers" />} /> 
-              <Route path="/journal" element={<DynamicTextPage sectionKey="blogs_page_header" fallbackTitle="Journal" />} />  
+              <Route path="/journal" element={<BlogsPage />} />  
               <Route path="/affiliate-program" element={<AffiliateProgram />} />
-              <Route path="/free-shipping" element={<DynamicTextPage sectionKey="free_shipping" fallbackTitle="Free Shipping" />} />
+              <Route path="/affiliates" element={<AffiliateProgram />} />
+              <Route path="/shipping" element={<DynamicTextPage sectionKey="shipping" fallbackTitle="Shipping" />} />
+              <Route path="/free-shipping" element={<DynamicTextPage sectionKey="shipping" fallbackTitle="Free Shipping" />} />
               <Route path="/shipping-info" element={<DynamicTextPage sectionKey="shipping_info" fallbackTitle="Shipping Information" />} />
-              <Route path="/delivery" element={<DynamicTextPage sectionKey="delivery" fallbackTitle="Delivery" />} />
-              <Route path="/returns-exchanges" element={<DynamicTextPage sectionKey="returns_exchanges" fallbackTitle="Returns & Exchanges" />} /> 
+              <Route path="/delivery" element={<DynamicTextPage sectionKey="shipping" fallbackTitle="Delivery" />} />
+              <Route path="/returns" element={<DynamicTextPage sectionKey="returns" fallbackTitle="Returns & Exchanges" />} />
+              <Route path="/returns-exchanges" element={<DynamicTextPage sectionKey="returns" fallbackTitle="Returns & Exchanges" />} /> 
               <Route path="/Products/:slug" element={<ProductDetail />} />
               <Route path="/Products/:slug/gallery" element={<ProductGalleryPage />} />
               <Route path="/cart" element={<CartPage />} />

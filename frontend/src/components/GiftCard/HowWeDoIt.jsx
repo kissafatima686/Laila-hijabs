@@ -30,15 +30,19 @@ const HowWeDoIt = () => {
         {bodyContent && <p style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 40px auto', lineHeight: '1.6', color: '#555' }}>{bodyContent}</p>}
         <div className="how-we-do-it-container">
           <div className="features-grid">
-        {(Array.isArray(items) && items.length > 0 ? items : fallbackItems).map((item, index) => {
-          const IconComponent = FaIcons[item.icon_name] || FaIcons.FaRegCircle;
-          return (
-            <div key={index} className="feature-item">
-              <div className="icon"><IconComponent /></div>
-              <p>{item.text}</p>
-            </div>
-          );
-        })}
+            {(Array.isArray(items) && items.length > 0 ? items : fallbackItems)
+              .filter(item => item.status !== 'Hidden' && item.status !== 'Draft' && item.status !== 'Inactive')
+              .map((item, index) => {
+                const iconKey = item.icon_name || item.icon || 'FaRegCircle';
+                const IconComponent = FaIcons[iconKey] || FaIcons.FaRegCircle;
+                const displayText = item.text || item.title || item.label || '';
+                return (
+                  <div key={index} className="feature-item">
+                    <div className="icon"><IconComponent /></div>
+                    <p>{displayText}</p>
+                  </div>
+                );
+              })}
           </div>
         </div>
         {buttonText && buttonLink && (
