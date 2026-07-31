@@ -7,27 +7,41 @@ const AffiliatePage = () => {
   const [openFaq, setOpenFaq] = useState(null);
 
   const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [handle, setHandle] = useState('');
   const [followers, setFollowers] = useState("Under 1,000");
   const [reason, setReason] = useState('');
+  const [submitStatus, setSubmitStatus] = useState('');
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let message = `* NEW AFFILIATE APPLICATION - LAILA HIJABS*\n\n`;
-    message += `*Full Name:* ${fullName || 'N/A'}\n`;
-    message += `*WhatsApp:* ${phone || 'N/A'}\n`;
-    message += `*Handle:* ${handle || 'N/A'}\n`;
-    message += `*Followers:* ${followers}\n`;
-    if (reason) message += `*Reason:* ${reason}\n\n`;
-    message += `Please review my application. Thank you!`;
-
-    const whatsappUrl = `https://wa.me/923238399480?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    setSubmitStatus('Submitting...');
+    try {
+      const response = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/affiliate/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          phone,
+          instagram_handle: handle,
+          followers,
+          promo_strategy: reason
+        })
+      });
+      if (!response.ok) throw new Error('Failed to submit application');
+      
+      setSubmitStatus('Application Submitted Successfully!');
+      setFullName(''); setEmail(''); setPhone(''); setHandle(''); setReason(''); setFollowers('Under 1,000');
+    } catch (err) {
+      console.error(err);
+      setSubmitStatus('Error submitting application. Please try again.');
+    }
   };
 
   const stats = [
@@ -131,6 +145,18 @@ const AffiliatePage = () => {
                 />
               </div>
               <div className="form-field">
+                <label>Email Address</label>
+                <input 
+                  type="email" 
+                  placeholder="Your email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-field">
                 <label>WhatsApp Number</label>
                 <input 
                   type="tel" 
@@ -140,8 +166,6 @@ const AffiliatePage = () => {
                   required 
                 />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-field">
                 <label>Instagram / TikTok Handle</label>
                 <input 
@@ -152,6 +176,8 @@ const AffiliatePage = () => {
                   required 
                 />
               </div>
+            </div>
+            <div className="form-row">
               <div className="form-field">
                 <label>Follower Range *</label>
                 <select 
@@ -176,8 +202,11 @@ const AffiliatePage = () => {
                 required
               ></textarea>
             </div>
-            <button type="submit" className="submit-btn">Submit Application</button>
-            <div className="form-note">We'll reach out on WhatsApp once your application is reviewed.</div>
+            <button type="submit" className="submit-btn" disabled={submitStatus === 'Submitting...'}>
+              {submitStatus === 'Submitting...' ? 'Submitting...' : 'Submit Application'}
+            </button>
+            {submitStatus && <div className="form-note" style={{ color: submitStatus.includes('Error') ? '#ef4444' : '#10b981', marginTop: '10px' }}>{submitStatus}</div>}
+            <div className="form-note">We'll review your application and send you an email within 2-3 days!</div>
           </form>
         </div>
       </section>

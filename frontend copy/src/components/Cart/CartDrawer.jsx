@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
+import { useContent } from '../../context/useContent';
 import './CartDrawer.css';
 
 const CartDrawer = () => {
@@ -12,6 +13,10 @@ const CartDrawer = () => {
     cartTotal,
     clearCart,
   } = useCart();
+
+  const { getSectionContent } = useContent();
+  const bundlesRaw = getSectionContent('offers_bundles_page', 'bundles', []);
+  const activeBundles = bundlesRaw.filter(b => b.status !== 'Draft');
 
   if (!isCartOpen) return null;
 
@@ -84,6 +89,24 @@ const CartDrawer = () => {
                 Clear Cart
               </button>
             </div>
+            
+            {activeBundles.length > 0 && (
+              <div style={{ padding: '20px', borderTop: '1px solid #e1e1e1', backgroundColor: '#f9f9f9' }}>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#1A2010' }}>Complete Your Look (Save up to 30%)</h4>
+                <div style={{ display: 'flex', overflowX: 'auto', gap: '10px', paddingBottom: '10px' }}>
+                  {activeBundles.map((b, idx) => (
+                    <Link key={idx} to={b.slug ? `/Products/${b.slug}` : '#'} onClick={() => setIsCartOpen(false)} style={{ textDecoration: 'none', minWidth: '200px', border: '1px solid #e1e1e1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
+                      <img src={b.image_url || '/hero1.png'} alt={b.title} style={{ width: '100%', height: '120px', objectFit: 'cover' }} />
+                      <div style={{ padding: '10px' }}>
+                        <div style={{ fontSize: '10px', color: '#B8935B', fontWeight: 'bold' }}>{b.savings}</div>
+                        <h5 style={{ margin: '4px 0', fontSize: '12px', color: '#1A2010' }}>{b.title}</h5>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#1A2010' }}>{b.bundle_price} <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '10px' }}>{b.original_price}</span></div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

@@ -531,28 +531,63 @@ const getSectionByKey = async (req, res) => {
 
 const updateSection = async (req, res) => {
   const { key } = req.params;
-  const { title, subtitle, body_content, image_url, image_url_2, button_text, button_link, badge_text, metadata } = req.body;
+  const { title, subtitle, body_content, image_url, image_url_2, button_text, button_link, badge_text, status, metadata } = req.body;
   try {
     const metadataStr = metadata ? (typeof metadata === 'string' ? metadata : JSON.stringify(metadata)) : null;
     const [existing] = await pool.query(`SELECT section_key FROM site_sections WHERE section_key = ?`, [key]);
     
     if (existing.length === 0) {
       await pool.query(
-        `INSERT INTO site_sections (section_key, title, subtitle, body_content, image_url, image_url_2, button_text, button_link, badge_text, metadata)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [key, title || null, subtitle || null, body_content || null, image_url || null, image_url_2 || null, button_text || null, button_link || null, badge_text || null, metadataStr]
+        `INSERT INTO site_sections (section_key, page_name, section_name, title, subtitle, body_content, image_url, image_url_2, button_text, button_link, badge_text, status, metadata)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [key, key, key, title || null, subtitle || null, body_content || null, image_url || null, image_url_2 || null, button_text || null, button_link || null, badge_text || null, status || 'Live', metadataStr]
       );
     } else {
       await pool.query(
         `UPDATE site_sections SET 
           title = ?, subtitle = ?, body_content = ?, 
           image_url = ?, image_url_2 = ?,
-          button_text = ?, button_link = ?, badge_text = ?,
+          button_text = ?, button_link = ?, badge_text = ?, status = ?,
           metadata = ?
          WHERE section_key = ?`,
-        [title || null, subtitle || null, body_content || null, image_url || null, image_url_2 || null, button_text || null, button_link || null, badge_text || null, metadataStr, key]
+        [title || null, subtitle || null, body_content || null, image_url || null, image_url_2 || null, button_text || null, button_link || null, badge_text || null, status || 'Live', metadataStr, key]
       );
     }
+    
+    // Auto-sync bundles and ways_cards to products table
+    if (key === 'offers_bundles_page' && metadata) {
+      const itemsToSync = [];
+      if (metadata.bundles && Array.isArray(metadata.bundles)) {
+        metadata.bundles.forEach(b => {
+          if (b.slug) itemsToSync.push(b);
+        });
+      }
+      if (metadata.ways_cards && Array.isArray(metadata.ways_cards)) {
+        metadata.ways_cards.forEach(wc => {
+          if (wc.slug) itemsToSync.push(wc);
+        });
+      }
+
+      for (let item of itemsToSync) {
+        const priceStr = String(item.original_price || '').replace(/[^0-9.]/g, '');
+        const salePriceStr = String(item.bundle_price || '').replace(/[^0-9.]/g, '');
+        const price = priceStr ? parseFloat(priceStr) : 0;
+        const salePrice = salePriceStr ? parseFloat(salePriceStr) : null;
+        const name = item.title || 'Untitled Bundle';
+        const desc = item.items_included || item.description || '';
+        const status = item.status === 'Draft' ? 'Draft' : 'Live';
+
+        await pool.query(
+          `INSERT INTO products (name, slug, sku, short_description, price, sale_price, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE 
+             name = VALUES(name), short_description = VALUES(short_description), 
+             price = VALUES(price), sale_price = VALUES(sale_price), status = VALUES(status)`,
+          [name, item.slug, `BNDL-${item.slug.substring(0, 15).toUpperCase()}`, desc, price, salePrice, status]
+        );
+      }
+    }
+
     res.status(200).json({ message: 'Section saved successfully!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -611,6 +646,50 @@ const getProductSections = async (req, res) => {
   try {
     const [rows] = await pool.query(`SELECT * FROM product_sections ORDER BY default_display_order ASC`);
     res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getAdminCustomerDetails = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [userRows] = await pool.query(`SELECT user_id, full_name, email, phone, address, city, status, created_at FROM users WHERE user_id = ?`, [id]);
+    if (userRows.length === 0) return res.status(404).json({ error: 'Customer not found' });
+    const user = userRows[0];
+
+    const [orders] = await pool.query(`SELECT * FROM orders WHERE user_id = ? OR recipient_name = ? ORDER BY created_at DESC`, [id, user.full_name]);
+    
+    if (orders.length > 0) {
+      const orderIds = orders.map(o => o.order_id);
+      const [orderItems] = await pool.query(`
+        SELECT oi.order_id, oi.quantity, p.name as product_name
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.product_id
+        WHERE oi.order_id IN (?)
+      `, [orderIds]);
+
+      orders.forEach(order => {
+        order.items = orderItems
+          .filter(item => item.order_id === order.order_id)
+          .map(item => ({ product_name: item.product_name, quantity: item.quantity }));
+      });
+    }
+
+    const [customOrders] = await pool.query(`SELECT * FROM custom_orders WHERE user_id = ? OR customer_email = ? ORDER BY created_at DESC`, [id, user.email]);
+
+    const [wishlists] = await pool.query(`
+      SELECT w.wishlist_id, p.product_id, p.name, p.slug, p.price,
+        (SELECT image_url FROM product_images WHERE product_id = p.product_id ORDER BY display_order ASC LIMIT 1) as image
+      FROM wishlists w JOIN products p ON w.product_id = p.product_id WHERE w.user_id = ?
+    `, [id]);
+
+    res.status(200).json({
+      ...user,
+      orders,
+      customOrders,
+      wishlists
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -918,5 +997,6 @@ module.exports = {
   subscribeNewsletter,
   getAdminAffiliateDetails,
   getPayoutsSummary,
-  processPayout
+  processPayout,
+  getAdminCustomerDetails
 };

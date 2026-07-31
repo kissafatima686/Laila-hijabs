@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { CartContext } from '../context/CartContext';
 import { useContent } from '../context/useContent';
 import './AccountPage.css';
 import { 
@@ -12,6 +13,7 @@ import {
 } from 'react-icons/io5';
 
 const AccountPage = () => {
+  const { wishlistItems, removeFromWishlist, moveToCart } = useContext(CartContext);
   const { getSectionContent } = useContent();
   const pageTitle = getSectionContent('account_page_settings', 'title', 'Account Overview');
   const pageSubtitle = getSectionContent('account_page_settings', 'subtitle', 'Manage your orders, profile, and addresses.');
@@ -26,69 +28,128 @@ const AccountPage = () => {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
-  // Sample user profile data
-  const [userData, setUserData] = useState({
-    name: "ADMIN",
-    email: "admin@example.com",
-    phone: "+92 323 8399480"
+  // Persist user profile data
+  const [userData, setUserData] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('laila_hijabs_user');
+      if (savedUser) {
+        setIsLoggedIn(true);
+        return JSON.parse(savedUser);
+      }
+    } catch (e) {}
+    return { name: "", email: "", phone: "" };
   });
 
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      isDefault: true,
-      name: "ADMIN",
-      street: "123 Street Name, Apartment, Suite",
-      city: "Islamabad, Pakistan",
-      phone: "+92 323 8399480"
-    }
-  ]);
+  const [addresses, setAddresses] = useState(() => {
+    try {
+      const userStr = localStorage.getItem('laila_hijabs_user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      if (user && user.email) {
+        const savedAddresses = localStorage.getItem(`laila_hijabs_addresses_${user.email}`);
+        if (savedAddresses) return JSON.parse(savedAddresses);
+      }
+    } catch (e) {}
+    return [];
+  });
+  
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [addressForm, setAddressForm] = useState({ name: '', street: '', city: '', phone: '' });
 
-  // Sample order history in PKR
-  const orders = [
-    {
-      id: "LH-849201",
-      date: "18 July, 2026",
-      total: "Rs. 25,400",
-      status: "Processing",
-      items: "LAMIA OPEN KAFTAN SET (x1), PLEATED SATIN ABAYA (x2)"
-    },
-    {
-      id: "LH-392011",
-      date: "10 May, 2026",
-      total: "Rs. 8,500",
-      status: "Delivered",
-      items: "PLEATED SATIN ABAYA (x1)"
-    }
-  ];
+  const [orders, setOrders] = useState([]);
+  const [customOrders, setCustomOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
-  const handleLoginSubmit = (e) => {
+  // Save to localStorage when state changes
+  useEffect(() => {
+    if (isLoggedIn && userData.email) {
+      localStorage.setItem('laila_hijabs_user', JSON.stringify(userData));
+    }
+  }, [userData, isLoggedIn]);
+
+  useEffect(() => {
+    if (userData.email) {
+      localStorage.setItem(`laila_hijabs_addresses_${userData.email}`, JSON.stringify(addresses));
+    }
+  }, [addresses, userData.email]);
+
+  // Fetch Orders
+  useEffect(() => {
+    if (isLoggedIn && userData.email && (activeTab === 'orders' || activeTab === 'custom_orders')) {
+      setLoadingOrders(true);
+      if (activeTab === 'orders') {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/${userData.email}`)
+          .then(res => res.json())
+          .then(data => setOrders(Array.isArray(data) ? data : []))
+          .catch(err => console.error(err))
+          .finally(() => setLoadingOrders(false));
+      } else if (activeTab === 'custom_orders') {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/custom-orders/${userData.email}`)
+          .then(res => res.json())
+          .then(data => setCustomOrders(Array.isArray(data) ? data : []))
+          .catch(err => console.error(err))
+          .finally(() => setLoadingOrders(false));
+      }
+    }
+  }, [isLoggedIn, userData.email, activeTab]);
+
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (loginEmail && loginPassword) {
-      setUserData(prev => ({
-        ...prev,
-        email: loginEmail,
-        name: loginEmail.split('@')[0].toUpperCase()
-      }));
-      setIsLoggedIn(true);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: loginEmail, password: loginPassword })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Login failed');
+          return;
+        }
+        
+        setUserData({
+          id: data.user.id,
+          name: data.user.full_name,
+          email: data.user.email,
+          phone: data.user.phone,
+          address: data.user.address,
+          city: data.user.city
+        });
+        setIsLoggedIn(true);
+        // Load addresses for this specific user
+        if (data.user.address) {
+          setAddresses([{ id: Date.now(), name: data.user.full_name, street: data.user.address, city: data.user.city, phone: data.user.phone, isDefault: true }]);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred during login');
+      }
     }
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (regName && regEmail && regPassword) {
-      setUserData({
-        name: regName,
-        email: regEmail,
-        phone: "+92 323 8399480"
-      });
-      // After signing up, switch tab to Sign In form so the user logs in
-      setIsRegister(false);
-      setLoginEmail(regEmail);
-      alert("Registration successful! Please Sign In with your credentials.");
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full_name: regName, email: regEmail, password: regPassword })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Registration failed');
+          return;
+        }
+        // After signing up, switch tab to Sign In form so the user logs in
+        setIsRegister(false);
+        setLoginEmail(regEmail);
+        alert("Registration successful! Please Sign In with your credentials.");
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred during registration');
+      }
     }
   };
 
@@ -242,7 +303,10 @@ const AccountPage = () => {
           
           <button 
             className="tab-btn logout-btn"
-            onClick={() => setIsLoggedIn(false)}
+            onClick={() => {
+              setIsLoggedIn(false);
+              localStorage.removeItem('laila_hijabs_user');
+            }}
           >
             <IoLogOutOutline size={18} /> Log Out
           </button>
@@ -254,28 +318,37 @@ const AccountPage = () => {
           {activeTab === 'orders' && (
             <div className="tab-pane">
               <h2>Order History</h2>
-              {orders.length === 0 ? (
+              {loadingOrders ? (
+                <p>Loading orders...</p>
+              ) : orders.length === 0 ? (
                 <p className="empty-text">You haven't placed any orders yet.</p>
               ) : (
                 <div className="orders-list">
-                  {orders.map((order) => (
-                    <div key={order.id} className="order-card">
-                      <div className="order-card-header">
-                        <div>
-                          <span className="order-id">#{order.id}</span>
-                          <span className="order-date">{order.date}</span>
+                  {orders.map((order) => {
+                    const parsedItems = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+                    const itemsStr = parsedItems && parsedItems.length > 0
+                      ? parsedItems.map(item => `${item.product_name} (x${item.quantity})`).join(', ')
+                      : 'Standard Items';
+                      
+                    return (
+                      <div key={order.id} className="order-card">
+                        <div className="order-card-header">
+                          <div>
+                            <span className="order-id">#{order.order_id || order.id}</span>
+                            <span className="order-date">{new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                          </div>
+                          <span className={`order-status ${(order.order_status || 'Processing').toLowerCase()}`}>
+                            {order.order_status || 'Processing'}
+                          </span>
                         </div>
-                        <span className={`order-status ${order.status.toLowerCase()}`}>
-                          {order.status}
-                        </span>
+                        <p className="order-items">{itemsStr}</p>
+                        <div className="order-card-footer">
+                          <span className="order-total">Total: <strong>Rs. {parseFloat(order.total_amount).toLocaleString()}</strong></span>
+                          <Link to="/contact-us" className="help-link">Need Help?</Link>
+                        </div>
                       </div>
-                      <p className="order-items">{order.items}</p>
-                      <div className="order-card-footer">
-                        <span className="order-total">Total: <strong>{order.total}</strong></span>
-                        <Link to="/contact-us" className="help-link">Need Help?</Link>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -289,13 +362,29 @@ const AccountPage = () => {
               {isAddingAddress || editingAddressId !== null ? (
                 <form 
                   className="details-form" 
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
                     if (editingAddressId !== null) {
                       setAddresses(addresses.map(a => a.id === editingAddressId ? { ...addressForm, id: a.id, isDefault: a.isDefault } : a));
                     } else {
                       setAddresses([...addresses, { ...addressForm, id: Date.now(), isDefault: addresses.length === 0 }]);
                     }
+                    
+                    // Sync with backend if user has an ID
+                    if (userData.id) {
+                      try {
+                        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${userData.id}/address`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ address: addressForm.street, city: addressForm.city, phone: addressForm.phone })
+                        });
+                        // Also update userData so it stays in sync
+                        setUserData({ ...userData, address: addressForm.street, city: addressForm.city, phone: addressForm.phone });
+                      } catch (err) {
+                        console.error('Failed to sync address to backend', err);
+                      }
+                    }
+
                     setIsAddingAddress(false);
                     setEditingAddressId(null);
                   }}
@@ -373,10 +462,44 @@ const AccountPage = () => {
           {activeTab === 'wishlist' && (
             <div className="tab-pane">
               <h2>My Wishlist</h2>
-              <p className="empty-text" style={{ marginBottom: '20px' }}>Quickly access and view all your saved items.</p>
-              <Link to="/wishlist" className="save-btn" style={{ display: 'inline-block', textDecoration: 'none', textAlign: 'center' }}>
-                View Full Wishlist Page
-              </Link>
+              {wishlistItems.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                  <p className="empty-text">Your wishlist is empty.</p>
+                  <Link to="/categories" className="help-link">Explore Products</Link>
+                </div>
+              ) : (
+                <div className="wishlist-grid">
+                  {wishlistItems.map((item) => (
+                    <div key={item.id} className="wishlist-card">
+                      <div className="image-container">
+                        <Link to={`/Products/${item.slug}`}>
+                          <img src={item.image || "/hero2.png"} alt={item.name} className="wishlist-image" />
+                        </Link>
+                        <button className="remove-btn" onClick={() => removeFromWishlist(item.id)}>✕</button>
+                      </div>
+                      <div className="wishlist-details">
+                        <Link to={`/Products/${item.slug}`} className="item-link">
+                          <h3>{item.name}</h3>
+                        </Link>
+                        <p className="item-color">{item.color || "Olive"}</p>
+                        <div className="item-pricing">
+                          <span className="current-price">Rs. {item.price.toLocaleString()}</span>
+                        </div>
+                        <div className="wishlist-actions-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
+                          <button 
+                            className={`move-to-bag-btn ${!item.inStock ? 'disabled' : ''}`}
+                            onClick={() => item.inStock && moveToCart(item)}
+                            disabled={!item.inStock}
+                            style={{ width: '100%', height: '36px', background: item.inStock ? '#3E4930' : '#ccc', color: '#fff', border: 'none', cursor: item.inStock ? 'pointer' : 'not-allowed', borderRadius: '2px', fontSize: '11px', fontWeight: 'bold' }}
+                          >
+                            {item.inStock ? 'ADD TO CART' : 'OUT OF STOCK'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -384,22 +507,32 @@ const AccountPage = () => {
           {activeTab === 'custom_orders' && (
             <div className="tab-pane">
               <h2>Custom Tailoring Requests</h2>
-              <div className="orders-list">
-                <div className="order-card">
-                  <div className="order-card-header">
-                    <div>
-                      <span className="order-id">#CUST-9042</span>
-                      <span className="order-date">24 July, 2026</span>
+              {loadingOrders ? (
+                <p>Loading custom orders...</p>
+              ) : customOrders.length === 0 ? (
+                <p className="empty-text">You haven't placed any custom bespoke requests yet.</p>
+              ) : (
+                <div className="orders-list">
+                  {customOrders.map(co => (
+                    <div key={co.id} className="order-card">
+                      <div className="order-card-header">
+                        <div>
+                          <span className="order-id">#CUST-{co.id}</span>
+                          <span className="order-date">{new Date(co.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                        </div>
+                        <span className={`order-status ${(co.status || 'Received').toLowerCase()}`}>{co.status || 'Received'}</span>
+                      </div>
+                      <p className="order-items">
+                        {co.garment_type} {co.fabric_choice && `(${co.fabric_choice})`} {co.custom_color && `- ${co.custom_color}`}
+                      </p>
+                      <div className="order-card-footer">
+                        <span className="order-total">Status: <strong>{co.status || 'Patterning & Stitching'}</strong></span>
+                        <Link to="/contact-us" className="help-link">Need Help?</Link>
+                      </div>
                     </div>
-                    <span className="order-status processing">In Progress</span>
-                  </div>
-                  <p className="order-items">Bespoke Silk Abaya (Custom Length & Special Embroidery)</p>
-                  <div className="order-card-footer">
-                    <span className="order-total">Status: <strong>Patterning & Stitching</strong></span>
-                    <Link to="/contact-us" className="help-link">Need Help?</Link>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           )}
 

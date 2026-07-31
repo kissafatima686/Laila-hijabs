@@ -1,0 +1,1 @@
+﻿const { pool } = require('./config/db'); pool.query("UPDATE users SET password_hash = 'kissa' WHERE email = 'kissafatima204@gmail.com'").then(() => console.log('Done')).catch(console.error).finally(()=>process.exit(0));

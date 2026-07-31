@@ -102,6 +102,11 @@ const CustomerAccountsManagerPage = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [userForm, setUserForm] = useState({ full_name: '', email: '', phone: '', status: 'Active' });
+  
+  // Detailed Customer Profile State
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [customerProfile, setCustomerProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   // Orders State & CRUD
   const [orders, setOrders] = useState([]);
@@ -201,6 +206,19 @@ const CustomerAccountsManagerPage = () => {
     setEditUser(user);
     setUserForm({ full_name: user.full_name || '', email: user.email || '', phone: user.phone || '', status: user.status || 'Active' });
     setShowUserModal(true);
+  };
+  const viewCustomerProfile = async (user) => {
+    setLoadingProfile(true);
+    setShowProfileModal(true);
+    try {
+      const res = await fetch(`${API}/users/${user.user_id}/details`);
+      const data = await res.json();
+      setCustomerProfile(data);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load profile');
+    }
+    setLoadingProfile(false);
   };
   const handleSaveUser = (e) => {
     e.preventDefault();
@@ -448,16 +466,15 @@ const CustomerAccountsManagerPage = () => {
                           backgroundColor: user.status === 'Active' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
                           border: `1px solid ${user.status === 'Active' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`
                         }}>
-                          {user.status || 'Active'}
+                          {user.status === 'Active' ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td style={{ padding: '13px 16px' }}>
-                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                          <button onClick={() => handleToggleUserStatus(user)} style={{ ...btnG, padding: '5px 10px', fontSize: '11px' }}>
-                            {user.status === 'Active' ? 'Deactivate' : 'Activate'}
-                          </button>
-                          <button onClick={() => openEditUser(user)} style={{ ...btnG, padding: '5px 10px' }} title="Edit"><EditIcon /></button>
-                          <button onClick={() => handleDeleteUser(user.user_id)} style={{ ...btnD, padding: '5px 10px' }} title="Delete"><TrashIcon /></button>
+                      <td style={{ padding: '13px 16px', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button onClick={() => viewCustomerProfile(user)} style={{ ...btnG, backgroundColor: 'rgba(184,147,91,0.15)', border: '1px solid rgba(184,147,91,0.4)', color: '#B8935B' }}>View Profile</button>
+                          <button onClick={() => openEditUser(user)} style={btnG}><EditIcon /> Edit</button>
+                          <button onClick={() => handleToggleUserStatus(user)} style={{ ...btnG, backgroundColor: '#2B3521' }}>{user.status === 'Active' ? 'Deactivate' : 'Activate'}</button>
+                          <button onClick={() => handleDeleteUser(user.user_id)} style={btnD}><TrashIcon /></button>
                         </div>
                       </td>
                     </tr>
@@ -744,6 +761,112 @@ const CustomerAccountsManagerPage = () => {
           </div>
         </div>
       )}
+
+      {/* ── CUSTOMER PROFILE MODAL ─────────────────────────────────────────────── */}
+      {showProfileModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ ...cardStyle, width: '900px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '15px' }}>
+              <h3 style={{ margin: 0, color: '#F6F1E3', fontSize: '18px' }}>Customer 360° Profile</h3>
+              <button onClick={() => { setShowProfileModal(false); setCustomerProfile(null); }} style={{ background: 'none', border: 'none', color: '#E7D9C9', cursor: 'pointer' }}><CloseIcon /></button>
+            </div>
+            
+            {loadingProfile ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: '#B8935B' }}>Loading Profile...</div>
+            ) : customerProfile ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* 1. Account Details */}
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, backgroundColor: '#182012', padding: '15px', borderRadius: '8px', border: '1px solid rgba(184,147,91,0.2)' }}>
+                    <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '10px' }}>ACCOUNT DETAILS</div>
+                    <div style={{ color: '#F6F1E3', fontSize: '14px', marginBottom: '5px' }}><strong>Name:</strong> {customerProfile.full_name}</div>
+                    <div style={{ color: '#F6F1E3', fontSize: '14px', marginBottom: '5px' }}><strong>Email:</strong> {customerProfile.email}</div>
+                    <div style={{ color: '#F6F1E3', fontSize: '14px', marginBottom: '5px' }}><strong>Phone:</strong> {customerProfile.phone || 'N/A'}</div>
+                    <div style={{ color: '#F6F1E3', fontSize: '14px', marginBottom: '5px' }}><strong>Status:</strong> {customerProfile.status}</div>
+                    <div style={{ color: '#F6F1E3', fontSize: '14px' }}><strong>Member Since:</strong> {new Date(customerProfile.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <div style={{ flex: 1, backgroundColor: '#182012', padding: '15px', borderRadius: '8px', border: '1px solid rgba(184,147,91,0.2)' }}>
+                    <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '10px' }}>SAVED ADDRESS (DEFAULT)</div>
+                    {customerProfile.address ? (
+                      <>
+                        <div style={{ color: '#F6F1E3', fontSize: '14px', marginBottom: '5px' }}><strong>Street:</strong> {customerProfile.address}</div>
+                        <div style={{ color: '#F6F1E3', fontSize: '14px', marginBottom: '5px' }}><strong>City:</strong> {customerProfile.city}</div>
+                      </>
+                    ) : (
+                      <div style={{ color: '#B8A99A', fontSize: '13px' }}>Customer has not saved an address yet.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Order History */}
+                <div style={{ backgroundColor: '#182012', padding: '15px', borderRadius: '8px', border: '1px solid rgba(184,147,91,0.2)' }}>
+                  <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '10px' }}>ORDER HISTORY ({customerProfile.orders?.length || 0})</div>
+                  {customerProfile.orders && customerProfile.orders.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {customerProfile.orders.map(o => (
+                        <div key={o.order_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
+                          <div>
+                            <div style={{ color: '#F6F1E3', fontSize: '13px', fontWeight: 'bold' }}>Order #{o.order_id}</div>
+                            <div style={{ color: '#B8A99A', fontSize: '12px' }}>{new Date(o.created_at).toLocaleDateString()}</div>
+                          </div>
+                          <div>
+                            <div style={{ color: '#F6F1E3', fontSize: '13px', fontWeight: 'bold', textAlign: 'right' }}>Rs. {parseFloat(o.total_amount).toLocaleString()}</div>
+                            <div style={{ color: '#B8935B', fontSize: '12px', textAlign: 'right' }}>{o.order_status}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: '#B8A99A', fontSize: '13px' }}>No orders found for this customer.</div>
+                  )}
+                </div>
+
+                {/* 3. Custom Orders */}
+                <div style={{ backgroundColor: '#182012', padding: '15px', borderRadius: '8px', border: '1px solid rgba(184,147,91,0.2)' }}>
+                  <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '10px' }}>CUSTOM BESPOKE REQUESTS ({customerProfile.customOrders?.length || 0})</div>
+                  {customerProfile.customOrders && customerProfile.customOrders.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {customerProfile.customOrders.map(co => (
+                        <div key={co.custom_order_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
+                          <div>
+                            <div style={{ color: '#F6F1E3', fontSize: '13px', fontWeight: 'bold' }}>{co.garment_type}</div>
+                            <div style={{ color: '#B8A99A', fontSize: '12px' }}>{new Date(co.created_at).toLocaleDateString()}</div>
+                          </div>
+                          <div style={{ color: '#B8935B', fontSize: '12px' }}>{co.status}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: '#B8A99A', fontSize: '13px' }}>No bespoke requests found.</div>
+                  )}
+                </div>
+
+                {/* 4. Wishlist */}
+                <div style={{ backgroundColor: '#182012', padding: '15px', borderRadius: '8px', border: '1px solid rgba(184,147,91,0.2)' }}>
+                  <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '10px' }}>SAVED WISHLIST ITEMS ({customerProfile.wishlists?.length || 0})</div>
+                  {customerProfile.wishlists && customerProfile.wishlists.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+                      {customerProfile.wishlists.map(w => (
+                        <div key={w.wishlist_id} style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                          <img src={w.image || "/placeholder.png"} alt={w.name} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '4px', marginBottom: '10px' }} />
+                          <div style={{ color: '#F6F1E3', fontSize: '13px', fontWeight: 'bold' }}>{w.name}</div>
+                          <div style={{ color: '#B8935B', fontSize: '12px' }}>Rs. {parseFloat(w.price).toLocaleString()}</div>
+                          <a href={`http://localhost:5173/Products/${w.slug}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: '10px', fontSize: '11px', color: '#E7D9C9', textDecoration: 'underline' }}>
+                            View Product Page
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: '#B8A99A', fontSize: '13px' }}>Wishlist is empty.</div>
+                  )}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

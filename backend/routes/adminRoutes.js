@@ -23,7 +23,8 @@ const {
   subscribeNewsletter,
   getAdminAffiliateDetails,
   getPayoutsSummary,
-  processPayout
+  processPayout,
+  getAdminCustomerDetails
 } = require('../controllers/adminControllers');
 
 // Dashboard
@@ -40,7 +41,9 @@ router.get('/module/:moduleName', getModuleItems);
 router.post('/module/:moduleName', createModuleItem);
 router.put('/module/:moduleName/:id', updateModuleItem);
 router.put('/module/:moduleName/:id/status', toggleModuleItemStatus);
+router.patch('/module/:moduleName/:id/status', toggleModuleItemStatus);
 router.delete('/module/:moduleName/:id', deleteModuleItem);
+router.get('/users/:id/details', getAdminCustomerDetails);
 
 // ─── Affiliate Specific ──────────────────────────────────────────────────────
 router.get('/affiliate-details/:id', getAdminAffiliateDetails);

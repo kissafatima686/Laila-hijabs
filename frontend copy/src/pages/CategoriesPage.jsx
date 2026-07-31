@@ -7,87 +7,88 @@ import { CartContext } from '../context/CartContext';
 import './CategoriesPage.css';
 
 const CategoriesPage = () => {
-  const filterSections = [
-    { title: "Fabric", options: ["Nida Crepe", "Chiffon", "Linen Blend", "Silk Satin"] },
-    { title: "Size", options: ["XS", "S", "M", "L", "XL", "XXL"] },
-    { title: "Color", options: ["Olive", "Black", "Ivory", "Dusty Rose"] },
-    { title: "Price", options: ["Rs. 3,000 – 5,000", "Rs. 5,000 – 8,000", "Rs. 8,000+"] }
-  ];
-
-  const products = [
-    // Abayas
-    { id: 1, name: "Premium Nida Abaya", slug: "premium-nida-abaya-1", category: "abayas", sizes: "XS – XXL", sizesArray: ["XS", "S", "M", "L", "XL", "XXL"], fabric: "Nida Crepe", color: "Black", now: "5,990", tag: "NEW IN", mainImg: "/Categories/abaya/abaya1.png", altImg: "/Categories/abaya/abaya2.png", swatches: ["#1c1c1a"] },
-    { id: 2, name: "Everyday Abaya", slug: "everyday-abaya-2", category: "abayas", sizes: "XS – XXL", sizesArray: ["XS", "S", "M", "L", "XL", "XXL"], fabric: "Nida Crepe", color: "Beige", was: "5,990", now: "4,990", tag: "Bestseller", mainImg: "/Categories/abaya/abaya2.png", altImg: "/Categories/abaya/abaya3.png", swatches: ["#EFE4CC"] },
-    { id: 3, name: "Classic Black Abaya", slug: "classic-black-abaya-3", category: "abayas", sizes: "XS – XXL", sizesArray: ["XS", "S", "M", "L", "XL", "XXL"], fabric: "Nida Crepe", color: "Black", now: "5,490", mainImg: "/Categories/abaya/abaya3.png", altImg: "/Categories/abaya/abaya4.png", swatches: ["#1c1c1a"] },
-    { id: 4, name: "Elegant Abaya", slug: "elegant-abaya-4", category: "abayas", sizes: "XS – XXL", sizesArray: ["XS", "S", "M", "L", "XL", "XXL"], fabric: "Chiffon", color: "Dusty Rose", now: "6,490", mainImg: "/Categories/abaya/abaya4.png", altImg: "/Categories/abaya/abaya5.png", swatches: ["#E7D9C9"] },
-    { id: 5, name: "Luxury Occasion Abaya", slug: "luxury-occasion-abaya-5", category: "abayas", sizes: "XS – XXL", sizesArray: ["XS", "S", "M", "L", "XL", "XXL"], fabric: "Silk Satin", color: "Olive", now: "7,490", tag: "NEW IN", mainImg: "/Categories/abaya/abaya5.png", altImg: "/Categories/abaya/abaya1.png", swatches: ["#3E4930"] },
-    
-    // Hijabs
-    { id: 6, name: "Premium Chiffon Hijab", slug: "premium-chiffon-hijab-1", category: "hijabs", sizes: "One Size", sizesArray: ["One Size"], fabric: "Chiffon", color: "Dusty Rose", now: "2,400", tag: "Bestseller", mainImg: "/Categories/hijabs/hijab1.png", altImg: "/Categories/hijabs/hijab2.png", swatches: ["#E7D9C9"] },
-    { id: 7, name: "Everyday Jersey Hijab", slug: "everyday-jersey-hijab-2", category: "hijabs", sizes: "One Size", sizesArray: ["One Size"], fabric: "Linen Blend", color: "Olive", now: "2,200", mainImg: "/Categories/hijabs/hijab2.png", altImg: "/Categories/hijabs/hijab1.png", swatches: ["#3E4930"] },
-    
-    // Irani Chadar
-    { id: 8, name: "Classic Irani Chadar", slug: "classic-irani-chadar-1", category: "irani-chadar", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Black", now: "8,990", tag: "NEW IN", mainImg: "/Categories/iranichadar/irani1.png", altImg: "/Categories/iranichadar/irani2.png", swatches: ["#1c1c1a"] },
-    { id: 9, name: "Flowing Irani Chadar", slug: "flowing-irani-chadar-2", category: "irani-chadar", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Black", now: "8,990", mainImg: "/Categories/iranichadar/irani2.png", altImg: "/Categories/iranichadar/irani3.png", swatches: ["#1c1c1a"] },
-    { id: 10, name: "Premium Irani Chadar", slug: "premium-irani-chadar-3", category: "irani-chadar", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Black", now: "9,490", mainImg: "/Categories/iranichadar/irani3.png", altImg: "/Categories/iranichadar/irani4.png", swatches: ["#1c1c1a"] },
-    { id: 11, name: "Everyday Irani Chadar", slug: "everyday-irani-chadar-4", category: "irani-chadar", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Black", now: "7,990", mainImg: "/Categories/iranichadar/irani4.png", altImg: "/Categories/iranichadar/irani5.png", swatches: ["#1c1c1a"] },
-    { id: 12, name: "Lightweight Irani Chadar", slug: "lightweight-irani-chadar-5", category: "irani-chadar", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Black", now: "8,490", mainImg: "/Categories/iranichadar/irani5.png", altImg: "/Categories/iranichadar/irani1.png", swatches: ["#1c1c1a"] },
-    
-    // Jilbab
-    { id: 13, name: "Two Piece Jilbab", slug: "two-piece-jilbab-1", category: "jilbab", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Black", now: "6,990", tag: "Bestseller", mainImg: "/Categories/jilbab/jilbab.png", altImg: "/Categories/jilbab/jilbab2.png", swatches: ["#1c1c1a"] },
-    { id: 14, name: "Overhead Jilbab", slug: "overhead-jilbab-2", category: "jilbab", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Olive", now: "6,490", mainImg: "/Categories/jilbab/jilbab2.png", altImg: "/Categories/jilbab/jilbab3.png", swatches: ["#3E4930"] },
-    { id: 15, name: "Premium Jilbab Set", slug: "premium-jilbab-set-3", category: "jilbab", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Dusty Rose", now: "7,490", mainImg: "/Categories/jilbab/jilbab3.png", altImg: "/Categories/jilbab/jilbab4.png", swatches: ["#E7D9C9"] },
-    { id: 16, name: "Everyday Jilbab", slug: "everyday-jilbab-4", category: "jilbab", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Ivory", now: "5,990", mainImg: "/Categories/jilbab/jilbab4.png", altImg: "/Categories/jilbab/jilbab.png", swatches: ["#EFE4CC"] },
-    
-    // Namaz Chadar
-    { id: 17, name: "Comfort Namaz Chadar", slug: "comfort-namaz-chadar-1", category: "namaz-chadar", sizes: "One Size", sizesArray: ["One Size"], fabric: "Linen Blend", color: "Ivory", now: "3,490", tag: "Essential", mainImg: "/Categories/namazchadar/namazchaddar.png", altImg: "/Categories/namazchadar/namazchaddar.png", swatches: ["#ffffff"] },
-    
-    // Round Chadar
-    { id: 18, name: "Classic Round Chadar", slug: "classic-round-chadar-1", category: "round-chadar", sizes: "One Size", sizesArray: ["One Size"], fabric: "Nida Crepe", color: "Black", now: "4,490", mainImg: "/Categories/roundchadar/round1.png", altImg: "/Categories/roundchadar/round1.png", swatches: ["#1c1c1a"] }
-  ];
-
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { categoryId } = useParams();
 
-  const categoryHeaders = {
-    abayas: {
-      title: "Abayas",
-      eyebrow: "Full Coverage · XS – XXL",
-      desc: "Structured yet soft, tailored generously for every body — from everyday wear to Eid mornings.",
-      image: "/Categories/abaya/abaya1.png"
-    },
-    hijabs: {
-      title: "Hijabs",
-      eyebrow: "Premium Fabrics",
-      desc: "Breathable and drapeable hijabs for everyday luxury.",
-      image: "/Categories/hijabs/hijab1.png"
-    },
-    "irani-chadar": {
-      title: "Irani Chadar",
-      eyebrow: "Traditional Coverage",
-      desc: "Elegant and flowing irani chadar made from premium nida.",
-      image: "/Categories/iranichadar/irani1.png"
-    },
-    jilbab: {
-      title: "Jilbabs",
-      eyebrow: "Classic Modesty",
-      desc: "Comfortable two-piece and overhead jilbabs for complete coverage.",
-      image: "/Categories/jilbab/jilbab.png"
-    },
-    "namaz-chadar": {
-      title: "Namaz Chadar",
-      eyebrow: "Prayer Essentials",
-      desc: "Soft, breathable cotton-blend chadar perfect for your daily prayers.",
-      image: "/Categories/namazchadar/namazchaddar.png"
-    },
-    "round-chadar": {
-      title: "Round Chadar",
-      eyebrow: "Perfect Drape",
-      desc: "Classic round chadar ensuring perfect coverage with premium fabric.",
-      image: "/Categories/roundchadar/round1.png"
-    }
-  };
+  useEffect(() => {
+    setLoading(true);
+    
+    // Fetch categories and products simultaneously
+    const catUrl = `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/categories`;
+    const prodUrl = categoryId 
+      ? `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/products?category=${categoryId}`
+      : `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/products`;
+      
+    Promise.all([
+      fetch(catUrl).then(res => res.json()),
+      fetch(prodUrl).then(res => res.json())
+    ])
+      .then(([catsData, prodsData]) => {
+        setCategories(catsData);
+        
+        const formatted = prodsData.map(item => ({
+          id: item.product_id,
+          name: item.name,
+          slug: item.slug,
+          category: item.category_slug || item.category,
+          sizes: Array.isArray(item.sizes) ? item.sizes.join(" - ") : item.sizes,
+          sizesArray: Array.isArray(item.sizes) ? item.sizes : [],
+          fabric: item.fabric,
+          color: item.color,
+          was: item.compare_at_price ? item.compare_at_price.toLocaleString() : null,
+          now: item.price ? item.price.toLocaleString() : "0",
+          tag: item.badge,
+          mainImg: item.image_url,
+          altImg: item.thumbnails && item.thumbnails.length > 1 ? item.thumbnails[1] : item.image_url,
+          swatches: item.colorSwatches ? item.colorSwatches.map(sw => sw.hex) : [],
+          stock_quantity: item.stock_quantity
+        }));
+        setProducts(formatted);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch data:", err);
+        setLoading(false);
+      });
+  }, [categoryId]);
 
-  const currentHeader = categoryHeaders[categoryId] || categoryHeaders.abayas;
+  // Determine current category header
+  let currentHeader = {
+    title: "All Collections",
+    eyebrow: "Explore Our Full Range",
+    desc: "Discover every piece from all our exclusive collections.",
+    image: "/hero2.png"
+  };
+  
+  let dynamicFilters = [
+    { title: "Fabric", options: ["Premium Nida", "Chiffon", "Jersey"] },
+    { title: "Color", options: ["Black", "Olive", "Dusty Rose"] }
+  ];
+
+  if (categoryId && categories.length > 0) {
+    const activeCat = categories.find(c => c.slug === categoryId || c.name.toLowerCase() === categoryId.toLowerCase());
+    if (activeCat) {
+      currentHeader = {
+        title: activeCat.hero_title || activeCat.name,
+        eyebrow: activeCat.seo_title || "Premium Modest Fashion",
+        desc: activeCat.hero_description || activeCat.description,
+        image: activeCat.banner_image || activeCat.image_url || "/hero2.png"
+      };
+      
+      if (activeCat.filters && activeCat.filters.length > 0) {
+        dynamicFilters = activeCat.filters.map(f => ({
+           title: f, 
+           // In a real app, we'd fetch actual values from product variants/specs for these options
+           options: f === 'Size' ? ["XS", "S", "M", "L", "XL"] : ["All"] 
+        }));
+      }
+    }
+  }
+
+  const filterSections = dynamicFilters;
+
   const { toggleWishlist, addToCart, wishlistItems } = useContext(CartContext);
 
   const [selectedFilters, setSelectedFilters] = useState({
@@ -197,7 +198,7 @@ const CategoriesPage = () => {
               <select
                 key={section.title}
                 className="native-filter-select"
-                value={selectedFilters[section.title][0] || ""}
+                value={selectedFilters[section.title]?.[0] || ""}
                 onChange={(e) => handleSelectChange(section.title, e.target.value)}
               >
                 <option value="">{section.title}</option>
@@ -232,7 +233,7 @@ const CategoriesPage = () => {
                   <label className="sidebar-filter-opt" key={i}>
                     <input 
                       type="checkbox" 
-                      checked={selectedFilters[section.title].includes(opt)}
+                      checked={selectedFilters[section.title]?.includes(opt) || false}
                       onChange={() => handleCheckboxChange(section.title, opt)}
                     /> 
                     <span>{opt}</span>
@@ -292,6 +293,9 @@ const CategoriesPage = () => {
                           <h4 style={{ margin: 0 }}>{item.name}</h4>
                         </Link>
                         <span className="sizes">{item.sizes}</span>
+                        <div style={{ fontSize: '0.85rem', color: item.stock_quantity > 0 ? 'green' : 'red', marginTop: '4px' }}>
+                          {item.stock_quantity > 0 ? `${item.stock_quantity} in stock` : 'Out of stock'}
+                        </div>
                         <div className="swatches">
                           {item.swatches.map((color, index) => (
                             <span key={index} style={{ background: color }}></span>

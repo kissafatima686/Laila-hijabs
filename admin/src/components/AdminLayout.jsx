@@ -16,8 +16,9 @@ const AdminLayout = () => {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#182012',
-      fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+      backgroundColor: '#F6F1E3',
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      color: '#3E4930'
     }}>
       <Sidebar />
       <div style={{
@@ -29,7 +30,7 @@ const AdminLayout = () => {
         <Header />
         <main style={{
           flex: 1,
-          padding: '32px',
+          padding: '24px 28px',
           overflowY: 'auto',
           boxSizing: 'border-box'
         }}>

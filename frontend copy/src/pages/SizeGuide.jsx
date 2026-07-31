@@ -39,20 +39,20 @@ const SizeGuide = () => {
       </div>
       <div className="how-to-measure-section">
   <h2>HOW TO MEASURE</h2>
-  <div className="measure-content">
-    <div className="measure-text-left">
-      <p>To determine your length, measure from the highest point of your shoulder to the length you want the dress to sit.</p>
-      <p><strong>TIP:</strong> For accurate measurements, wear the shoes you intend to pair with the garment. If you plan to wear heels with a garment, consider sizing up for the length measurement.</p>
+  <div className="measure-content" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="measure-text-top" style={{ textAlign: 'left', lineHeight: '1.6' }}>
+      <p style={{ margin: '0 0 15px 0' }}>To determine your length, measure from the highest point of your shoulder to the length you want the dress to sit.</p>
+      <p style={{ margin: 0 }}><strong>TIP:</strong> For accurate measurements, wear the shoes you intend to pair with the garment. If you plan to wear heels with a garment, consider sizing up for the length measurement.</p>
     </div>
     
-    <div className="measure-image">
-      <img src="/hero2.png" alt="How to measure guide" />
+    <div className="measure-image" style={{ width: '100%', maxWidth: '600px', margin: '10px 0' }}>
+      <img src="/hero2.png" alt="How to measure guide" style={{ width: '100%', borderRadius: '4px' }} />
     </div>
 
-    <div className="measure-text-right">
-      <p>Measure around the fullest part of your chest.</p>
-      <p>Measure at the narrowest part of your waistline.</p>
-      <p>Measure at the fullest part of your hips.</p>
+    <div className="measure-text-bottom" style={{ textAlign: 'left', lineHeight: '1.8' }}>
+      <p style={{ margin: '0 0 10px 0' }}>Measure around the fullest part of your chest.</p>
+      <p style={{ margin: '0 0 10px 0' }}>Measure at the narrowest part of your waistline.</p>
+      <p style={{ margin: 0 }}>Measure at the fullest part of your hips.</p>
     </div>
   </div>
 </div>

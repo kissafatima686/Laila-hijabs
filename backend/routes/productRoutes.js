@@ -13,7 +13,15 @@ const {
   getProductReviews,
   submitProductReview,
   getHomepageSections,
-  getProductsByDisplaySection
+  getProductsByDisplaySection,
+  getOrdersByEmail,
+  getCustomOrdersByEmail,
+  registerUser,
+  loginUser,
+  updateUserAddress,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist
 } = require('../controllers/productController');
 
 // Homepage Sections
@@ -27,9 +35,11 @@ router.get('/products/:slug', getProductBySlug);
 
 // Customer Checkout Order
 router.post('/orders', createOrder);
+router.get('/orders/:email', getOrdersByEmail);
 
 // Custom Bespoke Tailoring Orders Form (CustomOrdersPage.jsx)
 router.post('/custom-orders', submitCustomOrder);
+router.get('/custom-orders/:email', getCustomOrdersByEmail);
 
 // Affiliate Application Form now handled by affiliateRoutes.js
 
@@ -45,5 +55,15 @@ router.get('/locations', getStoreLocations);
 // Customer Product Reviews & Submission (ProductDetail.jsx)
 router.get('/products/:productId/reviews', getProductReviews);
 router.post('/products/:productId/reviews', submitProductReview);
+
+// ─── Customer Authentication & Profiles ───────────────────────────────────────
+router.post('/auth/register', registerUser);
+router.post('/auth/login', loginUser);
+router.put('/users/:id/address', updateUserAddress);
+
+// ─── Customer Wishlist ────────────────────────────────────────────────────────
+router.get('/wishlist/:userId', getWishlist);
+router.post('/wishlist', addToWishlist);
+router.delete('/wishlist/:userId/:productId', removeFromWishlist);
 
 module.exports = router;

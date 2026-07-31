@@ -3,193 +3,11 @@ import { createPortal } from 'react-dom';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { products as mainProducts } from '../../data/products';
 import { CartContext } from '../../context/CartContext';
+import { useContent } from '../../context/useContent';
 import ProductReviews from './ProductReviews';
 import './ProductDetail.css';
 
-// Unified product database including detail fields
-const productDatabase = [
-  {
-    id: 101,
-    slug: "lamia-open-kaftan-set",
-    category: "CO-ORD SETS",
-    name: "LAMIA OPEN KAFTAN SET",
-    price: 9900,
-    description: "Two-piece kaftan set with an inner layer and flowing open kaftan. Highlights a beautiful drape and structure perfect for any occasion.",
-    image: "/hero2.png",
-    thumbnails: ["/hero2.png", "/hero1.png", "/hero2.png", "/hero1.png"],
-    features: [
-      "Model is 5'7, UK 8-10 and wears size S 58",
-      "Size options",
-      "Burgundy colour",
-      "Premium Nida-silk fabric",
-      "Stand collar",
-      "Concealed button fastening",
-      "Feature self-fabric buttons",
-      "Wide leg trousers",
-      "Side pockets",
-      "Sold as a set"
-    ],
-    color: "Burgundy",
-    colorSwatches: [
-      { name: "Burgundy", hex: "#722F37" },
-      { name: "Olive", hex: "#5C6B44" },
-      { name: "Ivory", hex: "#F5F2EA" }
-    ],
-    sizes: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
-    badge: "NEW IN",
-    fitType: "Regular Fit"
-  },
-  {
-    id: 102,
-    slug: "structured-day-abaya",
-    category: "ABAYAS",
-    name: "STRUCTURED DAY ABAYA",
-    price: 5990,
-    description: "Tailored structured abaya designed for daily comfort and elegant modesty.",
-    image: "/hero2.png",
-    thumbnails: ["/hero2.png", "/hero1.png", "/hero2.png", "/hero1.png"],
-    features: [
-      "Model is 5'8 and wears size S 56",
-      "Relaxed fit",
-      "Olive colour",
-      "Breathable Nida crepe fabric",
-      "Stand collar",
-      "Concealed button fastening",
-      "Side pocket details",
-      "Single breasted closure"
-    ],
-    color: "Olive",
-    colorSwatches: [
-      { name: "Olive", hex: "#5C6B44" },
-      { name: "Black", hex: "#222222" }
-    ],
-    sizes: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
-    badge: "BEST SELLER",
-    fitType: "Regular Fit"
-  },
-  {
-    id: 103,
-    slug: "ivory-chiffon-abaya",
-    category: "ABAYAS",
-    name: "IVORY CHIFFON ABAYA",
-    price: 6490,
-    description: "Ethereal lightweight chiffon abaya with full interior lining.",
-    image: "/hero2.png",
-    thumbnails: ["/hero2.png", "/hero1.png", "/hero2.png", "/hero1.png"],
-    features: [
-      "Model is 5'7, UK 8-10 and wears size S",
-      "Georgette chiffon with smooth lining",
-      "Ivory colour",
-      "Elegant cuff buttons",
-      "Flowing silhouette",
-      "Lightweight feel"
-    ],
-    color: "Ivory",
-    colorSwatches: [
-      { name: "Ivory", hex: "#F5F2EA" },
-      { name: "Dusty Rose", hex: "#D4A5A5" }
-    ],
-    sizes: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
-    badge: "NEW IN",
-    fitType: "Loose Fit"
-  },
-  {
-    id: 104,
-    slug: "gold-trim-eid-abaya",
-    category: "EID COLLECTION",
-    name: "GOLD-TRIM EID ABAYA",
-    price: 7490,
-    description: "Luxury festive abaya featuring delicate gold-trim borders on sleeves and hem.",
-    image: "/hero2.png",
-    thumbnails: ["/hero2.png", "/hero1.png", "/hero2.png", "/hero1.png"],
-    features: [
-      "Gold trim accents",
-      "Satin blend sheen",
-      "Olive colour",
-      "Perfect for Eid morning",
-      "Includes self-tie belt"
-    ],
-    color: "Olive",
-    colorSwatches: [
-      { name: "Olive", hex: "#5C6B44" },
-      { name: "Burgundy", hex: "#722F37" }
-    ],
-    sizes: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
-    badge: "EXCLUSIVE",
-    fitType: "Regular Fit"
-  },
-  {
-    id: 105,
-    slug: "dusty-rose-open-abaya",
-    category: "ABAYAS",
-    name: "DUSTY ROSE OPEN ABAYA",
-    price: 6890,
-    description: "An elegant open abaya set in a beautiful blush rose shade.",
-    image: "/hero2.png",
-    thumbnails: ["/hero2.png", "/hero1.png", "/hero2.png", "/hero1.png"],
-    features: [
-      "Linen blend comfort",
-      "Open front look",
-      "Dusty Rose colour",
-      "Wide sleeve detail"
-    ],
-    color: "Dusty Rose",
-    colorSwatches: [
-      { name: "Dusty Rose", hex: "#D4A5A5" },
-      { name: "Sage", hex: "#9CAF88" }
-    ],
-    sizes: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
-    badge: "NEW IN",
-    fitType: "Loose Fit"
-  },
-  {
-    id: 106,
-    slug: "classic-black-abaya",
-    category: "ABAYAS",
-    name: "CLASSIC BLACK ABAYA",
-    price: 5490,
-    description: "The essential timeless black abaya for everyday modest style.",
-    image: "/hero2.png",
-    thumbnails: ["/hero2.png", "/hero1.png", "/hero2.png", "/hero1.png"],
-    features: [
-      "Nida fabric quality",
-      "Deep black tone",
-      "Easy maintenance",
-      "Side pockets"
-    ],
-    color: "Black",
-    colorSwatches: [
-      { name: "Black", hex: "#222222" }
-    ],
-    sizes: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
-    badge: "ESSENTIAL",
-    fitType: "Regular Fit"
-  },
-  {
-    id: 107,
-    slug: "everyday-comfort-abaya",
-    category: "ABAYAS",
-    name: "EVERYDAY COMFORT ABAYA",
-    price: 4990,
-    description: "Ultra-breathable linen-blend abaya crafted for ease and versatility.",
-    image: "/hero2.png",
-    thumbnails: ["/hero2.png", "/hero1.png", "/hero2.png", "/hero1.png"],
-    features: [
-      "Linen fabric blend",
-      "Comfortable wide sleeve",
-      "Brand label details",
-      "Side slit hem"
-    ],
-    color: "Ivory",
-    colorSwatches: [
-      { name: "Ivory", hex: "#F5F2EA" },
-      { name: "Olive", hex: "#5C6B44" }
-    ],
-    sizes: ["XXS", "XS", "S", "M", "L", "XL", "XXL"],
-    fitType: "Loose Fit"
-  },
-  ...mainProducts
-];
+
 
 // Interactive "How We Do It" pillars
 const howWeDoItPillars = [
@@ -265,14 +83,53 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addToCart, addToWishlist, removeFromWishlist, wishlistItems } = useContext(CartContext);
 
-  const product = productDatabase.find((p) => p.slug === slug);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const mainImageDefault = product ? (product.image || product.mainImage || "/hero2.png") : "/hero2.png";
   const [activeImage, setActiveImage] = useState(mainImageDefault);
   const [selectedSize, setSelectedSize] = useState("S");
-  const [selectedColor, setSelectedColor] = useState(product ? (product.color || "Yellow") : "Yellow");
+  const [selectedColor, setSelectedColor] = useState("Yellow");
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState('conversion');
+
+  React.useEffect(() => {
+    // Fetch product
+    setLoading(true);
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/products/${slug}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setProduct({ ...data, features: data.features || [] });
+          setActiveImage(data.image_url || data.image || "/hero2.png");
+          setSelectedColor(data.color || "Yellow");
+          
+          // Setup category items if bundle attributes are active
+          if (data.bundle_attributes) {
+             let ba = data.bundle_attributes;
+             if (typeof ba === 'string') {
+                 try { ba = JSON.parse(ba); } catch(e) {}
+             }
+             if (ba && ba.isActive && ba.items) {
+                 const curColor = data.color || "Olive Green";
+                 const curFabric = data.material || data.fabric || "Nida Crepe";
+                 setCategoryItems(ba.items.map(item => ({
+                     id: item.id || Math.random().toString(),
+                     garmentType: item.name.replace('FOR ', ''),
+                     size: 'S',
+                     fabricType: curFabric,
+                     customColor: curColor
+                 })));
+             }
+          }
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch product detail", err);
+        setLoading(false);
+      });
+  }, [slug]);
 
   // Accordion states
   const [openFabricFit, setOpenFabricFit] = useState(false);
@@ -282,20 +139,50 @@ const ProductDetail = () => {
   // How We Do It Modal state
   const [activePillar, setActivePillar] = useState(null);
 
+  const { getSectionContent } = useContent();
+  const specsConfig = getSectionContent('products_specs_template', 'specs', []);
+  const specsIsActive = getSectionContent('products_specs_template', 'isActive', true);
+
   const [categoryItems, setCategoryItems] = useState(() => {
     const curColor = product ? (product.color || "Olive Green") : "Olive Green";
     const curFabric = product ? (product.material || product.fabric || "Nida Crepe") : "Nida Crepe";
 
-    return [
-      { id: 'cat-abaya', garmentType: 'Abaya', size: 'S', fabricType: curFabric, customColor: curColor },
-      { id: 'cat-scarf', garmentType: 'Scarf / Hijab', size: 'Free Size', fabricType: 'Georgette Chiffon', customColor: curColor },
-      { id: 'cat-coord', garmentType: 'Co-Ord Set', size: 'S', fabricType: 'Cotton Blend Poplin', customColor: curColor },
-      { id: 'cat-irani', garmentType: 'Irani Chadar', size: 'S', fabricType: 'Lightweight Nida Fabric', customColor: curColor },
-      { id: 'cat-jilbab', garmentType: 'Jilbab', size: 'S', fabricType: 'Soft Nida Silk Blend', customColor: curColor },
-      { id: 'cat-namaz', garmentType: 'Namaz Chadar', size: 'S', fabricType: '100% Soft Cotton', customColor: curColor },
-      { id: 'cat-round', garmentType: 'Round Chadar', size: 'S', fabricType: 'Premium Nida Fabric', customColor: curColor }
+    const baseItems = specsConfig && specsConfig.length > 0 ? specsConfig.map(spec => {
+      let gTypeOptions = Array.isArray(spec.garmentTypes) ? spec.garmentTypes : (typeof spec.garmentTypes === 'string' ? spec.garmentTypes.split(',').map(s=>({name:s.trim(), active:true})) : []);
+      let fTypeOptions = Array.isArray(spec.fabricTypes) ? spec.fabricTypes : (typeof spec.fabricTypes === 'string' ? spec.fabricTypes.split(',').map(s=>({name:s.trim(), active:true})) : []);
+      
+      return {
+        id: spec.id,
+        name: spec.name,
+        garmentTypeLabel: spec.garmentTypeLabel || 'GARMENT TYPE',
+        garmentType: gTypeOptions.find(o => o.active)?.name || 'Abaya',
+        garmentTypes: gTypeOptions,
+        size: 'S',
+        fabricTypeLabel: spec.fabricTypeLabel || 'FABRIC TYPE',
+        fabricType: fTypeOptions.find(o => o.active)?.name || curFabric,
+        fabricTypes: fTypeOptions,
+        customColor: curColor,
+        hasSize: spec.hasSize !== false,
+        hasColor: spec.hasColor !== false,
+        hasSizeGuide: spec.hasSizeGuide !== false,
+        measurements: { abayaLength: '', abayaWidth: '', sleeveLength: '', sleeveWidth: '', shoulderWidth: '' }
+      };
+    }) : [
+      { id: 'cat-abaya', name: 'FOR ABAYA', garmentType: 'Abaya', size: 'S', fabricType: curFabric, customColor: curColor, measurements: { abayaLength: '', abayaWidth: '', sleeveLength: '', sleeveWidth: '', shoulderWidth: '' }, garmentTypes: 'Abaya', fabricTypes: 'Nida Crepe, Cotton Blend Poplin', hasSize: true },
+      { id: 'cat-scarf', name: 'FOR SCARF / HIJAB', garmentType: 'Scarf / Hijab', size: 'Free Size', fabricType: 'Georgette Chiffon', customColor: curColor, garmentTypes: 'Scarf / Hijab', fabricTypes: 'Georgette Chiffon, Cotton Jersey, Silk Satin', hasSize: false },
+      { id: 'cat-coord', name: 'FOR CO-ORD SET', garmentType: 'Co-Ord Set', size: 'S', fabricType: 'Cotton Blend Poplin', customColor: curColor, garmentTypes: 'Co-Ord Set', fabricTypes: 'Cotton Blend Poplin', hasSize: true }
     ];
+    return baseItems;
   });
+
+  const visibleCategoryItems = React.useMemo(() => {
+    if (!specsConfig || specsConfig.length === 0) return categoryItems;
+    return categoryItems.filter(item => {
+      const spec = specsConfig.find(s => s.id === item.id);
+      if (spec && spec.active === false) return false;
+      return true;
+    });
+  }, [categoryItems, specsConfig]);
 
   const [openCategoryAccordions, setOpenCategoryAccordions] = useState({});
 
@@ -338,6 +225,10 @@ const ProductDetail = () => {
     }
   }, [slug, product]);
 
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: '100px' }}>Loading...</div>;
+  }
+
   if (!product) {
     return (
       <div className="product-not-found" style={{ padding: '80px 20px', textAlign: 'center' }}>
@@ -350,23 +241,15 @@ const ProductDetail = () => {
   }
 
   const thumbnails = product.thumbnails || [mainImageDefault, "/hero1.png", mainImageDefault, "/hero1.png"];
-  const features = product.features || [
-    `Model is 5'7, UK 8-10 and wears size ${selectedSize}`,
-    "Size options",
-    `${product.color || 'Yellow'} colour`,
-    product.material || "Cotton blend poplin",
-    "Stand collar",
-    "Concealed button fastening",
-    "Utility-inspired pockets",
-    "Self-tie waist belt",
-    "Wide leg trousers",
-    "Side pockets",
-    "Sold as a set"
-  ];
-  const sizes = product.sizes || ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
-  const displayPrice = typeof product.price === 'number' 
-    ? `Rs. ${product.price.toLocaleString()}` 
-    : product.price;
+  const displayPrice = product.sale_price 
+    ? `Rs. ${product.sale_price.toLocaleString()}` 
+    : (typeof product.price === 'number' 
+        ? `Rs. ${product.price.toLocaleString()}` 
+        : product.price);
+        
+  const displayComparePrice = product.compare_at_price
+    ? `Rs. ${product.compare_at_price.toLocaleString()}`
+    : null;
 
   const isWishlisted = wishlistItems?.some(item => (item.id && item.id === product.id) || (item.slug && item.slug === product.slug));
 
@@ -398,18 +281,7 @@ const ProductDetail = () => {
     { name: "Nude", hex: "#C8A88B" }
   ];
 
-  const getProductFabric = (prod) => {
-    if (prod.material) return prod.material;
-    if (prod.fabric) return prod.fabric;
-    const cat = (prod.category || '').toLowerCase();
-    if (cat.includes('hijab') || cat.includes('scarf')) return "Premium Georgette Chiffon";
-    if (cat.includes('abaya')) return "Breathable Nida Crepe";
-    if (cat.includes('irani')) return "Lightweight Nida Fabric";
-    if (cat.includes('jilbab')) return "Soft Nida Silk Blend";
-    if (cat.includes('namaz')) return "100% Breathable Soft Cotton";
-    if (cat.includes('round')) return "Classic Nida Crepe";
-    return "Cotton & Silk Blend";
-  };
+  const sizes = product.sizes || ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 
   return (
     <div className="product-page-container">
@@ -446,19 +318,33 @@ const ProductDetail = () => {
         <div className="right-info-column">
           <span className="category-label">{product.category || "CO-ORD SETS"}</span>
           <h1 className="product-main-title">{(product.name || "").toUpperCase()}</h1>
-          <p className="product-price">{displayPrice}</p>
+          <p className="product-price" style={{ display: "flex", gap: "10px", alignItems: "center" }}>{displayPrice} {displayComparePrice && <span style={{ textDecoration: "line-through", color: "#888", fontSize: "0.8em" }}>{displayComparePrice}</span>}</p>
 
           <p className="product-description">{product.description}</p>
+          
+          {product.features && product.features.length > 0 && (
+            <ul className="prod-features-list">
+              {product.features.map((ft, i) => (
+                <li key={i}>{ft}</li>
+              ))}
+            </ul>
+          )}
+
+          <p className="prod-sku">SKU: {product.id} • {product.category}</p>
+
+          <div style={{ marginTop: '15px', color: product.stock_quantity > 0 ? 'green' : 'red', fontWeight: 'bold' }}>
+            {product.stock_quantity > 0 ? `${product.stock_quantity} in stock - Ready to ship!` : 'Out of stock'}
+          </div>
 
           {/* Category Details FAQ Accordions Block */}
-          <div className="product-category-accordions-container">
+          {(product && product.bundle_attributes && (typeof product.bundle_attributes === 'string' ? JSON.parse(product.bundle_attributes) : product.bundle_attributes).isActive && specsIsActive) && (<div className="product-category-accordions-container">
             <div className="category-accordions-header">
               <span className="specs-title">CATEGORY SPECIFICATIONS & CUSTOMIZATION</span>
             </div>
 
             {/* Accordion list for each category */}
             <div className="category-accordions-list">
-              {categoryItems.map((item) => {
+              {visibleCategoryItems.map((item) => {
                 const isScarf = item.garmentType.toLowerCase().includes('scarf') || item.garmentType.toLowerCase().includes('hijab');
                 const isOpen = Boolean(openCategoryAccordions[item.id]);
 
@@ -471,7 +357,7 @@ const ProductDetail = () => {
                         onClick={() => toggleCategoryAccordion(item.id)}
                       >
                         <span className="category-accordion-title">
-                          FOR {item.garmentType.toUpperCase()}
+                          {item.name.toUpperCase()}
                         </span>
                         <span className="category-accordion-chevron">{isOpen ? '∧' : '∨'}</span>
                       </button>
@@ -482,67 +368,46 @@ const ProductDetail = () => {
                         {/* Garment & Fabric Type Row */}
                         <div className="custom-form-row">
                           <div className="custom-form-field">
-                            <label className="custom-field-label">GARMENT TYPE *</label>
+                            <label className="custom-field-label">{item.garmentTypeLabel || 'GARMENT TYPE'} *</label>
                             <select 
                               className="custom-field-select"
                               value={item.garmentType}
                               onChange={(e) => updateCategoryItem(item.id, 'garmentType', e.target.value)}
                             >
-                              <option value="Abaya">Abaya</option>
-                              <option value="Scarf / Hijab">Scarf / Hijab</option>
-                              <option value="Co-Ord Set">Co-Ord Set</option>
-                              <option value="Irani Chadar">Irani Chadar</option>
-                              <option value="Jilbab">Jilbab</option>
-                              <option value="Namaz Chadar">Namaz Chadar</option>
-                              <option value="Round Chadar">Round Chadar</option>
+                              {(item.garmentTypes || []).filter(o => o.active).map((opt, i) => (
+                                <option key={i} value={opt.name}>{opt.name}</option>
+                              ))}
                             </select>
                           </div>
 
                           <div className="custom-form-field">
-                            <label className="custom-field-label">FABRIC TYPE *</label>
+                            <label className="custom-field-label">{item.fabricTypeLabel || 'FABRIC TYPE'} *</label>
                             <select 
                               className="custom-field-select"
                               value={item.fabricType}
                               onChange={(e) => updateCategoryItem(item.id, 'fabricType', e.target.value)}
                             >
-                              <option value="Nida Crepe">Nida Crepe</option>
-                              <option value="Georgette Chiffon">Georgette Chiffon</option>
-                              <option value="Cotton Jersey">Cotton Jersey</option>
-                              <option value="Silk Satin">Silk Satin</option>
-                              <option value="Cotton Blend Poplin">Cotton Blend Poplin</option>
-                              <option value="Linen Blend">Linen Blend</option>
-                              <option value="Soft Cotton">Soft Cotton</option>
+                              {(item.fabricTypes || []).filter(o => o.active).map((opt, i) => (
+                                <option key={i} value={opt.name}>{opt.name}</option>
+                              ))}
                             </select>
                           </div>
                         </div>
 
                         {/* Color Selector matching Image 2 */}
-                        <div className="color-selection-block">
-                          <div className="color-header">
-                            <span className="block-label">COLOUR:</span>
-                            <span className="selected-color-name">{(item.customColor || selectedColor || "").toUpperCase()}</span>
-                          </div>
-                          <div className="swatches-row">
-                            {colorSwatches.map((swatch, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                className={`color-swatch-circle ${(item.customColor || selectedColor) === swatch.name ? 'active' : ''}`}
-                                style={{ backgroundColor: swatch.hex }}
-                                onClick={() => {
-                                  updateCategoryItem(item.id, 'customColor', swatch.name);
-                                  setSelectedColor(swatch.name);
-                                }}
-                                title={swatch.name}
-                              />
-                            ))}
-                            <div className="custom-color-input-wrapper" style={{ marginLeft: '12px', flex: 1 }}>
+                        {item.hasColor !== false && (
+                          <div className="color-selection-block" style={{ marginBottom: '20px' }}>
+                            <div className="color-header" style={{ marginBottom: '8px' }}>
+                              <span className="block-label" style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '1px' }}>COLOUR:</span>
+                              <span className="selected-color-name" style={{ marginLeft: '10px', color: '#888', fontSize: '11px', letterSpacing: '1px' }}>{(item.customColor || selectedColor || "").toUpperCase()}</span>
+                            </div>
+                            <div className="custom-color-input-wrapper">
                               <input 
                                 type="text"
                                 className="custom-field-input"
-                                style={{ padding: '6px 10px', fontSize: '12px' }}
-                                placeholder="Or enter custom color name..."
-                                value={item.customColor}
+                                style={{ width: '100%', padding: '10px', fontSize: '13px', backgroundColor: '#e9e3d5', border: '1px solid #d4cbb8', borderRadius: '4px', outline: 'none' }}
+                                placeholder="Enter colour..."
+                                value={item.customColor || selectedColor || ""}
                                 onChange={(e) => {
                                   updateCategoryItem(item.id, 'customColor', e.target.value);
                                   setSelectedColor(e.target.value);
@@ -550,24 +415,25 @@ const ProductDetail = () => {
                               />
                             </div>
                           </div>
-                        </div>
+                        )}
 
                         {/* Size Selector matching Image 2 */}
-                        {!isScarf && (
+                        {item.hasSize !== false && (
                           <div className="size-selection-block">
                             <div className="size-header-line">
                               <span className="block-label">SELECT SIZE</span>
-                              <button 
-                                type="button" 
-                                className="size-guide-link"
-                                onClick={() => setShowSizeChart(true)}
-                              >
-                                SIZE GUIDE
-                              </button>
+                              {item.hasSizeGuide !== false && (
+                                <Link 
+                                  to="/size-guide"
+                                  className="size-guide-link"
+                                >
+                                  SIZE GUIDE
+                                </Link>
+                              )}
                             </div>
 
                             <div className="size-boxes-grid">
-                              {sizes.map((size) => {
+                              {product.sizes && product.sizes.map((size) => {
                                 const isOutOfStock = size === "XXS";
                                 return (
                                   <button
@@ -600,24 +466,26 @@ const ProductDetail = () => {
               })}
             </div>
           </div>
+          )}
 
           {/* Standalone Color & Size Selector Block Above Cart Button */}
-          <div className="product-quick-selection-block" style={{ margin: '20px 0 24px 0' }}>
+          {(!product || !product.bundle_attributes || !(typeof product.bundle_attributes === 'string' ? JSON.parse(product.bundle_attributes) : product.bundle_attributes).isActive) && (<div className="product-quick-selection-block" style={{ margin: '20px 0 24px 0' }}>
             {/* Color Selector */}
             <div className="color-selection-block">
               <div className="color-header">
                 <span className="block-label">COLOUR:</span>
                 <span className="selected-color-name">{(selectedColor || "").toUpperCase()}</span>
               </div>
+
               <div className="swatches-row">
-                {colorSwatches.map((swatch, idx) => (
+                {product.variants && product.variants.map((variant, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    className={`color-swatch-circle ${selectedColor === swatch.name ? 'active' : ''}`}
-                    style={{ backgroundColor: swatch.hex }}
-                    onClick={() => setSelectedColor(swatch.name)}
-                    title={swatch.name}
+                    className={`color-swatch-circle ${selectedColor === variant.name ? 'active' : ''}`}
+                    style={{ backgroundColor: variant.hex }}
+                    onClick={() => handleColorChange(variant)}
+                    title={variant.name}
                   />
                 ))}
               </div>
@@ -627,17 +495,16 @@ const ProductDetail = () => {
             <div className="size-selection-block">
               <div className="size-header-line">
                 <span className="block-label">SELECT SIZE</span>
-                <button 
-                  type="button" 
-                  className="size-guide-link"
-                  onClick={() => setShowSizeChart(true)}
-                >
-                  SIZE GUIDE
-                </button>
+                                <Link 
+                                  to="/size-guide"
+                                  className="size-guide-link"
+                                >
+                                  SIZE GUIDE
+                                </Link>
               </div>
 
               <div className="size-boxes-grid">
-                {sizes.map((size) => {
+                {product.sizes && product.sizes.map((size) => {
                   const isOutOfStock = size === "XXS";
                   return (
                     <button
@@ -659,6 +526,7 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* Action Buttons */}
           <div className="cta-buttons-group">
@@ -942,7 +810,7 @@ const ProductDetail = () => {
               <h3 className="pillar-modal-title">{activePillar.headline}</h3>
               <p className="pillar-modal-text">{activePillar.description}</p>
               <div className="pillar-modal-actions">
-                <Link to="/our-story" onClick={() => setActivePillar(null)} className="pillar-action-btn">
+                <Link to="/gift-card" onClick={() => setActivePillar(null)} className="pillar-action-btn">
                   OUR STORY
                 </Link>
                 <button type="button" onClick={() => setActivePillar(null)} className="pillar-close-btn">

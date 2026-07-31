@@ -13,11 +13,30 @@ const WhatsAppFloat = () => {
 
   const url = `https://wa.me/${phone.replace(/[^0-9]/g, '')}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
 
+  const handleClick = (e) => {
+    e.preventDefault();
+    try {
+      fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'WhatsApp Float User',
+          email: 'N/A',
+          phone: phone,
+          subject: 'Initiated WhatsApp Chat via Floating Button',
+          message: 'The user clicked the floating WhatsApp button to chat.'
+        })
+      });
+    } catch (err) {
+      console.error('Failed to log WhatsApp click:', err);
+    }
+    window.open(url, '_blank');
+  };
+
   return (
     <a 
       href={url} 
-      target="_blank" 
-      rel="noopener noreferrer" 
+      onClick={handleClick}
       className={`global-wa-float ${position === 'bottom-left' ? 'pos-left' : 'pos-right'}`}
       aria-label="Chat on WhatsApp"
       title="Chat with us on WhatsApp"

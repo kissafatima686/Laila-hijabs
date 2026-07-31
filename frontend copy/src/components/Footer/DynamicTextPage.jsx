@@ -38,20 +38,12 @@ const DynamicTextPage = ({ sectionKey, fallbackTitle }) => {
         {subtitle && <h3 style={{ color: '#B8935B', marginBottom: '20px' }}>{subtitle}</h3>}
         {bodyContent && <p style={{ marginBottom: '40px' }}>{renderText(bodyContent)}</p>}
 
-        {Array.isArray(contentBlocks) && contentBlocks.map((block, idx) => {
-          if (block.status === 'Hidden' || block.status === 'Draft' || block.status === 'Inactive') return null;
-          const blockTitle = block.subheading || block.title || block.q;
-          const blockSub = block.subtitle;
-          const blockDesc = block.text || block.description || block.a;
-
-          return (
-            <div key={idx} style={{ marginBottom: '30px' }}>
-              {blockTitle && <h2>{blockTitle}</h2>}
-              {blockSub && <h4 style={{ color: '#B8935B', marginBottom: '8px', fontWeight: '600' }}>{blockSub}</h4>}
-              {blockDesc && <p>{renderText(blockDesc)}</p>}
-            </div>
-          );
-        })}
+        {Array.isArray(contentBlocks) && contentBlocks.map((block, idx) => (
+          <div key={idx} style={{ marginBottom: '30px' }}>
+            {block.subheading && <h2>{block.subheading}</h2>}
+            {block.text && <p>{renderText(block.text)}</p>}
+          </div>
+        ))}
 
         {!title && !bodyContent && (!contentBlocks || contentBlocks.length === 0) && (
           <p style={{ textAlign: 'center', color: '#666', fontStyle: 'italic' }}>

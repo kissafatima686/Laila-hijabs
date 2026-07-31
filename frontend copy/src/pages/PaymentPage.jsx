@@ -1,12 +1,13 @@
-import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { useContent } from '../context/useContent';
 import './PaymentPage.css';
 
 const PaymentPage = () => {
-  const { cartItems, cartTotal } = useContext(CartContext);
+  const { cartItems, cartTotal, clearCart } = useContext(CartContext);
   const { getSectionContent } = useContent();
+  const location = useLocation();
 
   // Dynamic Settings from Admin CMS
   const title = getSectionContent('payment_page_settings', 'title', 'Order Confirmation');
@@ -35,25 +36,37 @@ const PaymentPage = () => {
   });
   const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
+  // Read order details passed from Checkout
+  const passedOrder = location.state?.orderDetails || {};
+
   // Resolve cart items
-  const finalItems = cartItems.length > 0 ? cartItems : [
+  const finalItems = passedOrder.cartItems || (cartItems.length > 0 ? cartItems : [
     { name: "Premium Chiffon Hijab", size: "M", color: "Olive", quantity: 1, price: 2400 }
-  ];
-  const finalTotal = cartItems.length > 0 ? cartTotal : 2400;
+  ]);
+  const finalTotal = passedOrder.cartTotal || (cartItems.length > 0 ? cartTotal : 2400);
 
   const orderDetails = {
-    orderId: orderId,
+    orderId: passedOrder.orderId || orderId,
     date: dateStr,
-    customerName: "Valued Customer",
-    phone: "+92 323 8399480",
-    address: "Islamabad, Pakistan",
-    paymentMethod: "WhatsApp Confirmation Payment",
+    customerName: passedOrder.firstName ? `${passedOrder.firstName} ${passedOrder.lastName}` : "Valued Customer",
+    phone: passedOrder.phone || "+92 323 8399480",
+    address: passedOrder.address ? `${passedOrder.address}, ${passedOrder.city}` : "Islamabad, Pakistan",
+    paymentMethod: "WhatsApp Confirmation",
     items: finalItems,
     subtotal: finalTotal,
     discount: 0,
     shipping: 0,
     total: finalTotal
   };
+
+  // Clear cart on mount if an order was just passed to us
+  useEffect(() => {
+    if (location.state?.orderDetails) {
+      if (typeof clearCart === 'function') {
+        clearCart();
+      }
+    }
+  }, [location.state, clearCart]);
 
   // Function to format and open WhatsApp with the Receipt
   const sendToWhatsApp = () => {

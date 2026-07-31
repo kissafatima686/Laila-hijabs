@@ -43,7 +43,7 @@ const Footer = () => {
           // Group by group_name and filter only active / live items
           const grouped = {};
           data.forEach(item => {
-            const isLive = !item.status || item.status === 'Live' || item.status === 'Active';
+            const isLive = item.status === 'Live' || item.status === 'Active';
             if (isLive) {
               const group = item.group_name || 'Quick Links';
               if (!grouped[group]) grouped[group] = [];

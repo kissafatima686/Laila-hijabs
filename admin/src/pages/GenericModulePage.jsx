@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
-// ─── Shared Styles ────────────────────────────────────────────────────────────
-const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#182012', border: '1px solid rgba(184,147,91,0.5)', color: '#F6F1E3', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
-const lStyle = { fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
-const btnP = { padding: '9px 18px', borderRadius: '8px', backgroundColor: '#B8935B', border: 'none', color: '#1A2010', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
-const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' };
-const btnD = { padding: '7px 10px', borderRadius: '6px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' };
+// ─── Palette Styles (Olive & Gold Quiet Luxury) ──────────────────────────────
+const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '6px', backgroundColor: '#F6F1E3', border: '1px solid #B8935B', color: '#3E4930', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
+const lStyle = { fontSize: '11px', fontWeight: '700', color: '#3E4930', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
+const btnP = { padding: '9px 18px', borderRadius: '6px', backgroundColor: '#3E4930', border: 'none', color: '#F6F1E3', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
+const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#F6F1E3', border: '1px solid #B8935B', color: '#3E4930', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' };
+const btnD = { padding: '7px 10px', borderRadius: '6px', backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5', color: '#DC2626', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' };
 
 const EditIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
 const TrashIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></svg>;
@@ -72,7 +72,7 @@ const MODULE_FIELDS = {
     { key: 'discount_value', label: 'Discount Value', type: 'number' },
     { key: 'min_order_value', label: 'Min Order Value (Rs.)', type: 'number' },
     { key: 'expires_at', label: 'Expiry Date', type: 'text', placeholder: 'YYYY-MM-DD' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Live', 'Draft'] },
+    { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Expired'] },
   ],
   locations: [
     { key: 'name', label: 'Studio Name', type: 'text', required: true },
@@ -86,7 +86,7 @@ const MODULE_FIELDS = {
     { key: 'map_url', label: 'Google Maps Embed URL', type: 'textarea' },
     { key: 'directions_url', label: 'Directions Link', type: 'text' },
     { key: 'description', label: 'Studio Description', type: 'textarea' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Live', 'Draft'] },
+    { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'] },
   ],
   affiliates: [
     { key: 'full_name', label: 'Applicant Name', type: 'text' },
@@ -98,85 +98,41 @@ const MODULE_FIELDS = {
     { key: 'status', label: 'Status', type: 'select', options: ['Pending', 'Approved', 'Rejected'] },
   ],
   'approved-affiliates': [
-    { key: 'user_id', label: 'User ID', type: 'number', required: true },
-    { key: 'affiliate_code', label: 'Affiliate Code', type: 'text', required: true },
-    { key: 'affiliate_link', label: 'Referral Link', type: 'text' },
-    { key: 'commission_rate', label: 'Commission Rate (%)', type: 'number' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Approved', 'Suspended'] },
-  ],
-  commissions: [
-    { key: 'affiliate_id', label: 'Affiliate ID', type: 'number', required: true },
-    { key: 'order_id', label: 'Order ID', type: 'number', required: true },
-    { key: 'sale_amount', label: 'Sale Amount', type: 'number' },
-    { key: 'commission_rate', label: 'Commission Rate (%)', type: 'number' },
-    { key: 'commission_amount', label: 'Commission Amount', type: 'number' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Pending', 'Approved', 'Rejected', 'Paid'] },
-  ],
-  payouts: [
-    { key: 'affiliate_id', label: 'Affiliate ID', type: 'number', required: true },
-    { key: 'amount', label: 'Payout Amount', type: 'number' },
-    { key: 'payment_method', label: 'Payment Method', type: 'text' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Paid', 'Pending'] },
-  ],
-  messages: [
-    { key: 'name', label: 'Sender Name', type: 'text' },
-    { key: 'email', label: 'Sender Email', type: 'email' },
-    { key: 'subject', label: 'Subject', type: 'text' },
-    { key: 'message', label: 'Message Body', type: 'textarea' },
-    { key: 'is_read', label: 'Read? (1 = yes)', type: 'number' },
-  ],
-  subscribers: [
-    { key: 'email', label: 'Email Address', type: 'email', required: true },
-    { key: 'source', label: 'Signup Source', type: 'text' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Unsubscribed'] },
-  ],
-  users: [
-    { key: 'full_name', label: 'Full Name', type: 'text' },
+    { key: 'full_name', label: 'Affiliate Name', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' },
     { key: 'phone', label: 'Phone', type: 'text' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive', 'Banned'] },
+    { key: 'promo_code', label: 'Assigned Coupon Code', type: 'text' },
+    { key: 'commission_rate', label: 'Commission Rate (%)', type: 'number' },
+    { key: 'total_earnings', label: 'Total Earnings (Rs.)', type: 'number' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'] },
   ],
-  orders: [
-    { key: 'order_status', label: 'Order Status', type: 'select', options: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'] },
-    { key: 'payment_status', label: 'Payment Status', type: 'select', options: ['Unpaid', 'Paid', 'Refunded'] },
-    { key: 'notes', label: 'Admin Notes', type: 'textarea' },
+  testimonials: [
+    { key: 'customer_name', label: 'Customer Name', type: 'text', required: true },
+    { key: 'role', label: 'Role / City', type: 'text' },
+    { key: 'review_text', label: 'Review Text', type: 'textarea', required: true },
+    { key: 'rating', label: 'Rating (1-5)', type: 'number' },
+    { key: 'product_name', label: 'Product Purchased', type: 'text' },
+    { key: 'avatar_url', label: 'Avatar Image URL', type: 'text' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Live', 'Draft'] },
   ],
-  custom_orders: [
-    { key: 'customer_name', label: 'Customer Full Name', type: 'text', required: true },
-    { key: 'phone', label: 'WhatsApp / Phone Number', type: 'text' },
-    { key: 'email', label: 'Customer Email', type: 'email' },
-    { key: 'garment_type', label: 'Garment Type (e.g. Abaya, Hijab Set)', type: 'text' },
-    { key: 'size_label', label: 'Standard Size (XS-XXL / Custom)', type: 'text' },
-    { key: 'fabric_type', label: 'Fabric Choice', type: 'text' },
-    { key: 'color_choice', label: 'Color Choice', type: 'text' },
-    { key: 'chest', label: 'Chest Measurement (inches)', type: 'text' },
-    { key: 'hips', label: 'Hips Measurement (inches)', type: 'text' },
-    { key: 'shoulders', label: 'Shoulders Measurement (inches)', type: 'text' },
-    { key: 'waist', label: 'Waist Measurement (inches)', type: 'text' },
-    { key: 'length', label: 'Length Measurement (inches)', type: 'text' },
-    { key: 'width', label: 'Width Measurement (inches)', type: 'text' },
-    { key: 'description', label: 'Vision & Design Description', type: 'textarea' },
-    { key: 'reference_image', label: 'Reference Image Photo URL', type: 'text' },
-    { key: 'status', label: 'Custom Order Status', type: 'select', options: ['Pending', 'Confirmed', 'In Progress', 'Ready to Ship', 'Delivered', 'Cancelled'] },
-  ],
-  'custom-orders': [
-    { key: 'customer_name', label: 'Customer Name', type: 'text' },
-    { key: 'email', label: 'Email', type: 'email' },
-    { key: 'garment_type', label: 'Garment Type', type: 'text' },
-    { key: 'description', label: 'Order Details', type: 'textarea' },
-    { key: 'status', label: 'Status', type: 'select', options: ['Pending', 'In Progress', 'Completed', 'Cancelled'] },
+  faqs: [
+    { key: 'question', label: 'Question', type: 'text', required: true },
+    { key: 'answer', label: 'Answer', type: 'textarea', required: true },
+    { key: 'category', label: 'Category', type: 'text' },
+    { key: 'display_order', label: 'Display Order', type: 'number' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Live', 'Draft'] },
   ],
   'navbar-links': [
-    { key: 'label', label: 'Link Label', type: 'text', required: true },
-    { key: 'url', label: 'URL / Path', type: 'text', required: true },
+    { key: 'label', label: 'Link Title', type: 'text', required: true },
+    { key: 'url', label: 'Target URL / Path', type: 'text', required: true },
     { key: 'display_order', label: 'Display Order', type: 'number' },
-    { key: 'is_highlighted', label: 'Enable Badge?', type: 'select', options: ['1', '0'] },
-    { key: 'badge_text', label: 'Badge Text (e.g., New)', type: 'text' },
-    { key: 'badge_color', label: 'Badge Color (e.g., #ef4444)', type: 'text' },
+    { key: 'is_highlighted', label: 'Is Highlighted (0 or 1)', type: 'number' },
+    { key: 'badge_text', label: 'Badge Text (e.g. SALE)', type: 'text' },
+    { key: 'badge_color', label: 'Badge Color (Hex)', type: 'text' },
     { key: 'status', label: 'Status', type: 'select', options: ['Live', 'Draft'] },
   ],
   'footer-links': [
-    { key: 'group_name', label: 'Column Group Name', type: 'text', required: true },
+    { key: 'group_name', label: 'Column / Group Name', type: 'text', required: true },
     { key: 'label', label: 'Link Label', type: 'text', required: true },
     { key: 'url', label: 'URL / Path', type: 'text', required: true },
     { key: 'display_order', label: 'Display Order', type: 'number' },
@@ -192,6 +148,45 @@ const DEFAULT_FIELDS = [
 
 // ─── Field Renderer ───────────────────────────────────────────────────────────
 const Field = ({ field, value, onChange }) => {
+  const isMedia = ['image', 'avatar', 'cover', 'video', 'file'].some(k => field.key.toLowerCase().includes(k) || (field.label && field.label.toLowerCase().includes('image')));
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      onChange(field.key, reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  if (isMedia) {
+    return (
+      <div>
+        <label style={lStyle}>{field.label}{field.required && ' *'}</label>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <label style={{ ...btnG, backgroundColor: '#3E4930', color: '#F6F1E3', borderColor: '#3E4930', padding: '8px 14px', cursor: 'pointer', flexShrink: 0, fontWeight: '700' }}>
+            📁 Upload File
+            <input type="file" accept="image/*,video/*" onChange={handleFileUpload} style={{ display: 'none' }} />
+          </label>
+          <input
+            type="text"
+            required={field.required}
+            value={value || ''}
+            onChange={e => onChange(field.key, e.target.value)}
+            style={iStyle}
+            placeholder="Upload file or enter URL..."
+          />
+        </div>
+        {value && (value.startsWith('data:image') || value.startsWith('http')) && (
+          <div style={{ marginTop: '6px' }}>
+            <img src={value} alt="Preview" style={{ height: '48px', borderRadius: '4px', border: '1px solid #E7D9C9', objectFit: 'cover' }} />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (field.type === 'textarea') return (
     <div><label style={lStyle}>{field.label}{field.required && ' *'}</label>
       <textarea rows={3} required={field.required} value={value || ''} onChange={e => onChange(field.key, e.target.value)}
@@ -214,16 +209,9 @@ const Field = ({ field, value, onChange }) => {
 
 // ─── Item Row Status Badge ────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
-  const cfg = {
-    Live: { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' },
-    Active: { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' },
-    Approved: { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' },
-    Pending: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.3)' },
-    Draft: { color: '#B8A99A', bg: 'rgba(184,147,91,0.08)', border: 'rgba(184,147,91,0.2)' },
-    Inactive: { color: '#EF4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)' },
-  }[status] || { color: '#B8A99A', bg: 'transparent', border: 'rgba(184,147,91,0.2)' };
+  const isOk = ['Live', 'Active', 'Approved'].includes(status);
   return (
-    <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '10px', fontWeight: '700', color: cfg.color, backgroundColor: cfg.bg, border: `1px solid ${cfg.border}`, whiteSpace: 'nowrap' }}>
+    <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '10px', fontWeight: '700', color: isOk ? '#15803D' : '#3E4930', backgroundColor: isOk ? 'rgba(34,197,94,0.15)' : '#E7D9C9', border: `1px solid ${isOk ? 'rgba(34,197,94,0.3)' : '#B8935B'}`, whiteSpace: 'nowrap' }}>
       {status || 'Live'}
     </span>
   );
@@ -239,6 +227,7 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
   const [editItem, setEditItem] = useState(null);
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
 
   const fields = MODULE_FIELDS[moduleKey] || DEFAULT_FIELDS;
 
@@ -255,22 +244,35 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
     fields.forEach(f => { empty[f.key] = f.type === 'number' ? '' : ''; });
     setFormData(empty); setEditItem(null); setShowModal(true);
   };
+
   const openEdit = (item) => {
     const filled = {};
     fields.forEach(f => { filled[f.key] = item[f.key] !== undefined ? String(item[f.key]) : ''; });
     setFormData(filled); setEditItem(item); setShowModal(true);
   };
+
   const handleFieldChange = (key, val) => setFormData(p => ({ ...p, [key]: val }));
 
   const handleSave = (e) => {
-    e.preventDefault(); setSaving(true);
+    if (e) e.preventDefault();
+    setSaving(true);
     const id = editItem ? getItemId(editItem) : null;
     const url = id ? `${API}/module/${moduleKey}/${id}` : `${API}/module/${moduleKey}`;
     fetch(url, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
-      .then(() => { setShowModal(false); fetchItems(); })
+      .then(() => { 
+        setShowModal(false); 
+        fetchItems(); 
+        triggerSavedNotice();
+      })
       .catch(() => {}).finally(() => setSaving(false));
   };
 
+  const triggerSavedNotice = () => {
+    setSavedNotice(true);
+    setTimeout(() => setSavedNotice(false), 3000);
+  };
+
+  // Immediate Auto-Save Toggle
   const handleToggleStatus = (item) => {
     const id = getItemId(item);
     const current = item.status || 'Live';
@@ -278,27 +280,38 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
     let next;
     let targetModule = moduleKey;
 
-    if (moduleKey === 'approved-affiliates') {
-        // Actual affiliates (table: affiliates)
-        next = current === 'Approved' ? 'Suspended' : 'Approved';
-        // Wait, the API table_map has 'approved-affiliates' mapped to 'affiliates'.
-        // So we DO NOT need to override targetModule in frontend, the backend handles it!
-    } else if (moduleKey === 'affiliates') {
-        // Affiliate applications (table: affiliate_applications)
-        // If it's Pending or Rejected, clicking toggles it to Approved. If Approved, toggles to Rejected (or Pending).
+    const statusField = fields.find(f => f.key === 'status');
+    if (statusField && statusField.options && statusField.options.length >= 2) {
+      if (moduleKey === 'affiliates') {
         next = current === 'Approved' ? 'Rejected' : 'Approved';
+      } else {
+        next = current === statusField.options[0] ? statusField.options[1] : statusField.options[0];
+      }
     } else {
-        const statuses = ['Live', 'Active', 'Approved'];
-        next = statuses.includes(current) ? 'Draft' : 'Live';
+      const statuses = ['Live', 'Active', 'Approved'];
+      next = statuses.includes(current) ? 'Draft' : 'Live';
     }
 
-    fetch(`${API}/module/${targetModule}/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) }).then(fetchItems);
+    // Immediately save to DB
+    fetch(`${API}/module/${targetModule}/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) })
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.json();
+          alert(`Error updating status: ${err.error || err.message}`);
+        } else {
+          triggerSavedNotice();
+        }
+        fetchItems();
+      });
   };
 
   const handleDelete = (item) => {
     if (!window.confirm('Delete this record permanently?')) return;
     const id = getItemId(item);
-    fetch(`${API}/module/${moduleKey}/${id}`, { method: 'DELETE' }).then(fetchItems);
+    fetch(`${API}/module/${moduleKey}/${id}`, { method: 'DELETE' }).then(() => {
+      triggerSavedNotice();
+      fetchItems();
+    });
   };
 
   const filteredItems = items.filter(item => {
@@ -313,64 +326,83 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '40px' }}>
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div style={{ background: 'linear-gradient(135deg, #3E4930 0%, #222C1A 100%)', borderRadius: '16px', padding: '24px 28px', border: '1px solid #B8935B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+      {/* ── Top Bar Header: Title, Counts, Top Save Button & Add ─────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px', backgroundColor: '#FFFFFF', padding: '18px 24px', borderRadius: '12px', border: '1px solid #E7D9C9', boxShadow: '0 2px 8px rgba(62,73,48,0.04)' }}>
         <div>
-          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1.5px', marginBottom: '5px' }}>CONTENT MODULE</div>
-          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#F6F1E3' }}>{title}</h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#E7D9C9' }}>{description || `Manage all ${title} entries.`}</p>
+          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px' }}>MANAGEMENT</div>
+          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: '#3E4930' }}>{title}</h2>
+          <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: '#6B7280' }}>{description || `Manage all ${title} entries.`}</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <span style={{ fontSize: '13px', color: '#B8A99A' }}>{filteredItems.length} records</span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {savedNotice && (
+            <span style={{ fontSize: '12px', color: '#15803D', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', backgroundColor: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)' }}>
+              Saved Changes ✓
+            </span>
+          )}
+          <button onClick={() => triggerSavedNotice()} style={{ ...btnG, backgroundColor: '#3E4930', color: '#F6F1E3', borderColor: '#3E4930', padding: '9px 16px', fontWeight: '700' }}>
+            💾 Save Changes
+          </button>
           <button onClick={openAdd} style={btnP}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-            Add {title.replace(/s$/, '')}
+            + Add New
           </button>
         </div>
       </div>
 
-      {/* ── Filter Bar ─────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <input type="text" placeholder={`Search ${title.toLowerCase()}...`} value={search} onChange={e => setSearch(e.target.value)}
-          style={{ ...iStyle, width: '260px' }} />
-        {['All', 'Live', 'Draft', 'Pending', 'Active', 'Approved', 'Rejected', 'Paid'].map(s => (
-          <button key={s} onClick={() => setFilterStatus(s)} style={{ padding: '7px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', border: filterStatus === s ? '1px solid #B8935B' : '1px solid rgba(184,147,91,0.25)', backgroundColor: filterStatus === s ? '#B8935B' : 'transparent', color: filterStatus === s ? '#1A2010' : '#E7D9C9', transition: 'all 0.15s' }}>
-            {s}
-          </button>
-        ))}
+      {/* ── Search & Filter Controls ───────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder={`Search ${title.toLowerCase()}...`}
+          style={{ ...iStyle, maxWidth: '280px', backgroundColor: '#FFFFFF' }}
+        />
+        <div style={{ display: 'flex', gap: '4px' }}>
+          {['All', 'Live', 'Active', 'Draft', 'Inactive', 'Approved', 'Pending'].map(st => {
+            const hasAny = items.some(i => i.status === st || (!i.status && st === 'Live'));
+            if (st !== 'All' && !hasAny) return null;
+            return (
+              <button key={st} onClick={() => setFilterStatus(st)}
+                style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', border: filterStatus === st ? '1px solid #B8935B' : '1px solid #E7D9C9', backgroundColor: filterStatus === st ? '#3E4930' : '#FFFFFF', color: filterStatus === st ? '#F6F1E3' : '#3E4930' }}>
+                {st}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* ── Table ──────────────────────────────────────────────────────────── */}
-      <div style={{ backgroundColor: '#222C1A', borderRadius: '14px', border: '1px solid rgba(184,147,91,0.25)', overflow: 'hidden' }}>
+      {/* ── Table Card ───────────────────────────────────────────────────────── */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E7D9C9', overflow: 'hidden', boxShadow: '0 2px 8px rgba(62,73,48,0.04)' }}>
         {loading ? (
-          <div style={{ padding: '50px', textAlign: 'center', color: '#E7D9C9' }}>Loading {title}...</div>
+          <div style={{ padding: '40px', textAlign: 'center', color: '#3E4930', fontWeight: '600' }}>Loading entries...</div>
         ) : filteredItems.length === 0 ? (
-          <div style={{ padding: '50px', textAlign: 'center' }}>
-            <div style={{ fontSize: '13px', color: '#B8A99A', marginBottom: '12px' }}>No {title} found.</div>
-            <button onClick={openAdd} style={btnP}>+ Add First Entry</button>
+          <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+            No records found. Click <strong>+ Add New</strong> above to create your first entry.
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
               <thead>
-                <tr style={{ backgroundColor: '#182012', borderBottom: '1px solid rgba(184,147,91,0.25)' }}>
-                  <th style={{ padding: '12px 18px', fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '1px', whiteSpace: 'nowrap' }}>RECORD</th>
-                  <th style={{ padding: '12px 18px', fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '1px', whiteSpace: 'nowrap' }}>DETAILS</th>
-                  <th style={{ padding: '12px 18px', fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '1px' }}>STATUS</th>
-                  <th style={{ padding: '12px 18px', fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '1px', textAlign: 'right', whiteSpace: 'nowrap' }}>ACTIONS</th>
+                <tr style={{ backgroundColor: '#3E4930', color: '#F6F1E3' }}>
+                  <th style={{ padding: '12px 18px', fontWeight: '700', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Item Title</th>
+                  <th style={{ padding: '12px 18px', fontWeight: '700', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Details / Subtitle</th>
+                  <th style={{ padding: '12px 18px', fontWeight: '700', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
+                  <th style={{ padding: '12px 18px', fontWeight: '700', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item, idx) => {
+                {filteredItems.map(item => {
                   const itemTitle = getItemTitle(item);
                   const itemDetail = getItemDetail(item);
+                  const itemId = getItemId(item);
+
                   return (
-                    <tr key={getItemId(item) || idx} style={{ borderBottom: '1px solid rgba(184,147,91,0.1)', transition: 'background 0.12s' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(184,147,91,0.04)'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <td style={{ padding: '13px 18px', fontSize: '13px', fontWeight: '600', color: '#F6F1E3', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <tr key={itemId} style={{ borderBottom: '1px solid #E7D9C9' }}>
+                      <td style={{ padding: '13px 18px', fontWeight: '600', color: '#3E4930' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {item.image_url && (
+                            <img src={item.image_url} alt="" style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #E7D9C9' }} />
+                          )}
                           <span>{itemTitle}</span>
                           {moduleKey === 'navbar-links' && Number(item.is_highlighted) === 1 && item.badge_text && (
                             <span style={{
@@ -385,24 +417,24 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '13px 18px', fontSize: '12px', color: '#B8A99A', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{itemDetail}</td>
+                      <td style={{ padding: '13px 18px', fontSize: '12px', color: '#6B7280', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{itemDetail}</td>
                       <td style={{ padding: '13px 18px' }}>
                         <StatusBadge status={item.status} />
                       </td>
                       <td style={{ padding: '13px 18px' }}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                          {/* Active Toggle */}
+                          {/* Active Toggle (Auto-Saves Instantly) */}
                           <button onClick={() => handleToggleStatus(item)} style={{ ...btnG, fontSize: '11px', whiteSpace: 'nowrap' }}>
                             {['Live', 'Active', 'Approved'].includes(item.status) ? 'Deactivate' : 'Activate'}
                           </button>
                           {/* View Affiliate Activity */}
                           {moduleKey === 'approved-affiliates' && (
-                            <Link to={`/affiliate-details/${item.affiliate_id}`} style={{ ...btnG, textDecoration: 'none', backgroundColor: '#B8935B', color: '#1A2010', borderColor: '#B8935B' }} title="View Activity">
+                            <Link to={`/affiliate-details/${item.affiliate_id}`} style={{ ...btnG, textDecoration: 'none', backgroundColor: '#B8935B', color: '#FFFFFF', borderColor: '#B8935B' }} title="View Activity">
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Activity
                             </Link>
                           )}
                           {/* Edit */}
-                          <button onClick={() => openEdit(item)} style={btnG} title="Edit">
+                          <button onClick={() => openEdit(item)} style={{ ...btnG, backgroundColor: '#B8935B', color: '#FFFFFF', borderColor: '#B8935B' }} title="Edit">
                             <EditIcon />
                           </button>
                           {/* Delete */}
@@ -422,22 +454,22 @@ const GenericModulePage = ({ moduleKey, title, description }) => {
 
       {/* ── Add / Edit Modal ───────────────────────────────────────────────── */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#222C1A', borderRadius: '16px', padding: '28px', width: '90%', maxWidth: '580px', border: '1px solid #B8935B', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(62,73,48,0.4)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '28px', width: '90%', maxWidth: '580px', border: '1px solid #E7D9C9', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
-                <div style={{ fontSize: '10px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px', marginBottom: '3px' }}>{editItem ? 'EDITING' : 'NEW ENTRY'}</div>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#F6F1E3' }}>{editItem ? `Edit ${title.replace(/s$/, '')}` : `Add ${title.replace(/s$/, '')}`}</h3>
+                <div style={{ fontSize: '10px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px', marginBottom: '3px' }}>{editItem ? 'EDITING RECORD' : 'NEW ENTRY'}</div>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#3E4930' }}>{editItem ? `Edit ${title.replace(/s$/, '')}` : `Add ${title.replace(/s$/, '')}`}</h3>
               </div>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#E7D9C9', cursor: 'pointer', padding: '4px' }}><CloseIcon /></button>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#3E4930', cursor: 'pointer', padding: '4px' }}><CloseIcon /></button>
             </div>
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '13px' }}>
               {fields.map(field => (
                 <Field key={field.key} field={field} value={formData[field.key]} onChange={handleFieldChange} />
               ))}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', paddingTop: '14px', borderTop: '1px solid rgba(184,147,91,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', paddingTop: '14px', borderTop: '1px solid #E7D9C9' }}>
                 <button type="button" onClick={() => setShowModal(false)} style={{ ...btnG, padding: '9px 18px' }}>Cancel</button>
-                <button type="submit" disabled={saving} style={{ ...btnP, opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : editItem ? 'Update' : 'Add Entry'}</button>
+                <button type="submit" disabled={saving} style={{ ...btnP, opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : editItem ? 'Update Entry' : 'Add Entry'}</button>
               </div>
             </form>
           </div>

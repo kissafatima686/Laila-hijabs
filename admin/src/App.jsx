@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import TestimonialsPage from './pages/TestimonialsPage';
 import FAQsPage from './pages/FAQsPage';
 import SizeGuidePage from './pages/SizeGuidePage';
+import ProductsSpecsTemplatePage from './pages/ProductsSpecsTemplatePage';
 import ProductFiltersManagerPage from './pages/ProductFiltersManagerPage';
 import ProductReviewsPage from './pages/ProductReviewsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
@@ -89,7 +90,7 @@ const App = () => (
           <Route path="/product-reviews" element={<ProductReviewsPage />} />
           <Route path="/faqs/product" element={<FAQsPage defaultPage="product" />} />
           <Route path="/faqs" element={<FAQsPage />} />
-          <Route path="/sections/products_specs_template" element={<ProductsList />} />
+          <Route path="/sections/products_specs_template" element={<ProductsSpecsTemplatePage />} />
           <Route path="/sections/products_page_header" element={<SectionEditorPage sectionKey="products_page_header" />} />
           <Route path="/size-guide" element={<SizeGuidePage />} />
           <Route path="/sections/products_filters_config" element={<ProductFiltersManagerPage />} />

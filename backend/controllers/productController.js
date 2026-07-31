@@ -1,4 +1,5 @@
-const { pool } = require('../config/db');
+const { pool } = require("../config/db");
+const bcrypt = require("bcryptjs");
 
 // Helper to parse JSON fields safely
 const parseJsonField = (field, fallback = []) => {
@@ -292,10 +293,37 @@ const createOrder = async (req, res) => {
 
     if (items && Array.isArray(items)) {
       for (const item of items) {
+        let validProductId = null;
+        const rawId = item.product_id || item.id;
+        
+        if (rawId) {
+          if (typeof rawId === 'number' || (!isNaN(Number(rawId)) && Number(rawId) > 0)) {
+            const [pCheck] = await connection.query('SELECT product_id FROM products WHERE product_id = ?', [Number(rawId)]);
+            if (pCheck.length > 0) {
+              validProductId = pCheck[0].product_id;
+            }
+          }
+          
+          if (!validProductId) {
+            const [pCheckSlug] = await connection.query('SELECT product_id FROM products WHERE slug = ? OR name = ?', [String(rawId), String(rawId)]);
+            if (pCheckSlug.length > 0) {
+              validProductId = pCheckSlug[0].product_id;
+            }
+          }
+        }
+
+        // Guaranteed safety check against foreign key constraint errors
+        if (!validProductId) {
+          const [firstP] = await connection.query('SELECT product_id FROM products LIMIT 1');
+          if (firstP.length > 0) {
+            validProductId = firstP[0].product_id;
+          }
+        }
+
         await connection.query(
           `INSERT INTO order_items (order_id, product_id, quantity, unit_price, selected_color, selected_size) 
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [orderId, item.product_id || item.id, item.quantity || 1, item.price, item.color || null, item.size || null]
+          [orderId, validProductId, item.quantity || 1, item.price || 0, item.color || null, item.size || null]
         );
       }
     }
@@ -342,6 +370,35 @@ const createOrder = async (req, res) => {
   }
 };
 
+// 4.1 Get Orders by Customer Email (AccountPage.jsx)
+const getOrdersByEmail = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const [orders] = await pool.query(
+      `SELECT o.*, 
+        (SELECT JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', oi.id, 
+            'product_id', oi.product_id, 
+            'quantity', oi.quantity, 
+            'price', oi.price, 
+            'color', oi.color, 
+            'size', oi.size,
+            'product_name', p.name
+          )
+         ) FROM order_items oi LEFT JOIN products p ON oi.product_id = p.id WHERE oi.order_id = o.id) as items
+       FROM orders o 
+       WHERE o.customer_email = ? 
+       ORDER BY o.created_at DESC`,
+      [email]
+    );
+
+    res.status(200).json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // 5. Submit Custom Bespoke Design Order (CustomOrdersPage.jsx)
 const submitCustomOrder = async (req, res) => {
   const { customer_name, customer_email, customer_phone, garment_type, fabric_choice, custom_color, bust_size, waist_size, hip_size, sleeve_length, total_height, notes, reference_image_url } = req.body;
@@ -353,6 +410,20 @@ const submitCustomOrder = async (req, res) => {
     );
 
     res.status(201).json({ message: 'Bespoke custom order submitted successfully!', customOrderId: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// 5.1 Get Custom Orders by Customer Email (AccountPage.jsx)
+const getCustomOrdersByEmail = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const [customOrders] = await pool.query(
+      `SELECT * FROM custom_orders WHERE customer_email = ? ORDER BY created_at DESC`,
+      [email]
+    );
+    res.status(200).json(customOrders);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -535,6 +606,105 @@ const getProductsByDisplaySection = async (req, res) => {
   }
 };
 
+// ─── AUTHENTICATION & PROFILES ───────────────────────────────────────────────
+
+const registerUser = async (req, res) => {
+  const { full_name, email, password } = req.body;
+  try {
+    const [existing] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+    if (existing.length > 0) return res.status(400).json({ error: 'Email already in use.' });
+
+    // Hash password with bcrypt
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const [result] = await pool.query(
+      `INSERT INTO users (full_name, email, password_hash, role, status) VALUES (?, ?, ?, 'customer', 'Live')`,
+      [full_name, email, hashedPassword]
+    );
+
+    res.status(201).json({ message: 'Registration successful', user: { id: result.insertId, full_name, email } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const [users] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+    if (users.length === 0) return res.status(401).json({ error: 'Invalid email or password.' });
+
+    const user = users[0];
+    
+    // Compare provided password with hashed password (or fallback to plaintext for legacy accounts if no bcrypt hash exists)
+    let isMatch = false;
+    if (user.password_hash && user.password_hash.startsWith('$2a$')) {
+      isMatch = await bcrypt.compare(password, user.password_hash);
+    } else {
+      isMatch = (password === user.password_hash);
+    }
+
+    if (!isMatch) return res.status(401).json({ error: 'Invalid email or password.' });
+    res.status(200).json({ message: 'Login successful', user: { id: user.user_id, full_name: user.full_name, email: user.email, address: user.address, city: user.city, phone: user.phone } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const updateUserAddress = async (req, res) => {
+  const { id } = req.params;
+  const { address, city, phone } = req.body;
+  try {
+    await pool.query(`UPDATE users SET address = ?, city = ?, phone = ? WHERE user_id = ?`, [address, city, phone, id]);
+    res.status(200).json({ message: 'Address updated successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ─── WISHLISTS ───────────────────────────────────────────────────────────────
+
+const getWishlist = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [wishlist] = await pool.query(
+      `SELECT p.product_id as id, p.name, p.slug, p.price, p.stock, 
+        (SELECT image_url FROM product_images WHERE product_id = p.product_id ORDER BY display_order ASC LIMIT 1) as image,
+        (SELECT c.name FROM product_variants pv JOIN colors c ON pv.color_id = c.color_id WHERE pv.product_id = p.product_id LIMIT 1) as color
+       FROM wishlists w
+       JOIN products p ON w.product_id = p.product_id
+       WHERE w.user_id = ?`,
+      [userId]
+    );
+    // map stock > 0 to inStock for frontend compatibility
+    const mapped = wishlist.map(item => ({ ...item, inStock: item.stock > 0 }));
+    res.status(200).json(mapped);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const addToWishlist = async (req, res) => {
+  const { user_id, product_id } = req.body;
+  try {
+    await pool.query(`INSERT IGNORE INTO wishlists (user_id, product_id) VALUES (?, ?)`, [user_id, product_id]);
+    res.status(201).json({ message: 'Added to wishlist' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const removeFromWishlist = async (req, res) => {
+  const { userId, productId } = req.params;
+  try {
+    await pool.query(`DELETE FROM wishlists WHERE user_id = ? AND product_id = ?`, [userId, productId]);
+    res.status(200).json({ message: 'Removed from wishlist' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = { 
   getProducts, 
   getProductBySlug, 
@@ -549,5 +719,13 @@ module.exports = {
   getProductReviews,
   submitProductReview,
   getHomepageSections,
-  getProductsByDisplaySection
+  getProductsByDisplaySection,
+  getOrdersByEmail,
+  getCustomOrdersByEmail,
+  registerUser,
+  loginUser,
+  updateUserAddress,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist
 };

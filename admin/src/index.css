@@ -6,20 +6,14 @@
   --gold: #B8935B;
   --blush: #E7D9C9;
 
-  /* Theme mappings for quiet luxury Olive & Gold */
-  --bg-dark: #182012;
-  --bg-sidebar: #222C1A;
-  --bg-card: #2B3722;
-  --bg-card-hover: #34422A;
-  --bg-banner: linear-gradient(135deg, #3E4930 0%, #262E1D 100%);
-  --border-color: rgba(184, 147, 91, 0.25);
-  --border-color-glow: rgba(184, 147, 91, 0.5);
-  --text-primary: #F6F1E3;
-  --text-secondary: #E7D9C9;
-  --text-muted: #B8A99A;
-  
-  --accent-gold: #b8935b;
-  --accent-gold-light: #D4B07B;
+  --bg-dark: #F6F1E3;
+  --bg-sidebar: #3E4930;
+  --bg-card: #FFFFFF;
+  --border-color: #E7D9C9;
+  --text-primary: #3E4930;
+  --text-secondary: #6B7280;
+  --text-muted: #B8935B;
+  --accent-gold: #B8935B;
   --accent-olive: #3E4930;
 }
 
@@ -32,8 +26,8 @@
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--bg-dark);
-  color: var(--text-primary);
+  background-color: var(--cream);
+  color: var(--olive-deep);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -44,15 +38,15 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #182012;
+  background: var(--cream);
 }
 ::-webkit-scrollbar-thumb {
-  background: #3E4930;
-  border: 1px solid rgba(184, 147, 91, 0.3);
+  background: var(--olive-deep);
+  border: 1px solid var(--gold);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8935B;
+  background: var(--gold);
 }
 
 button {
@@ -64,3 +58,125 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Clean Simple Admin Theme Utilities */
+.admin-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(62, 73, 48, 0.04);
+  border: 1px solid var(--blush);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.admin-card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--blush);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-card-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--olive-deep);
+}
+
+.btn-add {
+  background-color: var(--olive-deep);
+  color: var(--cream);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-add:hover {
+  background-color: #2D3622;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.admin-table th {
+  background-color: var(--olive-deep);
+  color: var(--cream);
+  font-weight: 600;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+}
+
+.admin-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--blush);
+  color: var(--olive-deep);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.badge-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-status.active,
+.badge-status.live,
+.badge-status.approved {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #15803D;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.badge-status.inactive,
+.badge-status.draft,
+.badge-status.pending {
+  background-color: var(--blush);
+  color: var(--olive-deep);
+  border: 1px solid var(--gold);
+}
+
+.action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-icon-sq {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-icon-sq.yellow { background-color: var(--gold); color: #FFFFFF; }
+.btn-icon-sq.yellow:hover { background-color: #9E7B49; }
+.btn-icon-sq.blue { background-color: var(--olive-deep); color: var(--cream); }
+.btn-icon-sq.blue:hover { background-color: #2D3622; }
+.btn-icon-sq.red { background-color: #EF4444; color: #FFFFFF; }
+.btn-icon-sq.red:hover { background-color: #DC2626; }
