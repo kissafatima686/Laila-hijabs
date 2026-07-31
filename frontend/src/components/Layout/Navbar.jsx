@@ -21,6 +21,7 @@ const Navbar = () => {
   // Settings from CMS
   const logoText = getSectionContent('navbar_settings', 'logo_text', 'Laila');
   const badgeText = getSectionContent('navbar_settings', 'badge_text', 'HIJABS');
+  const logoImage = getSectionContent('navbar_settings', 'logo_image', '');
   const logoFontSize = getSectionContent('navbar_settings', 'logo_font_size', '');
   const logoFontColor = getSectionContent('navbar_settings', 'logo_font_color', '');
   const showSearch = getSectionContent('navbar_settings', 'show_search', 'true') !== 'false';
@@ -234,11 +235,19 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Center: Logo */}
-          <Link to="/" className="logo" style={{ ...(logoFontSize && { fontSize: logoFontSize }), ...(logoFontColor && { color: logoFontColor }) }}>
-            {logoText}
-            <span style={{ letterSpacing: '0.2em' }}>{badgeText}</span>
-          </Link>
+          {/* Logo Container (Auto-Adjusting Box) */}
+          <div className="logo-container">
+            <Link to="/" className="logo" style={{ ...(logoFontSize && { fontSize: logoFontSize }), ...(logoFontColor && { color: logoFontColor }) }}>
+              {logoImage ? (
+                <img src={logoImage} alt={logoText || "Laila Hijabs"} className="logo-img" />
+              ) : (
+                <>
+                  <span className="logo-main-text">{logoText}</span>
+                  {badgeText && <span className="logo-badge-text">{badgeText}</span>}
+                </>
+              )}
+            </Link>
+          </div>
 
           {/* Desktop Links with active gold underline */}
           <ul className="nav-links">
@@ -262,43 +271,29 @@ const Navbar = () => {
                       )}
                     </NavLink>
                     
-                    {/* MEGA MENU COMPONENT INLINED */}
+                    {/* Clean Simple Hover Category Dropdown */}
                     {isCategoryDropdownOpen && (
-                      <div className="mega-menu-wrapper">
-                        <div className="mega-menu-grid">
-                          {/* Column 1: ALL CATEGORIES */}
-                          <div className="mega-col-list">
-                            <h4 className="mega-col-title">ALL CATEGORIES</h4>
-                            {allCategoriesLinks.map(cat => (
-                              <Link key={cat.id} to={cat.url} className="mega-link" onClick={() => setIsCategoryDropdownOpen(false)}>
-                                {cat.label}
-                              </Link>
-                            ))}
-                          </div>
-
-                          {/* Column 2: FEATURED CATEGORIES */}
-                          <div className="mega-col-list">
-                            <h4 className="mega-col-title">FEATURED CATEGORIES</h4>
-                            {featuredCategoriesLinks.map(cat => (
-                              <Link key={cat.id} to={cat.url} className="mega-link" onClick={() => setIsCategoryDropdownOpen(false)}>
-                                {cat.label}
-                              </Link>
-                            ))}
-                          </div>
-
-                          {/* Column 3 & 4: FEATURED CARDS */}
-                          {featuredCards.map(card => (
-                            <div key={card.id} className="mega-card-item">
-                              <Link to={card.url} onClick={() => setIsCategoryDropdownOpen(false)}>
-                                <img src={card.image_url} alt={card.label} />
-                                <div className="card-overlay">
-                                  <h3>{card.label.toUpperCase()}</h3>
-                                  <span className="shop-link">{card.subtitle || 'EXPLORE NOW'}</span>
-                                </div>
-                              </Link>
+                      <div 
+                        className="category-dropdown"
+                        onMouseEnter={handleCategoryMouseEnter}
+                        onMouseLeave={handleCategoryMouseLeave}
+                      >
+                        <ul className="dropdown-list">
+                          <li className="has-submenu">
+                            <Link to="/categories/hijabs" onClick={() => setIsCategoryDropdownOpen(false)}>Hijabs</Link>
+                            <div className="sub-menu">
+                              <Link to="/Products?category=premium-chiffon" onClick={() => setIsCategoryDropdownOpen(false)}>Premium Chiffon</Link>
+                              <Link to="/Products?category=georgette" onClick={() => setIsCategoryDropdownOpen(false)}>Georgette</Link>
+                              <Link to="/Products?category=modal" onClick={() => setIsCategoryDropdownOpen(false)}>Modal</Link>
+                              <Link to="/Products?category=jersey" onClick={() => setIsCategoryDropdownOpen(false)}>Jersey</Link>
+                              <Link to="/Products?category=cotton" onClick={() => setIsCategoryDropdownOpen(false)}>Cotton</Link>
                             </div>
-                          ))}
-                        </div>
+                          </li>
+                          <li><Link to="/categories/accessories" onClick={() => setIsCategoryDropdownOpen(false)}>Accessories</Link></li>
+                          <li><Link to="/categories/modest-wear" onClick={() => setIsCategoryDropdownOpen(false)}>Modest Wear</Link></li>
+                          <li><Link to="/categories/best-sellers" onClick={() => setIsCategoryDropdownOpen(false)}>Best Sellers</Link></li>
+                          <li><Link to="/categories/sale" className="sale-link" onClick={() => setIsCategoryDropdownOpen(false)}>Sale &amp; Offers</Link></li>
+                        </ul>
                       </div>
                     )}
                   </li>

@@ -30,7 +30,7 @@ const AffiliateDashboard = () => {
 
   if (!dashboardData) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading Dashboard...</div>;
 
-  const refLink = `${import.meta.env.VITE_API_URL || (import.meta.env.VITE_API_URL || 'http://localhost:5000') + ''}/api/affiliate/ref/${dashboardData.code}`; // Using backend redirect
+  const refLink = `${window.location.origin}/ref/${dashboardData.code}`; // Using frontend redirect
 
   return (
     <div className="account-page">

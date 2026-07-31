@@ -13,6 +13,15 @@ const OffersPage = () => {
   const badgeText = getSectionContent('offers_page_header', 'badge_text', 'Limited Time · Ends Soon');
   const imageUrl = getSectionContent('offers_page_header', 'image_url', '/Categories/abaya/abaya1.png');
 
+  // Dynamic Offers Data
+  const waysTitle = getSectionContent('offers_bundles_page', 'ways_title', 'Every kind of grace, at a kinder price');
+  const waysCardsRaw = getSectionContent('offers_bundles_page', 'ways_cards', []);
+  const waysCards = waysCardsRaw.filter(wc => wc.status !== 'Draft');
+
+  const sec1Title = getSectionContent('offers_bundles_page', 'title', 'Curated Modest Fashion Sets & Bundles');
+  const bundlesRaw = getSectionContent('offers_bundles_page', 'bundles', []);
+  const bundles = bundlesRaw.filter(b => b.status !== 'Draft');
+
   // Timer Hook replacing static HTML Script
   const [time, setTime] = useState({ d: 3, h: 14, m: 52, s: 9 });
   const sliderRef = useRef(null);
@@ -53,20 +62,12 @@ const OffersPage = () => {
     }
   };
 
-  // Automatic move to next image every 1 second (1000ms)
   useEffect(() => {
     const interval = setInterval(() => {
       scrollRight();
-    }, 1000);
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
-
-  const products = [
-    { id: 5, slug: "luxury-occasion-abaya-5", name: "Gold-Trim Eid Abaya", sizes: "XS – XXL", was: "7,490", now: "5,990", discount: "20% Off", image: "/Categories/abaya/abaya5.png" },
-    { id: 6, slug: "premium-chiffon-hijab-1", name: "Ivory Silk Hijab", sizes: "One Size", was: "2,890", now: "2,170", discount: "25% Off", image: "/Categories/hijabs/hijab1.png" },
-    { id: 4, slug: "elegant-abaya-4", name: "Structured Day Abaya", sizes: "XS – XXL", was: "6,990", now: "5,940", discount: "15% Off", image: "/Categories/abaya/abaya4.png" },
-    { id: 7, slug: "everyday-jersey-hijab-2", name: "Olive Chiffon Hijab", sizes: "One Size", was: "1,790", now: "1,430", discount: "20% Off", image: "/Categories/hijabs/hijab2.png" }
-  ];
 
   return (
     <div className="offers-page-wrapper">
@@ -95,88 +96,68 @@ const OffersPage = () => {
         </div>
 
         {/* Offer Types Cards */}
-        <section style={{ paddingTop: 0 }}>
-          <div className="section-head">
-            <span className="eyebrow">Ways to Save</span>
-            <h2>Every kind of grace, at a kinder price</h2>
-          </div>
-          <div className="offer-grid">
-            <Link to="/Products/gold-trim-eid-abaya" className="offer-card-link" onClick={() => window.scrollTo(0, 0)}>
-              <div className="offer-card">
-                <div className="offer-card-img-wrapper">
-                  <img src="/hero2.png" alt="First Order Offer" className="offer-card-hero-img" />
-                </div>
-                <div className="offer-card-content">
-                  <span className="offer-badge">First Order</span>
-                  <h3>10% Off Your First Purchase</h3>
-                  <p>New to Laila? Enjoy 10% off your first purchase from our Everyday Grace & Premium Collections.</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/Products/premium-chiffon-hijab-1" className="offer-card-link" onClick={() => window.scrollTo(0, 0)}>
-              <div className="offer-card">
-                <div className="offer-card-img-wrapper">
-                  <img src="/hero2.png" alt="Bundle Offer" className="offer-card-hero-img" />
-                </div>
-                <div className="offer-card-content">
-                  <span className="offer-badge">Bundle</span>
-                  <h3>Buy 2 Hijabs, Save 15%</h3>
-                  <p>Mix and match any two Everyday or Premium hijabs and the discount is applied automatically.</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/Products/structured-day-abaya" className="offer-card-link" onClick={() => window.scrollTo(0, 0)}>
-              <div className="offer-card">
-                <div className="offer-card-img-wrapper">
-                  <img src="/hero2.png" alt="Special Edit Offer" className="offer-card-hero-img" />
-                </div>
-                <div className="offer-card-content">
-                  <span className="offer-badge">Special Edit</span>
-                  <h3>Exclusive Eid Collection Offer</h3>
-                  <p>Explore luxury abayas and silk hijabs marked down for a limited time during our Eid edit event.</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </section>
+        {waysCards.length > 0 && (
+          <section style={{ paddingTop: 0 }}>
+            <div className="section-head">
+              <span className="eyebrow">Ways to Save</span>
+              <h2>{waysTitle}</h2>
+            </div>
+            <div className="offer-grid">
+              {waysCards.map((wc, idx) => (
+                <Link key={idx} to={wc.slug ? `/Products/${wc.slug}` : '#'} className="offer-card-link" onClick={() => window.scrollTo(0, 0)}>
+                  <div className="offer-card">
+                    <div className="offer-card-img-wrapper">
+                      <img src={wc.image_url || '/hero2.png'} alt={wc.title} className="offer-card-hero-img" />
+                    </div>
+                    <div className="offer-card-content">
+                      <span className="offer-badge">{wc.badge}</span>
+                      <h3>{wc.title}</h3>
+                      <p>{wc.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Sale Products Horizontal Slider */}
-        <section id="sale-items" style={{ paddingTop: 0 }}>
-          <div className="section-head">
-            <span className="eyebrow">On Sale Now</span>
-            <h2>The Eid Edit — marked down</h2>
-          </div>
+        {bundles.length > 0 && (
+          <section id="sale-items" style={{ paddingTop: 0 }}>
+            <div className="section-head">
+              <span className="eyebrow">On Sale Now</span>
+              <h2>{sec1Title}</h2>
+            </div>
 
-          <div className="prod-slider-wrapper">
-            <button className="img-slider-arrow left" onClick={scrollLeft} aria-label="Scroll left">
-              <IoChevronBackOutline />
-            </button>
-            <button className="img-slider-arrow right" onClick={scrollRight} aria-label="Scroll right">
-              <IoChevronForwardOutline />
-            </button>
+            <div className="prod-slider-wrapper">
+              <button className="img-slider-arrow left" onClick={scrollLeft} aria-label="Scroll left">
+                <IoChevronBackOutline />
+              </button>
+              <button className="img-slider-arrow right" onClick={scrollRight} aria-label="Scroll right">
+                <IoChevronForwardOutline />
+              </button>
 
-            <div className="prod-slider-container" ref={sliderRef}>
-              <div className="prod-slider-track">
-                {products.map((item, index) => (
-                  <Link to={`/Products/${item.slug}`} className="prod-card-link" key={index}>
-                    <div className="prod-card">
-                      <div className="prod-frame">
-                        <span className="discount-tag">{item.discount}</span>
-                        <img src={item.image} alt={item.name} />
+              <div className="prod-slider-container" ref={sliderRef}>
+                <div className="prod-slider-track">
+                  {bundles.map((b, idx) => (
+                    <Link to={b.slug ? `/Products/${b.slug}` : '#'} className="prod-card-link" key={idx}>
+                      <div className="prod-card">
+                        <div className="prod-frame">
+                          <span className="discount-tag">{b.savings}</span>
+                          <img src={b.image_url || '/hero1.png'} alt={b.title} />
+                        </div>
+                        <div className="prod-info">
+                          <div><h4 style={{ fontSize: '15px' }}>{b.title}</h4><span className="sizes">{b.items_included}</span></div>
+                          <div className="price"><span className="was">{b.original_price}</span><span className="now">{b.bundle_price}</span></div>
+                        </div>
                       </div>
-                      <div className="prod-info">
-                        <div><h4>{item.name}</h4><span className="sizes">{item.sizes}</span></div>
-                        <div className="price"><span className="was">Rs. {item.was}</span><span className="now">Rs. {item.now}</span></div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Referral Strip */}
         <section>

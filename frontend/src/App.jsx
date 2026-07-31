@@ -18,6 +18,7 @@ import AffiliateProgram from "./pages/Affiliatepage";
 import OurStory from './components/Footer/AboutUs/OurStory';
 import AffiliateLogin from "./pages/AffiliateLogin";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
+import AffiliateRedirect from "./pages/AffiliateRedirect";
 import ProductDetail from "./components/Products/ProductDetail";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckOutPage";
@@ -48,6 +49,7 @@ function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* ── 2. STOREFRONT ROUTES (Using AppLayout as a parent route wrapper) ── */}
+            <Route path="/ref/:code" element={<AffiliateRedirect />} />
             <Route element={<AppLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/offers" element={<OffersPage />} />

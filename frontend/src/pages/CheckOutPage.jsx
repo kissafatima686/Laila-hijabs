@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { useContent } from '../context/useContent';
@@ -21,6 +21,42 @@ const CheckoutPage = () => {
   });
 
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('laila_hijabs_user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user && user.email) {
+          const parts = user.name ? user.name.split(' ') : [''];
+          const firstName = parts[0];
+          const lastName = parts.slice(1).join(' ');
+
+          let address = '';
+          let city = '';
+          const addressStr = localStorage.getItem(`laila_hijabs_addresses_${user.email}`);
+          if (addressStr) {
+            const addresses = JSON.parse(addressStr);
+            if (Array.isArray(addresses) && addresses.length > 0) {
+              const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
+              address = defaultAddr.street || '';
+              city = defaultAddr.city || '';
+            }
+          }
+
+          setFormData(prev => ({
+            ...prev,
+            email: user.email,
+            phone: user.phone || '',
+            firstName: firstName || '',
+            lastName: lastName || '',
+            address: address,
+            city: city
+          }));
+        }
+      }
+    } catch (e) {}
+  }, []);
 
   // Dynamic Settings from Admin CMS
   const title = getSectionContent('checkout_page_settings', 'title', 'Checkout');

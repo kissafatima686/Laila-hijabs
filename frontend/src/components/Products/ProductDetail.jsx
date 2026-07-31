@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { products as mainProducts } from '../../data/products';
 import { CartContext } from '../../context/CartContext';
+import { useContent } from '../../context/useContent';
 import ProductReviews from './ProductReviews';
 import './ProductDetail.css';
 
@@ -138,20 +139,50 @@ const ProductDetail = () => {
   // How We Do It Modal state
   const [activePillar, setActivePillar] = useState(null);
 
+  const { getSectionContent } = useContent();
+  const specsConfig = getSectionContent('products_specs_template', 'specs', []);
+  const specsIsActive = getSectionContent('products_specs_template', 'isActive', true);
+
   const [categoryItems, setCategoryItems] = useState(() => {
     const curColor = product ? (product.color || "Olive Green") : "Olive Green";
     const curFabric = product ? (product.material || product.fabric || "Nida Crepe") : "Nida Crepe";
 
-    return [
-      { id: 'cat-abaya', garmentType: 'Abaya', size: 'S', fabricType: curFabric, customColor: curColor },
-      { id: 'cat-scarf', garmentType: 'Scarf / Hijab', size: 'Free Size', fabricType: 'Georgette Chiffon', customColor: curColor },
-      { id: 'cat-coord', garmentType: 'Co-Ord Set', size: 'S', fabricType: 'Cotton Blend Poplin', customColor: curColor },
-      { id: 'cat-irani', garmentType: 'Irani Chadar', size: 'S', fabricType: 'Lightweight Nida Fabric', customColor: curColor },
-      { id: 'cat-jilbab', garmentType: 'Jilbab', size: 'S', fabricType: 'Soft Nida Silk Blend', customColor: curColor },
-      { id: 'cat-namaz', garmentType: 'Namaz Chadar', size: 'S', fabricType: '100% Soft Cotton', customColor: curColor },
-      { id: 'cat-round', garmentType: 'Round Chadar', size: 'S', fabricType: 'Premium Nida Fabric', customColor: curColor }
+    const baseItems = specsConfig && specsConfig.length > 0 ? specsConfig.map(spec => {
+      let gTypeOptions = Array.isArray(spec.garmentTypes) ? spec.garmentTypes : (typeof spec.garmentTypes === 'string' ? spec.garmentTypes.split(',').map(s=>({name:s.trim(), active:true})) : []);
+      let fTypeOptions = Array.isArray(spec.fabricTypes) ? spec.fabricTypes : (typeof spec.fabricTypes === 'string' ? spec.fabricTypes.split(',').map(s=>({name:s.trim(), active:true})) : []);
+      
+      return {
+        id: spec.id,
+        name: spec.name,
+        garmentTypeLabel: spec.garmentTypeLabel || 'GARMENT TYPE',
+        garmentType: gTypeOptions.find(o => o.active)?.name || 'Abaya',
+        garmentTypes: gTypeOptions,
+        size: 'S',
+        fabricTypeLabel: spec.fabricTypeLabel || 'FABRIC TYPE',
+        fabricType: fTypeOptions.find(o => o.active)?.name || curFabric,
+        fabricTypes: fTypeOptions,
+        customColor: curColor,
+        hasSize: spec.hasSize !== false,
+        hasColor: spec.hasColor !== false,
+        hasSizeGuide: spec.hasSizeGuide !== false,
+        measurements: { abayaLength: '', abayaWidth: '', sleeveLength: '', sleeveWidth: '', shoulderWidth: '' }
+      };
+    }) : [
+      { id: 'cat-abaya', name: 'FOR ABAYA', garmentType: 'Abaya', size: 'S', fabricType: curFabric, customColor: curColor, measurements: { abayaLength: '', abayaWidth: '', sleeveLength: '', sleeveWidth: '', shoulderWidth: '' }, garmentTypes: 'Abaya', fabricTypes: 'Nida Crepe, Cotton Blend Poplin', hasSize: true },
+      { id: 'cat-scarf', name: 'FOR SCARF / HIJAB', garmentType: 'Scarf / Hijab', size: 'Free Size', fabricType: 'Georgette Chiffon', customColor: curColor, garmentTypes: 'Scarf / Hijab', fabricTypes: 'Georgette Chiffon, Cotton Jersey, Silk Satin', hasSize: false },
+      { id: 'cat-coord', name: 'FOR CO-ORD SET', garmentType: 'Co-Ord Set', size: 'S', fabricType: 'Cotton Blend Poplin', customColor: curColor, garmentTypes: 'Co-Ord Set', fabricTypes: 'Cotton Blend Poplin', hasSize: true }
     ];
+    return baseItems;
   });
+
+  const visibleCategoryItems = React.useMemo(() => {
+    if (!specsConfig || specsConfig.length === 0) return categoryItems;
+    return categoryItems.filter(item => {
+      const spec = specsConfig.find(s => s.id === item.id);
+      if (spec && spec.active === false) return false;
+      return true;
+    });
+  }, [categoryItems, specsConfig]);
 
   const [openCategoryAccordions, setOpenCategoryAccordions] = useState({});
 
@@ -306,14 +337,14 @@ const ProductDetail = () => {
           </div>
 
           {/* Category Details FAQ Accordions Block */}
-          {(product && product.bundle_attributes && (typeof product.bundle_attributes === 'string' ? JSON.parse(product.bundle_attributes) : product.bundle_attributes).isActive) && (<div className="product-category-accordions-container">
+          {(product && product.bundle_attributes && (typeof product.bundle_attributes === 'string' ? JSON.parse(product.bundle_attributes) : product.bundle_attributes).isActive && specsIsActive) && (<div className="product-category-accordions-container">
             <div className="category-accordions-header">
               <span className="specs-title">CATEGORY SPECIFICATIONS & CUSTOMIZATION</span>
             </div>
 
             {/* Accordion list for each category */}
             <div className="category-accordions-list">
-              {categoryItems.map((item) => {
+              {visibleCategoryItems.map((item) => {
                 const isScarf = item.garmentType.toLowerCase().includes('scarf') || item.garmentType.toLowerCase().includes('hijab');
                 const isOpen = Boolean(openCategoryAccordions[item.id]);
 
@@ -326,7 +357,7 @@ const ProductDetail = () => {
                         onClick={() => toggleCategoryAccordion(item.id)}
                       >
                         <span className="category-accordion-title">
-                          FOR {item.garmentType.toUpperCase()}
+                          {item.name.toUpperCase()}
                         </span>
                         <span className="category-accordion-chevron">{isOpen ? '∧' : '∨'}</span>
                       </button>
@@ -337,72 +368,68 @@ const ProductDetail = () => {
                         {/* Garment & Fabric Type Row */}
                         <div className="custom-form-row">
                           <div className="custom-form-field">
-                            <label className="custom-field-label">GARMENT TYPE *</label>
+                            <label className="custom-field-label">{item.garmentTypeLabel || 'GARMENT TYPE'} *</label>
                             <select 
                               className="custom-field-select"
                               value={item.garmentType}
                               onChange={(e) => updateCategoryItem(item.id, 'garmentType', e.target.value)}
                             >
-                              <option value="Abaya">Abaya</option>
-                              <option value="Scarf / Hijab">Scarf / Hijab</option>
-                              <option value="Co-Ord Set">Co-Ord Set</option>
-                              <option value="Irani Chadar">Irani Chadar</option>
-                              <option value="Jilbab">Jilbab</option>
-                              <option value="Namaz Chadar">Namaz Chadar</option>
-                              <option value="Round Chadar">Round Chadar</option>
+                              {(item.garmentTypes || []).filter(o => o.active).map((opt, i) => (
+                                <option key={i} value={opt.name}>{opt.name}</option>
+                              ))}
                             </select>
                           </div>
 
                           <div className="custom-form-field">
-                            <label className="custom-field-label">FABRIC TYPE *</label>
+                            <label className="custom-field-label">{item.fabricTypeLabel || 'FABRIC TYPE'} *</label>
                             <select 
                               className="custom-field-select"
                               value={item.fabricType}
                               onChange={(e) => updateCategoryItem(item.id, 'fabricType', e.target.value)}
                             >
-                              <option value="Nida Crepe">Nida Crepe</option>
-                              <option value="Georgette Chiffon">Georgette Chiffon</option>
-                              <option value="Cotton Jersey">Cotton Jersey</option>
-                              <option value="Silk Satin">Silk Satin</option>
-                              <option value="Cotton Blend Poplin">Cotton Blend Poplin</option>
-                              <option value="Linen Blend">Linen Blend</option>
-                              <option value="Soft Cotton">Soft Cotton</option>
+                              {(item.fabricTypes || []).filter(o => o.active).map((opt, i) => (
+                                <option key={i} value={opt.name}>{opt.name}</option>
+                              ))}
                             </select>
                           </div>
                         </div>
 
                         {/* Color Selector matching Image 2 */}
-                        <div className="color-selection-block" style={{ marginBottom: '20px' }}>
-                          <div className="color-header" style={{ marginBottom: '8px' }}>
-                            <span className="block-label" style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '1px' }}>COLOUR:</span>
-                            <span className="selected-color-name" style={{ marginLeft: '10px', color: '#888', fontSize: '11px', letterSpacing: '1px' }}>{(item.customColor || selectedColor || "").toUpperCase()}</span>
+                        {item.hasColor !== false && (
+                          <div className="color-selection-block" style={{ marginBottom: '20px' }}>
+                            <div className="color-header" style={{ marginBottom: '8px' }}>
+                              <span className="block-label" style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '1px' }}>COLOUR:</span>
+                              <span className="selected-color-name" style={{ marginLeft: '10px', color: '#888', fontSize: '11px', letterSpacing: '1px' }}>{(item.customColor || selectedColor || "").toUpperCase()}</span>
+                            </div>
+                            <div className="custom-color-input-wrapper">
+                              <input 
+                                type="text"
+                                className="custom-field-input"
+                                style={{ width: '100%', padding: '10px', fontSize: '13px', backgroundColor: '#e9e3d5', border: '1px solid #d4cbb8', borderRadius: '4px', outline: 'none' }}
+                                placeholder="Enter colour..."
+                                value={item.customColor || selectedColor || ""}
+                                onChange={(e) => {
+                                  updateCategoryItem(item.id, 'customColor', e.target.value);
+                                  setSelectedColor(e.target.value);
+                                }}
+                              />
+                            </div>
                           </div>
-                          <div className="custom-color-input-wrapper">
-                            <input 
-                              type="text"
-                              className="custom-field-input"
-                              style={{ width: '100%', padding: '10px', fontSize: '13px', backgroundColor: '#e9e3d5', border: '1px solid #d4cbb8', borderRadius: '4px', outline: 'none' }}
-                              placeholder="Enter colour..."
-                              value={item.customColor || selectedColor || ""}
-                              onChange={(e) => {
-                                updateCategoryItem(item.id, 'customColor', e.target.value);
-                                setSelectedColor(e.target.value);
-                              }}
-                            />
-                          </div>
-                        </div>
+                        )}
 
                         {/* Size Selector matching Image 2 */}
-                        {!isScarf && (
+                        {item.hasSize !== false && (
                           <div className="size-selection-block">
                             <div className="size-header-line">
                               <span className="block-label">SELECT SIZE</span>
-                              <Link 
-                                to="/size-guide"
-                                className="size-guide-link"
-                              >
-                                SIZE GUIDE
-                              </Link>
+                              {item.hasSizeGuide !== false && (
+                                <Link 
+                                  to="/size-guide"
+                                  className="size-guide-link"
+                                >
+                                  SIZE GUIDE
+                                </Link>
+                              )}
                             </div>
 
                             <div className="size-boxes-grid">

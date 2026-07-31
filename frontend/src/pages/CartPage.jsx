@@ -13,6 +13,9 @@ const CartPage = () => {
   const [couponMessage, setCouponMessage] = React.useState('');
   const [couponApplied, setCouponApplied] = React.useState(false);
 
+  const bundlesRaw = getSectionContent('offers_bundles_page', 'bundles', []);
+  const activeBundles = bundlesRaw.filter(b => b.status !== 'Draft');
+
   // Dynamic Settings
   const title = getSectionContent('cart_page_settings', 'title', 'Cart');
   const step1 = getSectionContent('cart_page_settings', 'step_1_label', '1. Cart');
@@ -227,6 +230,31 @@ const CartPage = () => {
                 </p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Upsell Section */}
+      {cartItems.length > 0 && activeBundles.length > 0 && (
+        <div style={{ marginTop: '60px', padding: '40px 0', borderTop: '1px solid #eae7dc' }}>
+          <h2 style={{ fontFamily: 'Fraunces, serif', fontSize: '24px', color: '#3E4930', textAlign: 'center', marginBottom: '30px' }}>Complete Your Look & Save Up To 30%</h2>
+          <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px' }}>
+            {activeBundles.map((b, idx) => (
+              <Link key={idx} to={b.slug ? `/Products/${b.slug}` : '#'} style={{ textDecoration: 'none', minWidth: '280px', flex: '0 0 auto', border: '1px solid #eae7dc', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: '#22c55e', color: '#fff', padding: '4px 8px', fontSize: '11px', fontWeight: 'bold', borderRadius: '4px' }}>{b.savings}</span>
+                  <img src={b.image_url || '/hero1.png'} alt={b.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                </div>
+                <div style={{ padding: '20px' }}>
+                  <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1A2010', fontFamily: 'Fraunces, serif' }}>{b.title}</h3>
+                  <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#6b6a58' }}>{b.items_included}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#B8935B' }}>{b.bundle_price}</span>
+                    <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '13px' }}>{b.original_price}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       )}

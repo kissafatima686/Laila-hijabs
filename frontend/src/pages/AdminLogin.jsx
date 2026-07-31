@@ -9,7 +9,7 @@ export default function AdminLogin() {
   const [submitting, setSubmitting] = useState(false);
 
   if (token) {
-    // Already logged in — jump straight to the admin app
+    // Already logged in — jump straight to the admin app on port 5174
     window.location.href = "http://localhost:5174/dashboard";
     return null;
   }
@@ -26,7 +26,7 @@ export default function AdminLogin() {
 
     try {
       await login(form.email, form.password);
-      // Redirect to the admin app (runs on its own dev server / port)
+      // Redirect to the admin app running on port 5174
       window.location.href = "http://localhost:5174/dashboard";
     } catch (err) {
       const message = err?.response?.data?.message || err?.message || "Invalid email or password";
@@ -37,63 +37,143 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#F6F1E3] px-4 py-10 font-sans text-[#3E4930]">
-      {/* Background Soft Glow Accents */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(184,147,91,0.12),transparent_44%),radial-gradient(circle_at_82%_24%,rgba(62,73,48,0.08),transparent_42%)]" />
-
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#F6F1E3',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '30px 16px',
+      boxSizing: 'border-box',
+      fontFamily: "'Jost', system-ui, -apple-system, sans-serif"
+    }}>
       {/* Main Container Card */}
-      <div className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-[#B8935B]/30 bg-[#3E4930] shadow-[0_30px_120px_rgba(62,73,48,0.25)] backdrop-blur-xl">
-        <div className="grid min-h-[580px] lg:grid-cols-[1.1fr_0.9fr]">
-          
-          {/* Left Branding Panel */}
-          <section className="relative hidden flex-col justify-center border-r border-[#B8935B]/20 p-12 lg:flex bg-gradient-to-br from-[#3E4930] to-[#2c3322]">
-            <div className="absolute -left-16 top-16 h-52 w-52 rounded-full bg-[#B8935B]/10 blur-3xl" />
-            <div className="absolute bottom-6 right-8 h-56 w-56 rounded-full bg-[#E7D9C9]/5 blur-3xl" />
+      <div style={{
+        width: '100%',
+        maxWidth: '960px',
+        backgroundColor: '#3E4930',
+        borderRadius: '24px',
+        overflow: 'hidden',
+        boxShadow: '0 25px 60px rgba(62, 73, 48, 0.25)',
+        border: '1px solid rgba(184, 147, 91, 0.3)',
+        display: 'flex',
+        flexWrap: 'wrap'
+      }}>
 
-            <div className="relative mx-auto flex w-full max-w-lg flex-col items-start justify-center">
-              {/* Brand Typography Header */}
-              <div className="flex flex-col items-start">
-                <h1 className="font-serif text-5xl font-normal tracking-tight text-[#F6F1E3]">
-                  Laila
-                </h1>
-                <span className="mt-2 text-sm font-bold tracking-[0.35em] text-[#B8935B]">
-                  H I J A B S
-                </span>
-              </div>
+        {/* Left Branding Panel */}
+        <div style={{
+          flex: '1 1 380px',
+          padding: '48px 40px',
+          background: 'linear-gradient(135deg, #3E4930 0%, #2A3320 100%)',
+          color: '#F6F1E3',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          borderRight: '1px solid rgba(184, 147, 91, 0.2)',
+          boxSizing: 'border-box'
+        }}>
+          {/* Logo */}
+          <div style={{ marginBottom: '28px' }}>
+            <h1 style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: '44px',
+              fontWeight: '400',
+              color: '#F6F1E3',
+              margin: '0',
+              lineHeight: '1'
+            }}>
+              Laila
+            </h1>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: '700',
+              letterSpacing: '4px',
+              color: '#B8935B',
+              marginTop: '6px',
+              display: 'block'
+            }}>
+              H I J A B S
+            </span>
+          </div>
 
-              <p className="mt-8 max-w-md text-3xl font-extrabold leading-[1.1] tracking-tight text-[#F6F1E3]">
-                Administrator
-                <span className="block bg-gradient-to-r from-[#B8935B] to-[#E7D9C9] bg-clip-text text-transparent">
-                  Control Panel
-                </span>
-              </p>
+          <h2 style={{
+            fontFamily: "'Fraunces', serif",
+            fontSize: '28px',
+            fontWeight: '600',
+            color: '#F6F1E3',
+            lineHeight: '1.25',
+            margin: '0 0 16px 0'
+          }}>
+            Administrator<br />
+            <span style={{ color: '#B8935B' }}>Control Panel</span>
+          </h2>
 
-              <p className="mt-5 max-w-md text-sm leading-6 text-[#E7D9C9]/80">
-                Manage inventory catalog, monitor customer order fulfillment, and publish store updates from one elegant dashboard.
-              </p>
-            </div>
-          </section>
+          <p style={{
+            fontSize: '13px',
+            lineHeight: '1.6',
+            color: 'rgba(231, 217, 201, 0.85)',
+            margin: '0 0 32px 0'
+          }}>
+            Manage inventory catalog, monitor customer order fulfillment, and publish store updates from one elegant dashboard.
+          </p>
 
-          {/* Right Form Panel */}
-          <section className="flex items-center justify-center p-6 sm:p-8 lg:p-10 bg-[#F6F1E3]">
-            <form
-              onSubmit={onSubmit}
-              className="w-full max-w-md rounded-2xl border border-[#B8935B]/40 bg-[#E7D9C9] p-6 shadow-[0_14px_48px_rgba(62,73,48,0.12)] sm:p-8"
-            >
-              <div className="lg:hidden mb-2">
-                <h1 className="font-serif text-3xl font-normal text-[#3E4930]">Laila</h1>
-                <span className="text-[10px] font-bold tracking-[0.25em] text-[#B8935B]">H I J A B S</span>
-              </div>
+          {/* Direct Admin Server Link Option */}
+          <div style={{
+            padding: '14px 16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            border: '1px solid rgba(184, 147, 91, 0.2)',
+            fontSize: '12px',
+            color: '#E7D9C9'
+          }}>
+            <div style={{ fontWeight: '600', color: '#B8935B', marginBottom: '4px' }}>⚡ Direct Portal Access</div>
+            <span>Standalone Admin app runs at <a href="http://localhost:5174" target="_blank" rel="noreferrer" style={{ color: '#B8935B', textDecoration: 'underline' }}>http://localhost:5174</a></span>
+          </div>
+        </div>
 
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#3E4930]">
-                Admin Sign In
-              </h2>
-              <p className="mt-1 text-xs text-[#3E4930]/70">
-                Sign in to continue to your admin dashboard.
-              </p>
+        {/* Right Form Panel */}
+        <div style={{
+          flex: '1 1 360px',
+          backgroundColor: '#F6F1E3',
+          padding: '44px 36px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{
+            backgroundColor: '#E7D9C9',
+            padding: '32px 28px',
+            borderRadius: '16px',
+            border: '1px solid rgba(184, 147, 91, 0.4)',
+            boxShadow: '0 10px 30px rgba(62, 73, 48, 0.08)'
+          }}>
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: '700',
+              color: '#3E4930',
+              margin: '0 0 6px 0',
+              fontFamily: "'Fraunces', serif"
+            }}>
+              Admin Sign In
+            </h3>
+            <p style={{
+              fontSize: '12px',
+              color: 'rgba(62, 73, 48, 0.75)',
+              margin: '0 0 24px 0'
+            }}>
+              Sign in to continue to your admin dashboard.
+            </p>
 
-              <div className="mt-6 flex w-full flex-col gap-4">
-                <label className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#3E4930]">
+            <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  color: '#3E4930'
+                }}>
                   Email Address
                 </label>
                 <input
@@ -104,10 +184,29 @@ export default function AdminLogin() {
                   required
                   value={form.email}
                   onChange={onChange}
-                  className="h-12 w-full rounded-xl border border-[#B8935B]/60 bg-[#F6F1E3] px-4 text-[#3E4930] placeholder:text-[#3E4930]/40 outline-none transition-colors focus:border-[#3E4930] focus:ring-1 focus:ring-[#3E4930]"
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(184, 147, 91, 0.6)',
+                    backgroundColor: '#F6F1E3',
+                    padding: '0 14px',
+                    fontSize: '14px',
+                    color: '#3E4930',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
                 />
+              </div>
 
-                <label className="mt-1 text-[11px] font-bold uppercase tracking-[0.13em] text-[#3E4930]">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  color: '#3E4930'
+                }}>
                   Password
                 </label>
                 <input
@@ -118,31 +217,84 @@ export default function AdminLogin() {
                   required
                   value={form.password}
                   onChange={onChange}
-                  className="h-12 w-full rounded-xl border border-[#B8935B]/60 bg-[#F6F1E3] px-4 text-[#3E4930] placeholder:text-[#3E4930]/40 outline-none transition-colors focus:border-[#3E4930] focus:ring-1 focus:ring-[#3E4930]"
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(184, 147, 91, 0.6)',
+                    backgroundColor: '#F6F1E3',
+                    padding: '0 14px',
+                    fontSize: '14px',
+                    color: '#3E4930',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
                 />
               </div>
 
               {error ? (
-                <p className="mt-4 w-full rounded-xl border border-red-300 bg-red-500/10 px-3 py-2 text-center text-xs font-medium text-red-700">
+                <div style={{
+                  backgroundColor: 'rgba(217, 83, 79, 0.12)',
+                  border: '1px solid rgba(217, 83, 79, 0.3)',
+                  borderRadius: '10px',
+                  padding: '10px',
+                  color: '#D9534F',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  textAlign: 'center'
+                }}>
                   {error}
-                </p>
+                </div>
               ) : null}
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#3E4930] text-sm font-bold tracking-wide text-[#F6F1E3] shadow-[0_10px_20px_rgba(62,73,48,0.2)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#2c3322] disabled:cursor-not-allowed disabled:opacity-70"
+                style={{
+                  width: '100%',
+                  height: '46px',
+                  borderRadius: '10px',
+                  backgroundColor: '#3E4930',
+                  color: '#F6F1E3',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  border: 'none',
+                  cursor: submitting ? 'not-allowed' : 'pointer',
+                  marginTop: '8px',
+                  boxShadow: '0 6px 16px rgba(62, 73, 48, 0.2)',
+                  transition: 'all 0.2s ease'
+                }}
               >
                 {submitting ? "Logging in..." : "Log In"}
               </button>
-
-              <p className="mt-4 text-center text-[11px] text-[#3E4930]/60">
-                Protected access for authorized Laila Hijabs staff.
-              </p>
             </form>
-          </section>
 
+            <div style={{
+              marginTop: '18px',
+              backgroundColor: '#F6F1E3',
+              border: '1px dashed #B8935B',
+              borderRadius: '10px',
+              padding: '10px 12px',
+              textAlign: 'center',
+              fontSize: '11px',
+              color: '#3E4930'
+            }}>
+              <strong>Demo Login:</strong> admin@lailahijabs.com / admin123
+            </div>
+
+            <p style={{
+              marginTop: '14px',
+              textAlign: 'center',
+              fontSize: '11px',
+              color: 'rgba(62, 73, 48, 0.65)'
+            }}>
+              Protected access for authorized staff.
+            </p>
+          </div>
         </div>
+
       </div>
     </div>
   );

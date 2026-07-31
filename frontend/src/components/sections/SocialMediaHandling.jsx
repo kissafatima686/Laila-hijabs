@@ -86,15 +86,15 @@ const SocialMediaHandling = () => {
               {activeMediaItems.concat(activeMediaItems).map((item, index) => (
                 <div key={`${item.key || item.id}-${index}`} className="social-slider-item">
                   
-                  {/* Real MP4 Video Frame */}
-                  <div className="pure-media-card">
-                    <a 
-                      href={item.instagramLink} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      style={{ display: 'block', width: '100%', height: '100%', position: 'relative' }}
-                      aria-label={`Watch ${item.title} on Instagram`}
-                    >
+                  <a 
+                    href={item.instagramLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+                    aria-label={`Watch ${item.title} on Instagram`}
+                  >
+                    {/* Real MP4 Video Frame */}
+                    <div className="pure-media-card">
                       <video 
                         src={item.videoUrl} 
                         autoPlay 
@@ -104,14 +104,14 @@ const SocialMediaHandling = () => {
                         className="edge-to-edge-media" 
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                       />
-                    </a>
-                  </div>
+                    </div>
 
-                  {/* Text Below Frame */}
-                  <div className="card-text-container">
-                    <h3 className="card-title">{item.title}</h3>
-                    <p className="card-subtitle">{item.subtitle}</p>
-                  </div>
+                    {/* Text Below Frame */}
+                    <div className="card-text-container">
+                      <h3 className="card-title">{item.title}</h3>
+                      <p className="card-subtitle">{item.subtitle}</p>
+                    </div>
+                  </a>
 
                 </div>
               ))}
