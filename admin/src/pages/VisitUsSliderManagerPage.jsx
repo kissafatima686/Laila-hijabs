@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
@@ -155,10 +156,15 @@ const VisitUsSliderManagerPage = () => {
   const [locations, setLocations] = useState([]);
   const [sectionHeader, setSectionHeader] = useState({
     title: 'Prefer to see the fabric in person?',
+    title_active: true,
     subtitle: 'Our studio welcomes visits by appointment.',
+    subtitle_active: true,
     body_content: 'If you\'re not close by, our team is just as happy to guide you over WhatsApp or a call.',
+    body_active: true,
     badge_text: 'VISIT US',
+    badge_active: true,
     button_text: 'View Location Details',
+    button_active: true,
     sec_active: true,
     slider_sec_active: true
   });
@@ -179,6 +185,36 @@ const VisitUsSliderManagerPage = () => {
     status: 'Live'
   });
 
+  const saveHeaderData = (updatedHeader) => {
+    setSectionHeader(updatedHeader);
+    setSavingHeader(true);
+    fetch(`${API}/sections/location_visit_us_section`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: updatedHeader.title,
+        subtitle: updatedHeader.subtitle,
+        body_content: updatedHeader.body_content,
+        badge_text: updatedHeader.badge_text,
+        button_text: updatedHeader.button_text,
+        metadata: {
+          sec_active: updatedHeader.sec_active,
+          slider_sec_active: updatedHeader.slider_sec_active,
+          badge_active: updatedHeader.badge_active,
+          button_active: updatedHeader.button_active,
+          title_active: updatedHeader.title_active,
+          subtitle_active: updatedHeader.subtitle_active,
+          body_active: updatedHeader.body_active
+        }
+      })
+    })
+      .then(() => {
+        setSavedHeader(true);
+        setTimeout(() => setSavedHeader(false), 3000);
+      })
+      .finally(() => setSavingHeader(false));
+  };
+
   const fetchSectionData = () => {
     setLoading(true);
     fetch(`${API}/sections/location_visit_us_section`)
@@ -193,7 +229,12 @@ const VisitUsSliderManagerPage = () => {
             badge_text: data.badge_text || 'VISIT US',
             button_text: data.button_text || 'View Location Details',
             sec_active: meta.sec_active !== false,
-            slider_sec_active: meta.slider_sec_active !== false
+            slider_sec_active: meta.slider_sec_active !== false,
+            badge_active: meta.badge_active !== false,
+            button_active: meta.button_active !== false,
+            title_active: meta.title_active !== false,
+            subtitle_active: meta.subtitle_active !== false,
+            body_active: meta.body_active !== false
           });
         }
       })
@@ -214,27 +255,12 @@ const VisitUsSliderManagerPage = () => {
 
   const handleSaveHeader = (e) => {
     if (e) e.preventDefault();
-    setSavingHeader(true);
-    fetch(`${API}/sections/location_visit_us_section`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: sectionHeader.title,
-        subtitle: sectionHeader.subtitle,
-        body_content: sectionHeader.body_content,
-        badge_text: sectionHeader.badge_text,
-        button_text: sectionHeader.button_text,
-        metadata: {
-          sec_active: sectionHeader.sec_active,
-          slider_sec_active: sectionHeader.slider_sec_active
-        }
-      })
-    })
-      .then(() => {
-        setSavedHeader(true);
-        setTimeout(() => setSavedHeader(false), 3000);
-      })
-      .finally(() => setSavingHeader(false));
+    saveHeaderData(sectionHeader);
+  };
+
+  const toggleHeaderField = (fieldKey) => {
+    const updated = { ...sectionHeader, [fieldKey]: sectionHeader[fieldKey] === false ? true : false };
+    saveHeaderData(updated);
   };
 
   const openAddSlide = () => {
@@ -252,19 +278,11 @@ const VisitUsSliderManagerPage = () => {
     setShowModal(true);
   };
 
+  const navigate = useNavigate();
+
   const openEditSlide = (item) => {
-    setForm({
-      name: item.name || '',
-      city: item.city || '',
-      address: item.address || '',
-      hours: item.hours || '',
-      phone: item.phone || '',
-      email: item.email || '',
-      image_url: item.image_url || '',
-      status: item.status || 'Live'
-    });
-    setEditItem(item);
-    setShowModal(true);
+    const id = item.location_id || item.id;
+    navigate('/sections/location_detail_page', { state: { locationId: id } });
   };
 
   const handleSaveSlide = (e) => {
@@ -336,7 +354,7 @@ const VisitUsSliderManagerPage = () => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button
               type="button"
-              onClick={() => setSectionHeader(p => ({ ...p, sec_active: !p.sec_active }))}
+              onClick={() => toggleHeaderField('sec_active')}
               style={{
                 padding: '6px 14px',
                 borderRadius: '6px',
@@ -359,20 +377,20 @@ const VisitUsSliderManagerPage = () => {
 
         <form onSubmit={handleSaveHeader} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <FieldBox label="Section Badge Tag" active={sectionHeader.badge_active} onToggle={() => setSectionHeader(p => ({ ...p, badge_active: p.badge_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, badge_text: '' }))}>
+            <FieldBox label="Section Badge Tag" active={sectionHeader.badge_active} onToggle={() => toggleHeaderField('badge_active')} onClear={() => setSectionHeader(p => ({ ...p, badge_text: '' }))}>
               <input value={sectionHeader.badge_text} onChange={e => setSectionHeader(p => ({ ...p, badge_text: e.target.value }))} style={iStyle} placeholder="VISIT US" />
             </FieldBox>
-            <FieldBox label='"View Location Details" Button Label' active={sectionHeader.button_active} onToggle={() => setSectionHeader(p => ({ ...p, button_active: p.button_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, button_text: '' }))}>
+            <FieldBox label='"View Location Details" Button Label' active={sectionHeader.button_active} onToggle={() => toggleHeaderField('button_active')} onClear={() => setSectionHeader(p => ({ ...p, button_text: '' }))}>
               <input value={sectionHeader.button_text} onChange={e => setSectionHeader(p => ({ ...p, button_text: e.target.value }))} style={iStyle} placeholder="View Location Details" />
             </FieldBox>
           </div>
-          <FieldBox label="Main Heading Title *" active={sectionHeader.title_active} onToggle={() => setSectionHeader(p => ({ ...p, title_active: p.title_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, title: '' }))}>
+          <FieldBox label="Main Heading Title *" active={sectionHeader.title_active} onToggle={() => toggleHeaderField('title_active')} onClear={() => setSectionHeader(p => ({ ...p, title: '' }))}>
             <input required value={sectionHeader.title} onChange={e => setSectionHeader(p => ({ ...p, title: e.target.value }))} style={iStyle} placeholder="Prefer to see the fabric in person?" />
           </FieldBox>
-          <FieldBox label="Subtitle Tagline" active={sectionHeader.subtitle_active} onToggle={() => setSectionHeader(p => ({ ...p, subtitle_active: p.subtitle_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, subtitle: '' }))}>
+          <FieldBox label="Subtitle Tagline" active={sectionHeader.subtitle_active} onToggle={() => toggleHeaderField('subtitle_active')} onClear={() => setSectionHeader(p => ({ ...p, subtitle: '' }))}>
             <input value={sectionHeader.subtitle} onChange={e => setSectionHeader(p => ({ ...p, subtitle: e.target.value }))} style={iStyle} placeholder="Our studio welcomes visits by appointment." />
           </FieldBox>
-          <FieldBox label="Body Content Description" active={sectionHeader.body_active} onToggle={() => setSectionHeader(p => ({ ...p, body_active: p.body_active === false ? true : false }))} onClear={() => setSectionHeader(p => ({ ...p, body_content: '' }))}>
+          <FieldBox label="Body Content Description" active={sectionHeader.body_active} onToggle={() => toggleHeaderField('body_active')} onClear={() => setSectionHeader(p => ({ ...p, body_content: '' }))}>
             <textarea rows={2} value={sectionHeader.body_content} onChange={e => setSectionHeader(p => ({ ...p, body_content: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="If you're not close by, our team is just as happy to guide you over WhatsApp..." />
           </FieldBox>
         </form>
@@ -388,7 +406,7 @@ const VisitUsSliderManagerPage = () => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button
               type="button"
-              onClick={() => setSectionHeader(p => ({ ...p, slider_sec_active: !p.slider_sec_active }))}
+              onClick={() => toggleHeaderField('slider_sec_active')}
               style={{
                 padding: '6px 14px',
                 borderRadius: '6px',

@@ -246,6 +246,35 @@ const getModuleItems = async (req, res) => {
       return res.status(200).json(formatted);
     }
     
+    if (req.params.moduleName === 'locations') {
+      const formatted = rows.map(loc => {
+        let meta = {};
+        try {
+          if (loc.metadata) meta = typeof loc.metadata === 'string' ? JSON.parse(loc.metadata) : loc.metadata;
+        } catch(e) {}
+        return {
+          ...loc,
+          id: loc.location_id,
+          name: loc.store_name || loc.name || '',
+          store_name: loc.store_name || loc.name || '',
+          hours: loc.opening_hours || loc.hours || '',
+          opening_hours: loc.opening_hours || loc.hours || '',
+          image_url: loc.image_url || '',
+          status: (loc.status === 'Active' || loc.status === 'Live') ? 'Live' : 'Draft',
+          city_active: meta.city_active !== false,
+          name_active: meta.name_active !== false,
+          desc_active: meta.desc_active !== false,
+          address_active: meta.address_active !== false,
+          hours_active: meta.hours_active !== false,
+          phone_active: meta.phone_active !== false,
+          email_active: meta.email_active !== false,
+          map_active: meta.map_active !== false,
+          image_active: meta.image_active !== false
+        };
+      });
+      return res.status(200).json(formatted);
+    }
+
     res.status(200).json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -302,6 +331,48 @@ const updateModuleItem = async (req, res) => {
       categoryFilters = bodyData.filters;
       delete bodyData.filters;
     }
+  }
+
+  if (req.params.moduleName === 'locations') {
+    const cleanBody = {};
+    if ('name' in bodyData) cleanBody.store_name = bodyData.name;
+    if ('store_name' in bodyData) cleanBody.store_name = bodyData.store_name;
+    if ('city' in bodyData) cleanBody.city = bodyData.city;
+    if ('address' in bodyData) cleanBody.address = bodyData.address;
+    if ('phone' in bodyData) cleanBody.phone = bodyData.phone;
+    if ('email' in bodyData) cleanBody.email = bodyData.email;
+    if ('hours' in bodyData) cleanBody.opening_hours = bodyData.hours;
+    if ('opening_hours' in bodyData) cleanBody.opening_hours = bodyData.opening_hours;
+    if ('image_url' in bodyData) cleanBody.image_url = bodyData.image_url;
+    if ('map_url' in bodyData) cleanBody.map_url = bodyData.map_url;
+    if ('status' in bodyData) {
+      cleanBody.status = (bodyData.status === 'Live' || bodyData.status === 'Active') ? 'Active' : 'Inactive';
+    }
+
+    let existingMeta = {};
+    try {
+      const [locRow] = await pool.query(`SELECT metadata FROM store_locations WHERE location_id = ?`, [req.params.id]);
+      if (locRow.length > 0 && locRow[0].metadata) {
+        existingMeta = typeof locRow[0].metadata === 'string' ? JSON.parse(locRow[0].metadata) : locRow[0].metadata;
+      }
+    } catch(e) {}
+
+    const metaObj = {
+      ...existingMeta,
+      city_active: bodyData.city_active !== undefined ? bodyData.city_active : (existingMeta.city_active !== false),
+      name_active: bodyData.name_active !== undefined ? bodyData.name_active : (existingMeta.name_active !== false),
+      desc_active: bodyData.desc_active !== undefined ? bodyData.desc_active : (existingMeta.desc_active !== false),
+      address_active: bodyData.address_active !== undefined ? bodyData.address_active : (existingMeta.address_active !== false),
+      hours_active: bodyData.hours_active !== undefined ? bodyData.hours_active : (existingMeta.hours_active !== false),
+      phone_active: bodyData.phone_active !== undefined ? bodyData.phone_active : (existingMeta.phone_active !== false),
+      email_active: bodyData.email_active !== undefined ? bodyData.email_active : (existingMeta.email_active !== false),
+      map_active: bodyData.map_active !== undefined ? bodyData.map_active : (existingMeta.map_active !== false),
+      image_active: bodyData.image_active !== undefined ? bodyData.image_active : (existingMeta.image_active !== false),
+      description: bodyData.description !== undefined ? bodyData.description : existingMeta.description
+    };
+
+    cleanBody.metadata = JSON.stringify(metaObj);
+    bodyData = cleanBody;
   }
 
   // Intercept Affiliate Approvals
@@ -368,6 +439,16 @@ const toggleModuleItemStatus = async (req, res) => {
   const config = TABLE_MAP[req.params.moduleName];
   if (!config) return res.status(400).json({ error: 'Invalid module' });
   const { status } = req.body;
+
+  if (req.params.moduleName === 'locations') {
+    try {
+      const dbStatus = (status === 'Live' || status === 'Active') ? 'Active' : 'Inactive';
+      await pool.query(`UPDATE store_locations SET status = ? WHERE location_id = ?`, [dbStatus, req.params.id]);
+      return res.status(200).json({ message: 'Status updated' });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
 
   // Intercept Affiliate Approvals
   if (req.params.moduleName === 'affiliates' && status === 'Approved') {

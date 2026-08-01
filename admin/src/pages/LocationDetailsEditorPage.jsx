@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
@@ -153,7 +154,10 @@ const LocationDetailsEditorPage = () => {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({});
 
-  const fetchLocations = () => {
+  const routerLoc = useLocation();
+  const targetId = routerLoc.state?.locationId;
+
+  const fetchLocations = (keepIndex) => {
     setLoading(true);
     fetch(`${API}/module/locations`)
       .then(r => r.json())
@@ -161,7 +165,14 @@ const LocationDetailsEditorPage = () => {
         const list = Array.isArray(data) ? data : [];
         setLocations(list);
         if (list.length > 0) {
-          populateForm(list[0]);
+          let idxToSelect = keepIndex !== undefined ? keepIndex : selectedIndex;
+          if (keepIndex === undefined && targetId) {
+            const foundIdx = list.findIndex(l => String(l.location_id || l.id) === String(targetId));
+            if (foundIdx !== -1) idxToSelect = foundIdx;
+          }
+          const validIdx = idxToSelect < list.length ? idxToSelect : 0;
+          setSelectedIndex(validIdx);
+          populateForm(list[validIdx]);
         }
       })
       .catch(() => setLocations([]))
@@ -203,34 +214,47 @@ const LocationDetailsEditorPage = () => {
     populateForm(locations[idx]);
   };
 
-  const handleSave = (e) => {
-    if (e) e.preventDefault();
-    if (!form.location_id) return;
+  const saveLocationFormState = (updatedForm) => {
+    setForm(updatedForm);
+    if (!updatedForm.location_id) return;
     setSaving(true);
 
-    fetch(`${API}/module/locations/${form.location_id}`, {
+    fetch(`${API}/module/locations/${updatedForm.location_id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify(updatedForm)
     })
       .then(() => {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
-        fetchLocations();
+        fetchLocations(selectedIndex);
       })
       .finally(() => setSaving(false));
   };
 
+  const handleSave = (e) => {
+    if (e) e.preventDefault();
+    saveLocationFormState(form);
+  };
+
+  const toggleLocationField = (fieldKey) => {
+    const updated = { ...form, [fieldKey]: form[fieldKey] === false ? true : false };
+    saveLocationFormState(updated);
+  };
+
   const handleToggleStatus = () => {
     if (!form.location_id) return;
-    const nextStatus = form.status === 'Live' ? 'Draft' : 'Live';
+    const isCurrentlyActive = form.status === 'Live' || form.status === 'Active';
+    const nextStatus = isCurrentlyActive ? 'Draft' : 'Live';
+
+    setForm(prev => ({ ...prev, status: nextStatus }));
+
     fetch(`${API}/module/locations/${form.location_id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: nextStatus })
     }).then(() => {
-      setForm(prev => ({ ...prev, status: nextStatus }));
-      fetchLocations();
+      fetchLocations(selectedIndex);
     });
   };
 
@@ -329,43 +353,56 @@ const LocationDetailsEditorPage = () => {
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <FieldBox label="City & Country *" active={form.city_active} onToggle={() => setForm(p => ({ ...p, city_active: p.city_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, city: '' }))}>
+                <FieldBox label="City & Country *" active={form.city_active} onToggle={() => toggleLocationField('city_active')} onClear={() => setForm(p => ({ ...p, city: '' }))}>
                   <input required value={form.city || ''} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} style={iStyle} placeholder="e.g. Islamabad, Pakistan" />
                 </FieldBox>
 
-                <FieldBox label="Studio / Boutique Name *" active={form.name_active} onToggle={() => setForm(p => ({ ...p, name_active: p.name_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, name: '' }))}>
+                <FieldBox label="Studio / Boutique Name *" active={form.name_active} onToggle={() => toggleLocationField('name_active')} onClear={() => setForm(p => ({ ...p, name: '' }))}>
                   <input required value={form.name || ''} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} style={iStyle} placeholder="e.g. Laila Hijabs Studio" />
                 </FieldBox>
               </div>
 
-              <FieldBox label="Boutique Subtitle / Description" active={form.desc_active} onToggle={() => setForm(p => ({ ...p, desc_active: p.desc_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, description: '' }))}>
+              <FieldBox label="Boutique Subtitle / Description" active={form.desc_active} onToggle={() => toggleLocationField('desc_active')} onClear={() => setForm(p => ({ ...p, description: '' }))}>
                 <textarea rows={2} value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="Our studio welcomes visits by appointment..." />
               </FieldBox>
 
-              <FieldBox label="Full Address *" active={form.address_active} onToggle={() => setForm(p => ({ ...p, address_active: p.address_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, address: '' }))}>
+              <FieldBox label="Full Address *" active={form.address_active} onToggle={() => toggleLocationField('address_active')} onClear={() => setForm(p => ({ ...p, address: '' }))}>
                 <textarea rows={2} required value={form.address || ''} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="Office #22, 4th Floor, Pakland City Center, I-8 Markaz, Islamabad" />
               </FieldBox>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <FieldBox label="Opening Hours *" active={form.hours_active} onToggle={() => setForm(p => ({ ...p, hours_active: p.hours_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, hours: '' }))}>
+                <FieldBox label="Opening Hours *" active={form.hours_active} onToggle={() => toggleLocationField('hours_active')} onClear={() => setForm(p => ({ ...p, hours: e.target.value }))}>
                   <input required value={form.hours || ''} onChange={e => setForm(p => ({ ...p, hours: e.target.value }))} style={iStyle} placeholder="Mon–Sat: 11:00 AM – 8:00 PM" />
                 </FieldBox>
 
-                <FieldBox label="Phone & Support *" active={form.phone_active} onToggle={() => setForm(p => ({ ...p, phone_active: p.phone_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, phone: '' }))}>
+                <FieldBox label="Phone & Support *" active={form.phone_active} onToggle={() => toggleLocationField('phone_active')} onClear={() => setForm(p => ({ ...p, phone: e.target.value }))}>
                   <input required value={form.phone || ''} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} style={iStyle} placeholder="+92 323 8399480" />
                 </FieldBox>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <FieldBox label="Email Address *" active={form.email_active} onToggle={() => setForm(p => ({ ...p, email_active: p.email_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, email: '' }))}>
+                <FieldBox label="Email Address *" active={form.email_active} onToggle={() => toggleLocationField('email_active')} onClear={() => setForm(p => ({ ...p, email: e.target.value }))}>
                   <input required type="email" value={form.email || ''} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} style={iStyle} placeholder="info@lailahijabs.com" />
                 </FieldBox>
 
-                <ImageUploaderBox label="Boutique Location Photo" value={form.image_url} onChange={val => setForm(p => ({ ...p, image_url: val }))} active={form.image_active} onToggle={() => setForm(p => ({ ...p, image_active: p.image_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url: '' }))} />
+                <ImageUploaderBox label="Boutique Location Photo" value={form.image_url} onChange={val => setForm(p => ({ ...p, image_url: val }))} active={form.image_active} onToggle={() => toggleLocationField('image_active')} onClear={() => setForm(p => ({ ...p, image_url: '' }))} />
               </div>
 
-              <FieldBox label="Google Maps Embed URL / Link" active={form.map_active} onToggle={() => setForm(p => ({ ...p, map_active: p.map_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, map_url: '' }))}>
+              <FieldBox label="Find Us on Google Maps (Embed URL & Preview)" active={form.map_active} onToggle={() => toggleLocationField('map_active')} onClear={() => setForm(p => ({ ...p, map_url: '' }))}>
                 <textarea rows={2} value={form.map_url || ''} onChange={e => setForm(p => ({ ...p, map_url: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="https://www.google.com/maps/embed?pb=..." />
+                {(form.map_url || form.address) && (
+                  <div style={{ marginTop: '10px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #E7D9C9', height: '180px', backgroundColor: '#F6F1E3' }}>
+                    <iframe
+                      title="Google Map Preview"
+                      src={form.map_url || `https://maps.google.com/maps?q=${encodeURIComponent(form.address || 'Pakistan')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen=""
+                      loading="lazy"
+                    ></iframe>
+                  </div>
+                )}
               </FieldBox>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>

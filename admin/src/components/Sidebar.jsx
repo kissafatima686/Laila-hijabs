@@ -239,7 +239,6 @@ const Sidebar = () => (
     <ColGroup label="About Our Brand" icon="section" defaultOpen={false}>
       <SideLink to="/brand-overview" label="Brand Overview & Story" icon="section" indent />
       <SideLink to="/visit-us-slider" label="Visit Us Gallery Slider" icon="image" indent />
-      <SideLink to="/locations" label="Location Manager" icon="locations" indent />
       <SideLink to="/location-details" label="Maps, Hours & Details" icon="section" indent />
     </ColGroup>
 

@@ -79,18 +79,33 @@ const AboutUsPage = () => {
   const activeValues = (Array.isArray(rawValues) ? rawValues : []).filter(v => v.active !== false && v.status !== 'Hidden');
   const activeRoadmap = (Array.isArray(rawRoadmap) ? rawRoadmap : []).filter(r => r.active !== false && r.status !== 'Hidden');
 
-  const studioImages = [
-    { id: 1, src: '/hero2.png', alt: 'Laila Hijabs Studio 1' },
-    { id: 2, src: '/Categories/abaya/abaya1.png', alt: 'Abaya Collection Display' },
-    { id: 3, src: '/Categories/hijabs.png', alt: 'Premium Fabric Hijabs' },
-    { id: 4, src: '/Categories/iranichadar.png', alt: 'Traditional Irani Chadar' },
-    { id: 5, src: '/Categories/jilbab.png', alt: 'Jilbab Collection' },
-    { id: 6, src: '/Categories/namazchadar.png', alt: 'Namaz Chadar Section' },
-  ];
+  // Dynamic Location Slider Cards
+  const [dbLocations, setDbLocations] = useState([]);
+  const sliderSecActive = getSectionContent('location_visit_us_section', 'slider_sec_active', true);
+
+  useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    fetch(`${API_BASE}/api/admin/module/locations`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          // Filter ONLY items that are Live or Active (excluding Hidden, Inactive, or Draft)
+          setDbLocations(data.filter(l => l.status === 'Live' || l.status === 'Active'));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const studioImages = dbLocations.map((loc, idx) => ({
+    id: loc.location_id || loc.id || (idx + 1),
+    src: formatImgSrc(loc.image_url || (idx % 2 === 0 ? '/hero1.png' : '/hero2.png')),
+    alt: loc.name || loc.city || 'Laila Hijabs Studio'
+  }));
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   useEffect(() => {
+    if (studioImages.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlideIndex((prevIndex) => (prevIndex + 1) % studioImages.length);
     }, 3000);
@@ -242,71 +257,83 @@ const AboutUsPage = () => {
       {visitUsSecActive !== false && (
         <section className="shop-band">
           <div className="wrap shop-grid">
-            <div className="shop-slider-container">
-              <div className="popup-slider-wrapper">
-                <div className="popup-slider-track">
-                  {studioImages.map((img, index) => {
-                    let position = 'hidden';
-                    const total = studioImages.length;
-                    const diff = (index - currentSlideIndex + total) % total;
+            {sliderSecActive !== false && studioImages.length > 0 && (
+              <div className="shop-slider-container">
+                <div className="popup-slider-wrapper">
+                  <div className="popup-slider-track">
+                    {studioImages.map((img, index) => {
+                      let position = 'hidden';
+                      const total = studioImages.length;
+                      const diff = (index - currentSlideIndex + total) % total;
 
-                    if (diff === 0) {
-                      position = 'active';
-                    } else if (diff === 1 || (currentSlideIndex === total - 1 && index === 0)) {
-                      position = 'next';
-                    } else if (diff === total - 1 || (currentSlideIndex === 0 && index === total - 1)) {
-                      position = 'prev';
-                    }
+                      if (diff === 0) {
+                        position = 'active';
+                      } else if (diff === 1 || (currentSlideIndex === total - 1 && index === 0)) {
+                        position = 'next';
+                      } else if (diff === total - 1 || (currentSlideIndex === 0 && index === total - 1)) {
+                        position = 'prev';
+                      }
 
-                    return (
-                      <div 
-                        key={img.id} 
-                        className={`popup-slide ${position}`}
-                        onClick={() => handleSlideClick(index, img.id)}
-                      >
-                        <img src={img.src} alt={img.alt} />
-                        {position === 'active' && (
-                          <div className="slide-badge-overlay">
-                            View Location Details 
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                      return (
+                        <div 
+                          key={img.id} 
+                          className={`popup-slide ${position}`}
+                          onClick={() => handleSlideClick(index, img.id)}
+                        >
+                          <img src={img.src} alt={img.alt} />
+                          {position === 'active' && (
+                            <div className="slide-badge-overlay">
+                              View Location Details 
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="slider-controls">
+                  <button 
+                    type="button" 
+                    className="slider-arrow prev-arrow" 
+                    onClick={handlePrevSlide}
+                    aria-label="Previous slide"
+                  >
+                    <IoChevronBackOutline size={18} />
+                  </button>
+                  <button 
+                    type="button" 
+                    className="slider-arrow next-arrow" 
+                    onClick={handleNextSlide}
+                    aria-label="Next slide"
+                  >
+                    <IoChevronForwardOutline size={18} />
+                  </button>
                 </div>
               </div>
-
-              <div className="slider-controls">
-                <button 
-                  type="button" 
-                  className="slider-arrow prev-arrow" 
-                  onClick={handlePrevSlide}
-                  aria-label="Previous slide"
-                >
-                  <IoChevronBackOutline size={18} />
-                </button>
-                <button 
-                  type="button" 
-                  className="slider-arrow next-arrow" 
-                  onClick={handleNextSlide}
-                  aria-label="Next slide"
-                >
-                  <IoChevronForwardOutline size={18} />
-                </button>
-              </div>
-            </div>
+            )}
             <div className="shop-copy">
-              <span className="eyebrow">Visit Us</span>
-              <h2 style={{ marginTop: '12px' }}>Prefer to see the fabric in person?</h2>
-              <p>Our studio welcomes visits by appointment. If you're not close by, our team is just as happy to guide you over WhatsApp or a call — sharing fabric details, sizing, and photos before you decide.</p>
-              <div className="shop-info">
-                <div><b>Location:</b> Office #22, 4th Floor, Pakland City Center, I-8 Markaz, Islamabad</div>
-                <div><b>Hours:</b> Mon–Sat, 11am – 8pm</div>
-                <div><b>Reach us:</b> WhatsApp or call for full product details</div>
-              </div>
-              <div className="shop-actions">
-                <a href="tel:+923238399480" className="btn-ghost">Call the Studio</a>
-              </div>
+              {getSectionContent('location_visit_us_section', 'badge_active', true) !== false && (
+                <span className="eyebrow">{getSectionContent('location_visit_us_section', 'badge_text', 'VISIT US')}</span>
+              )}
+              {getSectionContent('location_visit_us_section', 'title_active', true) !== false && (
+                <h2 style={{ marginTop: '12px' }}>{getSectionContent('location_visit_us_section', 'title', 'Prefer to see the fabric in person?')}</h2>
+              )}
+              {getSectionContent('location_visit_us_section', 'subtitle_active', true) !== false && (
+                <p style={{ fontWeight: '600', color: '#3E4930', marginBottom: '8px' }}>
+                  {getSectionContent('location_visit_us_section', 'subtitle', 'Our studio welcomes visits by appointment.')}
+                </p>
+              )}
+              {getSectionContent('location_visit_us_section', 'body_active', true) !== false && (
+                <p>{getSectionContent('location_visit_us_section', 'body_content', 'If you\'re not close by, our team is just as happy to guide you over WhatsApp or a call.')}</p>
+              )}
+              {getSectionContent('location_visit_us_section', 'button_active', true) !== false && (
+                <div className="shop-actions" style={{ marginTop: '18px' }}>
+                  <Link to="/visit-us" className="btn-ghost">
+                    {getSectionContent('location_visit_us_section', 'button_text', 'View Location Details')}
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </section>

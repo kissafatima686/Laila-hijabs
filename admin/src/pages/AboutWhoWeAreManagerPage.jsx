@@ -76,7 +76,7 @@ const ImageUploaderBox = ({ label, value, onChange, active = true, onToggle, onC
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result;
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/upload`, {
+      fetch(`${API}/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64 })
@@ -208,6 +208,67 @@ const AboutWhoWeAreManagerPage = () => {
     sec5_active: true
   });
 
+  const saveFormState = (updatedForm) => {
+    setForm(updatedForm);
+    setSaving(true);
+
+    fetch(`${API}/sections/about_who_we_are`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: updatedForm.title,
+        subtitle: updatedForm.sec3_subtitle,
+        body_content: updatedForm.body_content,
+        image_url: updatedForm.image_url,
+        image_url_2: updatedForm.image_url_2,
+        metadata: {
+          badge_text: updatedForm.badge_text,
+          badge_text_active: updatedForm.badge_text_active,
+          title_active: updatedForm.title_active,
+          body_content_active: updatedForm.body_content_active,
+          image_url_active: updatedForm.image_url_active,
+          image_url_2_active: updatedForm.image_url_2_active,
+          sec1_active: updatedForm.sec1_active,
+
+          sec2_title: updatedForm.sec2_title,
+          sec2_title_active: updatedForm.sec2_title_active,
+          quote_text: updatedForm.quote_text,
+          quote_text_active: updatedForm.quote_text_active,
+          quote_author: updatedForm.quote_author,
+          quote_author_active: updatedForm.quote_author_active,
+          sec2_active: updatedForm.sec2_active,
+
+          sec3_title: updatedForm.sec3_title,
+          sec3_title_active: updatedForm.sec3_title_active,
+          sec3_subtitle: updatedForm.sec3_subtitle,
+          sec3_subtitle_active: updatedForm.sec3_subtitle_active,
+          values: updatedForm.values,
+          sec3_active: updatedForm.sec3_active,
+
+          sec4_title: updatedForm.sec4_title,
+          sec4_title_active: updatedForm.sec4_title_active,
+          sec4_subtitle: updatedForm.sec4_subtitle,
+          sec4_subtitle_active: updatedForm.sec4_subtitle_active,
+          roadmap: updatedForm.roadmap,
+          sec4_active: updatedForm.sec4_active,
+
+          founder_quote: updatedForm.founder_quote,
+          founder_quote_active: updatedForm.founder_quote_active,
+          founder_title: updatedForm.founder_title,
+          founder_title_active: updatedForm.founder_title_active,
+          founder_logo: updatedForm.founder_logo,
+          founder_logo_active: updatedForm.founder_logo_active,
+          sec5_active: updatedForm.sec5_active
+        }
+      })
+    })
+      .then(() => {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      })
+      .finally(() => setSaving(false));
+  };
+
   useEffect(() => {
     fetch(`${API}/sections/about_who_we_are`)
       .then(r => r.json())
@@ -267,63 +328,12 @@ const AboutWhoWeAreManagerPage = () => {
 
   const handleSave = (e) => {
     if (e) e.preventDefault();
-    setSaving(true);
+    saveFormState(form);
+  };
 
-    fetch(`${API}/sections/about_who_we_are`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: form.title,
-        subtitle: form.sec3_subtitle,
-        body_content: form.body_content,
-        image_url: form.image_url,
-        image_url_2: form.image_url_2,
-        metadata: {
-          badge_text: form.badge_text,
-          badge_text_active: form.badge_text_active,
-          title_active: form.title_active,
-          body_content_active: form.body_content_active,
-          image_url_active: form.image_url_active,
-          image_url_2_active: form.image_url_2_active,
-          sec1_active: form.sec1_active,
-
-          sec2_title: form.sec2_title,
-          sec2_title_active: form.sec2_title_active,
-          quote_text: form.quote_text,
-          quote_text_active: form.quote_text_active,
-          quote_author: form.quote_author,
-          quote_author_active: form.quote_author_active,
-          sec2_active: form.sec2_active,
-
-          sec3_title: form.sec3_title,
-          sec3_title_active: form.sec3_title_active,
-          sec3_subtitle: form.sec3_subtitle,
-          sec3_subtitle_active: form.sec3_subtitle_active,
-          values: form.values,
-          sec3_active: form.sec3_active,
-
-          sec4_title: form.sec4_title,
-          sec4_title_active: form.sec4_title_active,
-          sec4_subtitle: form.sec4_subtitle,
-          sec4_subtitle_active: form.sec4_subtitle_active,
-          roadmap: form.roadmap,
-          sec4_active: form.sec4_active,
-
-          founder_quote: form.founder_quote,
-          founder_quote_active: form.founder_quote_active,
-          founder_title: form.founder_title,
-          founder_title_active: form.founder_title_active,
-          founder_logo: form.founder_logo,
-          founder_logo_active: form.founder_logo_active,
-          sec5_active: form.sec5_active
-        }
-      })
-    })
-      .then(() => {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
-      })
-      .finally(() => setSaving(false));
+  const toggleField = (fieldKey) => {
+    const updated = { ...form, [fieldKey]: form[fieldKey] === false ? true : false };
+    saveFormState(updated);
   };
 
   const handleValueChange = (idx, field, val) => {
@@ -335,25 +345,26 @@ const AboutWhoWeAreManagerPage = () => {
   };
 
   const handleAddValue = () => {
-    setForm(p => ({
-      ...p,
-      values: [...p.values, { letter: 'V', title: 'New Value', desc: 'Description of the new brand value.', active: true }]
-    }));
+    const updated = {
+      ...form,
+      values: [...form.values, { letter: 'V', title: 'New Value', desc: 'Description of the new brand value.', active: true }]
+    };
+    saveFormState(updated);
   };
 
   const handleDeleteValue = (idx) => {
-    setForm(p => ({
-      ...p,
-      values: p.values.filter((_, i) => i !== idx)
-    }));
+    const updated = {
+      ...form,
+      values: form.values.filter((_, i) => i !== idx)
+    };
+    saveFormState(updated);
   };
 
   const handleToggleValueActive = (idx) => {
-    setForm(p => {
-      const copy = [...p.values];
-      copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
-      return { ...p, values: copy };
-    });
+    const copy = [...form.values];
+    copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
+    const updated = { ...form, values: copy };
+    saveFormState(updated);
   };
 
   const handleRoadmapChange = (idx, field, val) => {
@@ -365,25 +376,26 @@ const AboutWhoWeAreManagerPage = () => {
   };
 
   const handleAddRoadmap = () => {
-    setForm(p => ({
-      ...p,
-      roadmap: [...p.roadmap, { year: '2027', title: 'New Phase', desc: 'Phase details...', active: true }]
-    }));
+    const updated = {
+      ...form,
+      roadmap: [...form.roadmap, { year: '2027', title: 'New Phase', desc: 'Phase details...', active: true }]
+    };
+    saveFormState(updated);
   };
 
   const handleDeleteRoadmap = (idx) => {
-    setForm(p => ({
-      ...p,
-      roadmap: p.roadmap.filter((_, i) => i !== idx)
-    }));
+    const updated = {
+      ...form,
+      roadmap: form.roadmap.filter((_, i) => i !== idx)
+    };
+    saveFormState(updated);
   };
 
   const handleToggleRoadmapActive = (idx) => {
-    setForm(p => {
-      const copy = [...p.roadmap];
-      copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
-      return { ...p, roadmap: copy };
-    });
+    const copy = [...form.roadmap];
+    copy[idx] = { ...copy[idx], active: copy[idx].active === false ? true : false };
+    const updated = { ...form, roadmap: copy };
+    saveFormState(updated);
   };
 
   if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#3E4930', fontWeight: '600' }}>Loading Brand Overview & Story...</div>;
@@ -415,7 +427,7 @@ const AboutWhoWeAreManagerPage = () => {
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>A Legacy of Modest Luxury & Who We Are</h3>
             </div>
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <button type="button" onClick={() => setForm(p => ({ ...p, sec1_active: !p.sec1_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec1_active ? '#FEE2E2' : '#E0E7FF', color: form.sec1_active ? '#DC2626' : '#3730A3', border: form.sec1_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+              <button type="button" onClick={() => toggleField('sec1_active')} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec1_active ? '#FEE2E2' : '#E0E7FF', color: form.sec1_active ? '#DC2626' : '#3730A3', border: form.sec1_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
                 {form.sec1_active ? 'Hide Section' : 'Show Section'}
               </button>
             </div>
@@ -423,21 +435,21 @@ const AboutWhoWeAreManagerPage = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <FieldBox label="Section Badge / Tagline" active={form.badge_text_active} onToggle={() => setForm(p => ({ ...p, badge_text_active: p.badge_text_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, badge_text: '' }))}>
+              <FieldBox label="Section Badge / Tagline" active={form.badge_text_active} onToggle={() => toggleField('badge_text_active')} onClear={() => setForm(p => ({ ...p, badge_text: '' }))}>
                 <input value={form.badge_text} onChange={e => setForm(p => ({ ...p, badge_text: e.target.value }))} style={iStyle} placeholder="A Legacy of Modest Luxury" />
               </FieldBox>
-              <FieldBox label="Main Heading *" active={form.title_active} onToggle={() => setForm(p => ({ ...p, title_active: p.title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, title: '' }))}>
+              <FieldBox label="Main Heading *" active={form.title_active} onToggle={() => toggleField('title_active')} onClear={() => setForm(p => ({ ...p, title: '' }))}>
                 <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} style={iStyle} placeholder="Who We Are" />
               </FieldBox>
             </div>
 
-            <FieldBox label="Brand Description Story *" active={form.body_content_active} onToggle={() => setForm(p => ({ ...p, body_content_active: p.body_content_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, body_content: '' }))}>
+            <FieldBox label="Brand Description Story *" active={form.body_content_active} onToggle={() => toggleField('body_content_active')} onClear={() => setForm(p => ({ ...p, body_content: '' }))}>
               <textarea rows={4} required value={form.body_content} onChange={e => setForm(p => ({ ...p, body_content: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="Laila Hijabs is Pakistan's leading luxury modest fashion house..." />
             </FieldBox>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <ImageUploaderBox label="Primary Story Photo" value={form.image_url} onChange={val => setForm(p => ({ ...p, image_url: val }))} active={form.image_url_active} onToggle={() => setForm(p => ({ ...p, image_url_active: p.image_url_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url: '' }))} />
-              <ImageUploaderBox label="Secondary Craftsmanship Photo" value={form.image_url_2} onChange={val => setForm(p => ({ ...p, image_url_2: val }))} active={form.image_url_2_active} onToggle={() => setForm(p => ({ ...p, image_url_2_active: p.image_url_2_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url_2: '' }))} />
+              <ImageUploaderBox label="Primary Story Photo" value={form.image_url} onChange={val => setForm(p => ({ ...p, image_url: val }))} active={form.image_url_active} onToggle={() => toggleField('image_url_active')} onClear={() => setForm(p => ({ ...p, image_url: '' }))} />
+              <ImageUploaderBox label="Secondary Craftsmanship Photo" value={form.image_url_2} onChange={val => setForm(p => ({ ...p, image_url_2: val }))} active={form.image_url_2_active} onToggle={() => toggleField('image_url_2_active')} onClear={() => setForm(p => ({ ...p, image_url_2: '' }))} />
             </div>
           </div>
         </div>
@@ -449,19 +461,19 @@ const AboutWhoWeAreManagerPage = () => {
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 2 OF 5</span>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>Our Philosophy Quote Banner</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec2_active: !p.sec2_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec2_active ? '#FEE2E2' : '#E0E7FF', color: form.sec2_active ? '#DC2626' : '#3730A3', border: form.sec2_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+            <button type="button" onClick={() => toggleField('sec2_active')} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec2_active ? '#FEE2E2' : '#E0E7FF', color: form.sec2_active ? '#DC2626' : '#3730A3', border: form.sec2_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
               {form.sec2_active ? 'Hide Section' : 'Show Section'}
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <FieldBox label="Section Title" active={form.sec2_title_active} onToggle={() => setForm(p => ({ ...p, sec2_title_active: p.sec2_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec2_title: '' }))}>
+            <FieldBox label="Section Title" active={form.sec2_title_active} onToggle={() => toggleField('sec2_title_active')} onClear={() => setForm(p => ({ ...p, sec2_title: '' }))}>
               <input value={form.sec2_title} onChange={e => setForm(p => ({ ...p, sec2_title: e.target.value }))} style={iStyle} placeholder="Our Philosophy" />
             </FieldBox>
-            <FieldBox label="Philosophy Quote *" active={form.quote_text_active} onToggle={() => setForm(p => ({ ...p, quote_text_active: p.quote_text_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, quote_text: '' }))}>
+            <FieldBox label="Philosophy Quote *" active={form.quote_text_active} onToggle={() => toggleField('quote_text_active')} onClear={() => setForm(p => ({ ...p, quote_text: '' }))}>
               <textarea rows={2} value={form.quote_text} onChange={e => setForm(p => ({ ...p, quote_text: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="She does not compete loudly. She attracts quietly." />
             </FieldBox>
-            <FieldBox label="Quote Attribution Author" active={form.quote_author_active} onToggle={() => setForm(p => ({ ...p, quote_author_active: p.quote_author_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, quote_author: '' }))}>
+            <FieldBox label="Quote Attribution Author" active={form.quote_author_active} onToggle={() => toggleField('quote_author_active')} onClear={() => setForm(p => ({ ...p, quote_author: '' }))}>
               <input value={form.quote_author} onChange={e => setForm(p => ({ ...p, quote_author: e.target.value }))} style={iStyle} placeholder="— The Laila Hijab Studio" />
             </FieldBox>
           </div>
@@ -476,7 +488,7 @@ const AboutWhoWeAreManagerPage = () => {
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button type="button" onClick={handleAddValue} style={btnG}>+ Add Value</button>
-              <button type="button" onClick={() => setForm(p => ({ ...p, sec3_active: !p.sec3_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec3_active ? '#FEE2E2' : '#E0E7FF', color: form.sec3_active ? '#DC2626' : '#3730A3', border: form.sec3_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+              <button type="button" onClick={() => toggleField('sec3_active')} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec3_active ? '#FEE2E2' : '#E0E7FF', color: form.sec3_active ? '#DC2626' : '#3730A3', border: form.sec3_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
                 {form.sec3_active ? 'Hide Section' : 'Show Section'}
               </button>
             </div>
@@ -484,10 +496,10 @@ const AboutWhoWeAreManagerPage = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <FieldBox label="Section Title" active={form.sec3_title_active} onToggle={() => setForm(p => ({ ...p, sec3_title_active: p.sec3_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec3_title: '' }))}>
+              <FieldBox label="Section Title" active={form.sec3_title_active} onToggle={() => toggleField('sec3_title_active')} onClear={() => setForm(p => ({ ...p, sec3_title: '' }))}>
                 <input value={form.sec3_title} onChange={e => setForm(p => ({ ...p, sec3_title: e.target.value }))} style={iStyle} placeholder="What We Stand For" />
               </FieldBox>
-              <FieldBox label="Subtitle Tagline" active={form.sec3_subtitle_active} onToggle={() => setForm(p => ({ ...p, sec3_subtitle_active: p.sec3_subtitle_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec3_subtitle: '' }))}>
+              <FieldBox label="Subtitle Tagline" active={form.sec3_subtitle_active} onToggle={() => toggleField('sec3_subtitle_active')} onClear={() => setForm(p => ({ ...p, sec3_subtitle: '' }))}>
                 <input value={form.sec3_subtitle} onChange={e => setForm(p => ({ ...p, sec3_subtitle: e.target.value }))} style={iStyle} placeholder="Grace, built on four values" />
               </FieldBox>
             </div>
@@ -525,7 +537,7 @@ const AboutWhoWeAreManagerPage = () => {
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button type="button" onClick={handleAddRoadmap} style={btnG}>+ Add Phase</button>
-              <button type="button" onClick={() => setForm(p => ({ ...p, sec4_active: !p.sec4_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec4_active ? '#FEE2E2' : '#E0E7FF', color: form.sec4_active ? '#DC2626' : '#3730A3', border: form.sec4_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+              <button type="button" onClick={() => toggleField('sec4_active')} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec4_active ? '#FEE2E2' : '#E0E7FF', color: form.sec4_active ? '#DC2626' : '#3730A3', border: form.sec4_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
                 {form.sec4_active ? 'Hide Section' : 'Show Section'}
               </button>
             </div>
@@ -533,10 +545,10 @@ const AboutWhoWeAreManagerPage = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <FieldBox label="Section Title" active={form.sec4_title_active} onToggle={() => setForm(p => ({ ...p, sec4_title_active: p.sec4_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec4_title: '' }))}>
+              <FieldBox label="Section Title" active={form.sec4_title_active} onToggle={() => toggleField('sec4_title_active')} onClear={() => setForm(p => ({ ...p, sec4_title: '' }))}>
                 <input value={form.sec4_title} onChange={e => setForm(p => ({ ...p, sec4_title: e.target.value }))} style={iStyle} placeholder="Where We're Headed" />
               </FieldBox>
-              <FieldBox label="Subtitle Tagline" active={form.sec4_subtitle_active} onToggle={() => setForm(p => ({ ...p, sec4_subtitle_active: p.sec4_subtitle_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec4_subtitle: '' }))}>
+              <FieldBox label="Subtitle Tagline" active={form.sec4_subtitle_active} onToggle={() => toggleField('sec4_subtitle_active')} onClear={() => setForm(p => ({ ...p, sec4_subtitle: '' }))}>
                 <input value={form.sec4_subtitle} onChange={e => setForm(p => ({ ...p, sec4_subtitle: e.target.value }))} style={iStyle} placeholder="A brand built in phases, not overnight" />
               </FieldBox>
             </div>
@@ -570,21 +582,21 @@ const AboutWhoWeAreManagerPage = () => {
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 5 OF 5</span>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>Founder Statement & Logo</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec5_active: !p.sec5_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec5_active ? '#FEE2E2' : '#E0E7FF', color: form.sec5_active ? '#DC2626' : '#3730A3', border: form.sec5_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+            <button type="button" onClick={() => toggleField('sec5_active')} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec5_active ? '#FEE2E2' : '#E0E7FF', color: form.sec5_active ? '#DC2626' : '#3730A3', border: form.sec5_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
               {form.sec5_active ? 'Hide Section' : 'Show Section'}
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <FieldBox label="Founder Quote Statement *" active={form.founder_quote_active} onToggle={() => setForm(p => ({ ...p, founder_quote_active: p.founder_quote_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, founder_quote: '' }))}>
+            <FieldBox label="Founder Quote Statement *" active={form.founder_quote_active} onToggle={() => toggleField('founder_quote_active')} onClear={() => setForm(p => ({ ...p, founder_quote: '' }))}>
               <textarea rows={3} required value={form.founder_quote} onChange={e => setForm(p => ({ ...p, founder_quote: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder='"Modesty and elegance were never meant to be a compromise..."' />
             </FieldBox>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <FieldBox label="Founder Title & Name" active={form.founder_title_active} onToggle={() => setForm(p => ({ ...p, founder_title_active: p.founder_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, founder_title: '' }))}>
+              <FieldBox label="Founder Title & Name" active={form.founder_title_active} onToggle={() => toggleField('founder_title_active')} onClear={() => setForm(p => ({ ...p, founder_title: '' }))}>
                 <input value={form.founder_title} onChange={e => setForm(p => ({ ...p, founder_title: e.target.value }))} style={iStyle} placeholder="Founder, Laila Hijabs" />
               </FieldBox>
-              <ImageUploaderBox label="Founder Logo / Signature Image" value={form.founder_logo} onChange={val => setForm(p => ({ ...p, founder_logo: val }))} active={form.founder_logo_active} onToggle={() => setForm(p => ({ ...p, founder_logo_active: p.founder_logo_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, founder_logo: '' }))} />
+              <ImageUploaderBox label="Founder Logo / Signature Image" value={form.founder_logo} onChange={val => setForm(p => ({ ...p, founder_logo: val }))} active={form.founder_logo_active} onToggle={() => toggleField('founder_logo_active')} onClear={() => setForm(p => ({ ...p, founder_logo: '' }))} />
             </div>
           </div>
         </div>
