@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { products as mainProducts } from '../../data/products';
 import { CartContext } from '../../context/CartContext';
 import { useContent } from '../../context/useContent';
 import ProductReviews from './ProductReviews';

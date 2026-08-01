@@ -94,70 +94,36 @@ const Navbar = () => {
   // Search States
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  // Comprehensive search catalog with name, slug, price, image, category, and keywords
-  const searchCatalog = [
-    // Abayas
-    { name: "Premium Nida Abaya", slug: "premium-nida-abaya-1", price: "Rs. 5,990", image: "/Categories/abaya/abaya1.png", keywords: "abaya nida black saudi abaya kaftan gown" },
-    { name: "Everyday Abaya", slug: "everyday-abaya-2", price: "Rs. 4,990", image: "/Categories/abaya/abaya2.png", keywords: "abaya everyday beige casual modest dress saudi abaya" },
-    { name: "Classic Black Abaya", slug: "classic-black-abaya-3", price: "Rs. 5,490", image: "/Categories/abaya/abaya3.png", keywords: "abaya black classic saudi abaya robe" },
-    { name: "Elegant Abaya", slug: "elegant-abaya-4", price: "Rs. 6,490", image: "/Categories/abaya/abaya4.png", keywords: "abaya dusty rose elegant chiffon saudi abaya" },
-    { name: "Luxury Occasion Abaya", slug: "luxury-occasion-abaya-5", price: "Rs. 7,490", image: "/Categories/abaya/abaya5.png", keywords: "abaya luxury eid occasion olive saudi abaya kaftan" },
-    { name: "LAMIA OPEN KAFTAN SET", slug: "lamia-open-kaftan-set", price: "Rs. 9,900", image: "/hero2.png", keywords: "kaftan abaya co-ord set burgundy saudi abaya" },
-    { name: "STRUCTURED DAY ABAYA", slug: "structured-day-abaya", price: "Rs. 5,990", image: "/hero2.png", keywords: "abaya structured day olive saudi abaya" },
-    { name: "IVORY CHIFFON ABAYA", slug: "ivory-chiffon-abaya", price: "Rs. 6,490", image: "/hero2.png", keywords: "abaya ivory chiffon saudi abaya" },
-    { name: "GOLD-TRIM EID ABAYA", slug: "gold-trim-eid-abaya", price: "Rs. 7,490", image: "/hero2.png", keywords: "abaya gold trim eid saudi abaya" },
-    { name: "DUSTY ROSE OPEN ABAYA", slug: "dusty-rose-open-abaya", price: "Rs. 6,890", image: "/hero2.png", keywords: "abaya open dusty rose saudi abaya" },
-    
-    // Hijabs / Scarves
-    { name: "Premium Chiffon Hijab", slug: "premium-chiffon-hijab-1", price: "Rs. 2,400", image: "/Categories/hijabs/hijab1.png", keywords: "hijab scarf chiffon dusty rose headscarf veil" },
-    { name: "Everyday Jersey Hijab", slug: "everyday-jersey-hijab-2", price: "Rs. 2,200", image: "/Categories/hijabs/hijab2.png", keywords: "hijab scarf jersey olive cotton headscarf veil" },
-    { name: "EMBROIDERED CHIFFON HIJAB", slug: "embroidered-chiffon-hijab", price: "Rs. 2,500", image: "/hero2.png", keywords: "hijab scarf embroidered chiffon headscarf veil" },
-    { name: "EVERYDAY MODAL HIJAB", slug: "everyday-modal-hijab", price: "Rs. 1,800", image: "/hero2.png", keywords: "hijab scarf modal headscarf veil" },
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
 
-    // Jilbab (also alias for saudi abaya queries if needed)
-    { name: "Two Piece Jilbab Set", slug: "two-piece-jilbab-1", price: "Rs. 6,990", image: "/Categories/jilbab/jilbab.png", keywords: "jilbab saudi abaya overhead 2 piece black khimar full coverage" },
-    { name: "Overhead Jilbab", slug: "overhead-jilbab-2", price: "Rs. 6,490", image: "/Categories/jilbab/jilbab2.png", keywords: "jilbab saudi abaya overhead olive one piece khimar" },
-    { name: "Premium Jilbab Set", slug: "premium-jilbab-set-3", price: "Rs. 7,490", image: "/Categories/jilbab/jilbab3.png", keywords: "jilbab saudi abaya dusty rose set khimar" },
-    { name: "Everyday Jilbab", slug: "everyday-jilbab-4", price: "Rs. 5,990", image: "/Categories/jilbab/jilbab4.png", keywords: "jilbab saudi abaya navy daily khimar" },
-
-    // Chadar / Prayer
-    { name: "Classic Irani Chadar", slug: "classic-irani-chadar-1", price: "Rs. 8,990", image: "/Categories/iranichadar/irani1.png", keywords: "chadar irani black traditional drape" },
-    { name: "Flowing Irani Chadar", slug: "flowing-irani-chadar-2", price: "Rs. 8,990", image: "/Categories/iranichadar/irani2.png", keywords: "chadar irani black" },
-    { name: "Premium Irani Chadar", slug: "premium-irani-chadar-3", price: "Rs. 9,490", image: "/Categories/iranichadar/irani3.png", keywords: "chadar irani black" },
-    { name: "Everyday Irani Chadar", slug: "everyday-irani-chadar-4", price: "Rs. 7,990", image: "/Categories/iranichadar/irani4.png", keywords: "chadar irani black" },
-    { name: "Lightweight Irani Chadar", slug: "lightweight-irani-chadar-5", price: "Rs. 8,490", image: "/Categories/iranichadar/irani5.png", keywords: "chadar irani black" },
-    { name: "Comfort Namaz Chadar", slug: "comfort-namaz-chadar-1", price: "Rs. 3,490", image: "/Categories/namazchadar/namazchaddar.png", keywords: "chadar namaz prayer cotton white" },
-    { name: "Classic Round Chadar", slug: "classic-round-chadar-1", price: "Rs. 4,490", image: "/Categories/roundchadar/round1.png", keywords: "chadar round black" }
-  ];
-
-  const filteredResults = searchQuery.trim() === '' 
-    ? [] 
-    : searchCatalog.filter(p => {
-        const q = searchQuery.toLowerCase().trim();
-        let searchPool = `${p.name} ${p.keywords || ''} ${p.slug}`.toLowerCase();
-
-        // Dynamically include Category Keywords managed by Admin
-        dbCategories.forEach(cat => {
-          if (!cat.keywords) return;
-          const catKw = (cat.keywords || '').toLowerCase();
-          const catSlug = (cat.slug || '').toLowerCase();
-          const catName = (cat.name || '').toLowerCase();
-
-          if (catKw.includes(q) || catSlug.includes(q) || catName.includes(q)) {
-            // Match products that belong to this category
-            if (p.slug.includes(catSlug) || (p.keywords && p.keywords.toLowerCase().includes(catSlug)) || (catSlug && p.name.toLowerCase().includes(catSlug))) {
-              searchPool += ` ${catKw} ${catName}`;
-            }
-          }
+    const delayDebounceFn = setTimeout(() => {
+      setIsSearching(true);
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/products?search=${searchQuery}`)
+        .then(res => res.json())
+        .then(data => {
+          setSearchResults(data);
+          setIsSearching(false);
+        })
+        .catch(err => {
+          console.error("Search error:", err);
+          setIsSearching(false);
         });
+    }, 400);
 
-        return searchPool.includes(q);
-      });
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   const closeSearch = () => {
     setIsSearchOpen(false);
     setSearchQuery('');
+    setSearchResults([]);
   };
 
   const searchBarRef = useRef(null);
@@ -386,19 +352,21 @@ const Navbar = () => {
             {/* Live Dropdown Results */}
             {searchQuery.trim() !== '' && (
               <div className="search-results-dropdown">
-                {filteredResults.length > 0 ? (
+                {isSearching ? (
+                  <div className="no-results-text">Searching...</div>
+                ) : searchResults.length > 0 ? (
                   <div className="results-grid">
-                    {filteredResults.map((product) => (
+                    {searchResults.map((product) => (
                       <Link 
                         key={product.slug} 
                         to={`/Products/${product.slug}`} 
                         className="dropdown-result-item"
                         onClick={closeSearch}
                       >
-                        <img src={product.image} alt={product.name} />
+                        <img src={product.image || '/placeholder.png'} alt={product.name} />
                         <div className="item-info">
                           <h4>{product.name}</h4>
-                          <span>{product.price}</span>
+                          <span>Rs. {parseFloat(product.price || 0).toLocaleString()}</span>
                         </div>
                       </Link>
                     ))}

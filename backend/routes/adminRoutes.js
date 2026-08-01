@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const verifyAdmin = require('../middleware/auth');
 const {
   getDashboardStats,
   getAllSections,
@@ -25,9 +26,16 @@ const {
   getPayoutsSummary,
   processPayout,
   getAdminCustomerDetails,
+  loginAdmin,
   replyToCustomerMessage,
   uploadImage
 } = require('../controllers/adminControllers');
+
+// Admin Login (Public)
+router.post('/login', loginAdmin);
+
+// All routes below this line require admin authentication
+router.use(verifyAdmin);
 
 router.post('/messages/reply', replyToCustomerMessage);
 router.post('/upload', uploadImage);

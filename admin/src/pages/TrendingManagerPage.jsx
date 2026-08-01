@@ -102,15 +102,14 @@ const TrendingManagerPage = () => {
 
   const [cards, setCards] = useState(DEFAULT_CARDS);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [inventory, setInventory] = useState([]);
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editCard, setEditCard] = useState(null);
   const [cardForm, setCardForm] = useState({
-    name: '',
-    price: '4990',
+    product_id: '',
     badge: '',
-    image_url: '/Categories/abaya/abaya1.png',
     status: 'Active'
   });
 
@@ -136,17 +135,23 @@ const TrendingManagerPage = () => {
       .catch(err => console.error("Error fetching trending section settings:", err));
   };
 
+  const fetchInventory = () => {
+    fetch(`${API}/products`)
+      .then(res => res.json())
+      .then(data => setInventory(data))
+      .catch(err => console.error("Error fetching inventory", err));
+  };
+
   useEffect(() => {
     fetchSettings();
+    fetchInventory();
   }, []);
 
   const openAddCard = () => {
     setEditCard(null);
     setCardForm({
-      name: '',
-      price: '4990',
+      product_id: '',
       badge: '',
-      image_url: '/Categories/abaya/abaya1.png',
       status: 'Active'
     });
     setShowModal(true);
@@ -155,13 +160,23 @@ const TrendingManagerPage = () => {
   const openEditCard = (card) => {
     setEditCard(card);
     setCardForm({
-      name: card.name || '',
-      price: card.price || '4990',
+      product_id: card.product_id || '',
       badge: card.badge || '',
-      image_url: card.image_url || '/Categories/abaya/abaya1.png',
       status: card.status || 'Active'
     });
     setShowModal(true);
+  };
+
+  const handleSelectProduct = (e) => {
+    const pid = parseInt(e.target.value);
+    const prod = inventory.find(p => (p.product_id || p.id) === pid);
+    if (prod) {
+      setCardForm({
+        ...cardForm,
+        product_id: pid,
+        badge: prod.badge || ''
+      });
+    }
   };
 
   const handleSaveModalCard = (e) => {
@@ -186,7 +201,12 @@ const TrendingManagerPage = () => {
     const metaData = {
       is_enabled: globalSettings.is_enabled,
       slide_speed: globalSettings.slide_speed,
-      cards: cards,
+      cards: cards.map(c => ({
+        key: c.key,
+        product_id: c.product_id,
+        badge: c.badge, // optional override
+        status: c.status
+      })),
       field_statuses: fieldStatuses
     };
 
@@ -275,6 +295,8 @@ const TrendingManagerPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {cards.map((c) => {
             const isLive = c.status === 'Active' || c.status === 'Live';
+            const product = inventory.find(p => (p.product_id || p.id) === c.product_id) || {};
+
             return (
               <div key={c.key} style={{ 
                 backgroundColor: '#182012', 
@@ -288,7 +310,7 @@ const TrendingManagerPage = () => {
               }}>
                 {/* Product Picture Preview */}
                 <div style={{ position: 'relative', width: '90px', height: '115px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #B8935B', flexShrink: 0 }}>
-                  <img src={c.image_url || '/Categories/abaya/abaya1.png'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={product.image_url || product.image || '/Categories/abaya/abaya1.png'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   {c.badge && (
                     <span style={{ position: 'absolute', top: '4px', left: '4px', backgroundColor: '#FFFFFF', color: '#000000', fontSize: '8px', fontWeight: '800', padding: '2px 5px', borderRadius: '10px', textTransform: 'uppercase' }}>
                       {c.badge}
@@ -296,42 +318,26 @@ const TrendingManagerPage = () => {
                   )}
                 </div>
 
-                {/* Editable Details Form Grid */}
-                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr', gap: '12px', minWidth: '300px' }}>
+                {/* Details Form Grid */}
+                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px', minWidth: '300px' }}>
                   <div>
-                    <label style={lStyle}>PRODUCT NAME</label>
-                    <input 
-                      value={c.name} 
-                      onChange={e => setCards(prev => prev.map(item => item.key === c.key ? { ...item, name: e.target.value } : item))} 
-                      style={iStyle} 
-                      placeholder="EVERYDAY ABAYA" 
-                    />
+                    <label style={lStyle}>PRODUCT (LIVE DATA)</label>
+                    <div style={{ color: '#F6F1E3', fontSize: '13px', fontWeight: '600' }}>
+                      {product.name || 'Unlinked Product'}
+                    </div>
+                    <div style={{ color: '#B8935B', fontSize: '11px' }}>ID: {c.product_id}</div>
                   </div>
                   <div>
-                    <label style={lStyle}>PRICE (RS.)</label>
-                    <input type="number" min="0"
-                      value={c.price} 
-                      onChange={e => setCards(prev => prev.map(item => item.key === c.key ? { ...item, price: e.target.value } : item))} 
-                      style={iStyle} 
-                      placeholder="4990" 
-                    />
+                    <label style={lStyle}>LIVE PRICE</label>
+                    <div style={{ color: '#F6F1E3', fontSize: '13px' }}>Rs. {product.price || 'N/A'}</div>
                   </div>
                   <div>
-                    <label style={lStyle}>BADGE TAG</label>
+                    <label style={lStyle}>BADGE OVERRIDE</label>
                     <input 
-                      value={c.badge} 
+                      value={c.badge || ''}
                       onChange={e => setCards(prev => prev.map(item => item.key === c.key ? { ...item, badge: e.target.value } : item))} 
-                      style={iStyle} 
-                      placeholder="BESTSELLER" 
-                    />
-                  </div>
-                  <div>
-                    <label style={lStyle}>PRODUCT IMAGE URL</label>
-                    <input 
-                      value={c.image_url} 
-                      onChange={e => setCards(prev => prev.map(item => item.key === c.key ? { ...item, image_url: e.target.value } : item))} 
-                      style={iStyle} 
-                      placeholder="/Categories/abaya/abaya1.png" 
+                      style={iStyle}
+                      placeholder="e.g. BESTSELLER"
                     />
                   </div>
                 </div>
@@ -353,14 +359,6 @@ const TrendingManagerPage = () => {
                     }}
                   >
                     {isLive ? 'Deactivate' : 'Activate'}
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => openEditCard(c)} 
-                    style={{ ...btnG, height: '39px', width: '39px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
-                    title="Edit Product Card Details"
-                  >
-                    <EditIcon />
                   </button>
                   <button 
                     type="button" 
@@ -399,27 +397,23 @@ const TrendingManagerPage = () => {
 
             <form onSubmit={handleSaveModalCard} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={lStyle}>Product Name *</label>
-                <input required value={cardForm.name} onChange={e => setCardForm(p => ({ ...p, name: e.target.value }))} style={iStyle} placeholder="e.g. EVERYDAY ABAYA" />
+                <label style={lStyle}>LINK TO INVENTORY PRODUCT</label>
+                <select value={cardForm.product_id} onChange={handleSelectProduct} style={iStyle}>
+                  <option value="">-- Choose Existing Product --</option>
+                  {inventory.map(p => (
+                    <option key={p.product_id || p.id} value={p.product_id || p.id}>
+                      {p.name} (Rs. {p.price})
+                    </option>
+                  ))}
+                </select>
+                <p style={{ color: '#E7D9C9', fontSize: '10px', marginTop: '4px' }}>
+                  Selecting a product will automatically fill the fields below, but you can still override them for this section.
+                </p>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={lStyle}>Price (Rs.) *</label>
-                  <input required type="number" min="0" value={cardForm.price} onChange={e => setCardForm(p => ({ ...p, price: e.target.value }))} style={iStyle} placeholder="4990" />
-                </div>
-                <div>
-                  <label style={lStyle}>Badge Tag</label>
-                  <input value={cardForm.badge} onChange={e => setCardForm(p => ({ ...p, badge: e.target.value }))} style={iStyle} placeholder="e.g. BESTSELLER or NEW IN" />
-                </div>
-              </div>
+
               <div>
-                <label style={lStyle}>Dynamic Picture URL *</label>
-                <input required value={cardForm.image_url} onChange={e => setCardForm(p => ({ ...p, image_url: e.target.value }))} style={iStyle} placeholder="/Categories/abaya/abaya1.png or https://..." />
-                {cardForm.image_url && (
-                  <div style={{ marginTop: '8px', textAlign: 'center' }}>
-                    <img src={cardForm.image_url} alt="Preview" style={{ width: '110px', height: '140px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #B8935B' }} />
-                  </div>
-                )}
+                <label style={lStyle}>Badge Override Tag</label>
+                <input value={cardForm.badge} onChange={e => setCardForm(p => ({ ...p, badge: e.target.value }))} style={iStyle} placeholder="e.g. BESTSELLER or NEW IN" />
               </div>
               <div>
                 <label style={lStyle}>Status</label>

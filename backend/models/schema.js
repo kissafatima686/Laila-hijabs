@@ -13,7 +13,7 @@ const createTables = [
     hero_description VARCHAR(500),
     seo_title VARCHAR(255),
     seo_description VARCHAR(500),
-    status ENUM('Active', 'Draft') DEFAULT 'Active',
+    status ENUM('Live', 'Active', 'Draft') DEFAULT 'Live',
     display_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
@@ -56,8 +56,10 @@ const createTables = [
     canonical_url VARCHAR(255),
     size_guide_id INT,
     bundle_attributes JSON,
+    category_slug VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
+    INDEX idx_category_slug (category_slug)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
   // 3a. Category Filters
@@ -168,7 +170,7 @@ const createTables = [
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
-  // 3n. Related Products\n  CREATE TABLE IF NOT EXISTS product_sections (\n    section_id INT AUTO_INCREMENT PRIMARY KEY,\n    section_name VARCHAR(100) NOT NULL,\n    section_key VARCHAR(100) UNIQUE NOT NULL,\n    default_display_order INT DEFAULT 0,\n    status ENUM(\'Active\', \'Inactive\') DEFAULT \'Active\',\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  CREATE TABLE IF NOT EXISTS product_section_mapping (\n    mapping_id INT AUTO_INCREMENT PRIMARY KEY,\n    product_id INT NOT NULL,\n    section_id INT NOT NULL,\n    is_visible ENUM(\'Y\', \'N\') DEFAULT \'Y\',\n    display_order INT DEFAULT 0,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,\n    FOREIGN KEY (section_id) REFERENCES product_sections(section_id) ON DELETE CASCADE,\n    UNIQUE KEY product_section_unique (product_id, section_id)\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  CREATE TABLE IF NOT EXISTS website_sections (\n    section_id INT AUTO_INCREMENT PRIMARY KEY,\n    section_key VARCHAR(100) UNIQUE NOT NULL,\n    section_name VARCHAR(100) NOT NULL,\n    display_order INT DEFAULT 0,\n    status ENUM(\'Active\', \'Inactive\') DEFAULT \'Active\',\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  // 3o. Related Products
+  // 3n. Related Products\n  CREATE TABLE IF NOT EXISTS product_sections (\n    section_id INT AUTO_INCREMENT PRIMARY KEY,\n    section_name VARCHAR(100) NOT NULL,\n    section_key VARCHAR(100) UNIQUE NOT NULL,\n    default_display_order INT DEFAULT 0,\n    status ENUM('Live', 'Active', 'Inactive') DEFAULT 'Live',\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  CREATE TABLE IF NOT EXISTS product_section_mapping (\n    mapping_id INT AUTO_INCREMENT PRIMARY KEY,\n    product_id INT NOT NULL,\n    section_id INT NOT NULL,\n    is_visible ENUM(\'Y\', \'N\') DEFAULT \'Y\',\n    display_order INT DEFAULT 0,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,\n    FOREIGN KEY (section_id) REFERENCES product_sections(section_id) ON DELETE CASCADE,\n    UNIQUE KEY product_section_unique (product_id, section_id)\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  CREATE TABLE IF NOT EXISTS website_sections (\n    section_id INT AUTO_INCREMENT PRIMARY KEY,\n    section_key VARCHAR(100) UNIQUE NOT NULL,\n    section_name VARCHAR(100) NOT NULL,\n    display_order INT DEFAULT 0,\n    status ENUM('Live', 'Active', 'Inactive') DEFAULT 'Live',\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;,\n\n  // 3o. Related Products
   `CREATE TABLE IF NOT EXISTS related_products (
     product_id INT NOT NULL,
     related_id INT NOT NULL,
@@ -281,7 +283,7 @@ const createTables = [
     min_order_amount DECIMAL(10, 2) DEFAULT 0.00,
     image_url VARCHAR(500),
     valid_until DATE,
-    status ENUM('Active', 'Expired') DEFAULT 'Active',
+    status ENUM('Live', 'Active', 'Expired') DEFAULT 'Live',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
@@ -295,7 +297,7 @@ const createTables = [
     email VARCHAR(150),
     opening_hours VARCHAR(150),
     map_url VARCHAR(500),
-    status ENUM('Active', 'Inactive') DEFAULT 'Active',
+    status ENUM('Live', 'Active', 'Inactive') DEFAULT 'Live',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
@@ -355,7 +357,7 @@ const createTables = [
     subscriber_id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(150) UNIQUE NOT NULL,
     source VARCHAR(100) DEFAULT 'Footer',
-    status ENUM('Active', 'Unsubscribed') DEFAULT 'Active',
+    status ENUM('Live', 'Active', 'Unsubscribed') DEFAULT 'Live',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
@@ -388,7 +390,7 @@ const createTables = [
     location VARCHAR(150),
     avatar_url VARCHAR(500),
     permissions VARCHAR(255) DEFAULT '',
-    status ENUM('Active', 'Inactive') DEFAULT 'Active',
+    status ENUM('Live', 'Active', 'Inactive') DEFAULT 'Live',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
 
@@ -561,12 +563,12 @@ const seedData = [
   `INSERT IGNORE INTO customizations (customization_id, name, options_json) VALUES
     (1, 'Length Adjustment', '["YES"]'), (2, 'Extra Sleeve', '["YES"]'), (3, 'Custom Size', '["YES"]'), (4, 'Embroidery', '["YES"]');`,
 
-  `INSERT IGNORE INTO products 
-    (product_id, category_id, name, slug, sku, short_description, price, sale_price, stock, status, is_featured, is_new_arrival, size_guide_id) 
+  \`INSERT IGNORE INTO products
+    (product_id, category_id, category_slug, name, slug, sku, short_description, price, sale_price, stock, status, is_featured, is_new_arrival, size_guide_id)
   VALUES 
-    (101, 1, 'LAMIA OPEN KAFTAN SET', 'lamia-open-kaftan-set', 'KAFTAN-101', 'Two-piece kaftan set with an inner layer and flowing open kaftan.', 11500.00, 9900.00, 20, 'Live', 1, 1, 1),
-    (102, 1, 'Premium Nida Abaya', 'premium-nida-abaya-1', 'ABAYA-102', 'Classic black Saudi abaya crafted from smooth, high-grade Korean Nida fabric.', 6990.00, 5990.00, 25, 'Live', 1, 0, 1),
-    (111, 2, 'Premium Chiffon Hijab', 'premium-chiffon-hijab-1', 'HIJAB-111', 'Breathable lightweight chiffon hijab in dusty rose with hand-rolled hems.', 2900.00, 2400.00, 50, 'Live', 1, 0, 2);`,
+    (101, 1, 'abayas', 'LAMIA OPEN KAFTAN SET', 'lamia-open-kaftan-set', 'KAFTAN-101', 'Two-piece kaftan set with an inner layer and flowing open kaftan.', 11500.00, 9900.00, 20, 'Live', 1, 1, 1),
+    (102, 1, 'abayas', 'Premium Nida Abaya', 'premium-nida-abaya-1', 'ABAYA-102', 'Classic black Saudi abaya crafted from smooth, high-grade Korean Nida fabric.', 6990.00, 5990.00, 25, 'Live', 1, 0, 1),
+    (111, 2, 'hijabs', 'Premium Chiffon Hijab', 'premium-chiffon-hijab-1', 'HIJAB-111', 'Breathable lightweight chiffon hijab in dusty rose with hand-rolled hems.', 2900.00, 2400.00, 50, 'Live', 1, 0, 2);\`,
 
   `INSERT IGNORE INTO product_images (product_id, image_url, is_main, display_order) VALUES
     (101, '/hero2.png', 1, 1), (101, '/hero1.png', 0, 2),

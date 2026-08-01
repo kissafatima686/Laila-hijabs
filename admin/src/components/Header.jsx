@@ -24,7 +24,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('token');
-    window.location.href = 'http://localhost:5173/admin';
+    navigate('/login');
   };
 
   return (

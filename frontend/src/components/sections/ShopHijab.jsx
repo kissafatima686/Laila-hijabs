@@ -1,11 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import ProductCard from '../Products/ProductCard';
-import { products } from '../../data/products';
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import './ShopHijab.css';
 
 const ShopHijab = () => {
-  const hijabItems = products.filter(item => item.category === 'hijabs');
+  const [hijabItems, setHijabItems] = useState([]);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/products?category=hijabs`)
+      .then(res => res.json())
+      .then(data => setHijabItems(data))
+      .catch(err => console.error("Failed to fetch hijabs", err));
+  }, []);
+
   const extendedItems = hijabItems.concat(hijabItems).concat(hijabItems);
   
   const [currentIndex, setCurrentIndex] = useState(0);

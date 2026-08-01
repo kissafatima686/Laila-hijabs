@@ -12,12 +12,25 @@ const btnGray = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#4
 
 
 // Separate component for Bundle to handle View/Edit modes
-const BundleCard = ({ bundle, idx, removeBundle, handleBundleChange }) => {
+const BundleCard = ({ bundle, idx, removeBundle, handleBundleChange, inventory }) => {
   const [isEditing, setIsEditing] = useState(false);
   const isActive = bundle.status !== 'Draft';
 
   const toggleStatus = () => {
     handleBundleChange(idx, 'status', isActive ? 'Draft' : 'Live');
+  };
+
+  const handleSelectProduct = (e) => {
+    const pid = parseInt(e.target.value);
+    const prod = inventory.find(p => (p.product_id || p.id) === pid);
+    if (prod) {
+      handleBundleChange(idx, 'product_id', pid);
+      handleBundleChange(idx, 'title', prod.name);
+      handleBundleChange(idx, 'original_price', `Rs. ${prod.compare_at_price || prod.price}`);
+      handleBundleChange(idx, 'bundle_price', `Rs. ${prod.price}`);
+      handleBundleChange(idx, 'slug', prod.slug);
+      handleBundleChange(idx, 'image_url', prod.image_url || prod.image);
+    }
   };
 
   if (!isEditing) {
@@ -34,7 +47,7 @@ const BundleCard = ({ bundle, idx, removeBundle, handleBundleChange }) => {
         <h4 style={{ margin: '4px 0', color: '#F6F1E3', fontSize: '16px' }}>{bundle.title}</h4>
         <p style={{ margin: 0, color: '#E7D9C9', fontSize: '13px' }}>Price: {bundle.bundle_price} <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{bundle.original_price}</span></p>
         <p style={{ margin: 0, color: '#22c55e', fontSize: '12px', fontWeight: 'bold' }}>{bundle.savings}</p>
-        <p style={{ margin: 0, color: '#E7D9C9', fontSize: '13px' }}>Product Slug: {bundle.slug || 'N/A'}</p>
+        <p style={{ margin: 0, color: '#E7D9C9', fontSize: '13px' }}>Product ID: {bundle.product_id || 'N/A'}</p>
       </div>
     );
   }
@@ -47,13 +60,20 @@ const BundleCard = ({ bundle, idx, removeBundle, handleBundleChange }) => {
       </div>
 
       <div>
-        <label style={lStyle}>Bundle Name</label>
-        <input value={bundle.title} onChange={e => handleBundleChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Everyday Grace 3-Hijab Bundle" />
+        <label style={lStyle}>Link to Inventory Product</label>
+        <select value={bundle.product_id || ''} onChange={handleSelectProduct} style={iStyle}>
+          <option value="">-- Choose Existing Product --</option>
+          {inventory.map(p => (
+            <option key={p.product_id || p.id} value={p.product_id || p.id}>
+              {p.name} (Rs. {p.price})
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
-        <label style={lStyle}>Linked Product Slug</label>
-        <input value={bundle.slug || ''} onChange={e => handleBundleChange(idx, 'slug', e.target.value)} style={iStyle} placeholder="everyday-grace-bundle" />
+        <label style={lStyle}>Bundle Name (Override)</label>
+        <input value={bundle.title} onChange={e => handleBundleChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Everyday Grace 3-Hijab Bundle" />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
@@ -77,7 +97,7 @@ const BundleCard = ({ bundle, idx, removeBundle, handleBundleChange }) => {
       </div>
 
       <div>
-        <label style={lStyle}>Cover Image URL</label>
+        <label style={lStyle}>Cover Image URL (Override)</label>
         <input value={bundle.image_url} onChange={e => handleBundleChange(idx, 'image_url', e.target.value)} style={iStyle} placeholder="/hero1.png" />
       </div>
     </div>
@@ -85,7 +105,7 @@ const BundleCard = ({ bundle, idx, removeBundle, handleBundleChange }) => {
 };
 
 // Ways to save card component
-const WayToSaveCard = ({ wc, idx, setForm, form }) => {
+const WayToSaveCard = ({ wc, idx, setForm, form, inventory }) => {
     const [isEditing, setIsEditing] = useState(false);
     const isActive = wc.status !== 'Draft';
 
@@ -101,6 +121,23 @@ const WayToSaveCard = ({ wc, idx, setForm, form }) => {
         setForm(p => ({ ...p, ways_cards: copy }));
     };
 
+    const handleSelectProduct = (e) => {
+        const pid = parseInt(e.target.value);
+        const prod = inventory.find(p => (p.product_id || p.id) === pid);
+        if (prod) {
+            const copy = [...form.ways_cards];
+            copy[idx] = {
+                ...copy[idx],
+                product_id: pid,
+                title: prod.name,
+                description: prod.description || copy[idx].description,
+                slug: prod.slug,
+                image_url: prod.image_url || prod.image
+            };
+            setForm(p => ({ ...p, ways_cards: copy }));
+        }
+    };
+
     if (!isEditing) {
         return (
             <div style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: '1px solid rgba(184,147,91,0.3)', display: 'flex', flexDirection: 'column', gap: '10px', opacity: isActive ? 1 : 0.6 }}>
@@ -113,7 +150,7 @@ const WayToSaveCard = ({ wc, idx, setForm, form }) => {
                 </div>
                 <h4 style={{ margin: '4px 0', color: '#F6F1E3', fontSize: '15px' }}>{wc.title}</h4>
                 <p style={{ margin: 0, color: '#E7D9C9', fontSize: '13px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{wc.description}</p>
-                <p style={{ margin: 0, color: '#E7D9C9', fontSize: '13px' }}>Slug: {wc.slug || 'N/A'}</p>
+                <p style={{ margin: 0, color: '#E7D9C9', fontSize: '13px' }}>Product ID: {wc.product_id || 'N/A'}</p>
             </div>
         );
     }
@@ -124,20 +161,29 @@ const WayToSaveCard = ({ wc, idx, setForm, form }) => {
                 <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800' }}>EDITING CARD #{idx + 1}</span>
                 <button type="button" onClick={() => setIsEditing(false)} style={btnP}>Done</button>
             </div>
+
+            <div>
+                <label style={lStyle}>Link to Inventory Product</label>
+                <select value={wc.product_id || ''} onChange={handleSelectProduct} style={iStyle}>
+                    <option value="">-- Choose Existing Product --</option>
+                    {inventory.map(p => (
+                        <option key={p.product_id || p.id} value={p.product_id || p.id}>
+                            {p.name} (Rs. {p.price})
+                        </option>
+                    ))}
+                </select>
+            </div>
+
             <div>
                 <label style={lStyle}>Badge Tag</label>
                 <input value={wc.badge} onChange={e => handleChange('badge', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B' }} placeholder="FIRST ORDER / BUNDLE" />
             </div>
             <div>
-                <label style={lStyle}>Title</label>
+                <label style={lStyle}>Title (Override)</label>
                 <input value={wc.title} onChange={e => handleChange('title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Card Title" />
             </div>
             <div>
-                <label style={lStyle}>Product Slug</label>
-                <input value={wc.slug || ''} onChange={e => handleChange('slug', e.target.value)} style={iStyle} placeholder="optional-product-slug" />
-            </div>
-            <div>
-                <label style={lStyle}>Description</label>
+                <label style={lStyle}>Description (Override)</label>
                 <textarea rows={3} value={wc.description} onChange={e => handleChange('description', e.target.value)} style={{ ...iStyle, resize: 'vertical' }} placeholder="Card Description..." />
             </div>
         </div>
@@ -167,7 +213,14 @@ const OffersBundlesPageManager = () => {
     ]
   });
 
+  const [inventory, setInventory] = useState([]);
+
   useEffect(() => {
+    fetch(`${API}/products`)
+      .then(r => r.json())
+      .then(d => setInventory(d))
+      .catch(() => {});
+
     fetch(`${API}/sections/offers_bundles_page`)
       .then(r => r.json())
       .then(d => {
@@ -225,7 +278,7 @@ const OffersBundlesPageManager = () => {
 
   const addBundle = () => setForm(p => ({
     ...p,
-    bundles: [...p.bundles, { id: `b_${Date.now()}`, title: 'New Curated Bundle Set', slug: '', original_price: 'Rs. 10,000', bundle_price: 'Rs. 7,900', savings: 'SAVE 21%', image_url: '/hero1.png', items_included: 'Full Matching Set', status: 'Live' }]
+    bundles: [...p.bundles, { id: `b_${Date.now()}`, product_id: '', title: 'New Curated Bundle Set', slug: '', original_price: 'Rs. 10,000', bundle_price: 'Rs. 7,900', savings: 'SAVE 21%', image_url: '/hero1.png', items_included: 'Full Matching Set', status: 'Live' }]
   }));
 
   const removeBundle = (idx) => setForm(p => ({ ...p, bundles: p.bundles.filter((_, i) => i !== idx) }));
@@ -291,7 +344,7 @@ const OffersBundlesPageManager = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
               {form.bundles.map((b, idx) => (
-                <BundleCard key={b.id || idx} bundle={b} idx={idx} removeBundle={removeBundle} handleBundleChange={handleBundleChange} />
+                <BundleCard key={b.id || idx} bundle={b} idx={idx} removeBundle={removeBundle} handleBundleChange={handleBundleChange} inventory={inventory} />
               ))}
             </div>
           </div>
@@ -318,7 +371,7 @@ const OffersBundlesPageManager = () => {
               {/* 3 Ways Cards */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                 {form.ways_cards.map((wc, idx) => (
-                   <WayToSaveCard key={idx} wc={wc} idx={idx} form={form} setForm={setForm} />
+                   <WayToSaveCard key={idx} wc={wc} idx={idx} form={form} setForm={setForm} inventory={inventory} />
                 ))}
               </div>
             </div>

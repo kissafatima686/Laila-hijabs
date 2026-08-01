@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // Helper to parse JSON fields safely
 const parseJsonField = (field, fallback = []) => {
@@ -19,19 +20,19 @@ const getProducts = async (req, res) => {
     let sql = `SELECT p.*, c.name as category_name, c.slug as category_slug 
                FROM products p 
                LEFT JOIN categories c ON p.category_id = c.category_id 
-               WHERE p.status = 'Active'`;
+               WHERE p.status = 'Live'`;
     const params = [];
 
     if (category) {
-      sql += ` AND (c.slug = ? OR UPPER(c.name) = UPPER(?))`;
+      sql += ` AND (p.category_slug = ? OR UPPER(c.name) = UPPER(?))`;
       params.push(category, category);
     }
     if (featured === 'true' || featured === '1') {
       sql += ` AND p.is_featured = 1`;
     }
     if (search) {
-      sql += ` AND (p.name LIKE ? OR p.short_description LIKE ?)`;
-      params.push(`%${search}%`, `%${search}%`);
+      sql += ` AND (p.name LIKE ? OR p.short_description LIKE ? OR c.name LIKE ?)`;
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     sql += ` ORDER BY p.created_at DESC`;
@@ -94,7 +95,7 @@ const getProducts = async (req, res) => {
         category: prod.category_name || 'ABAYAS',
         category_slug: prod.category_slug,
         price: parseFloat(prod.price),
-        compare_at_price: prod.sale_price ? parseFloat(prod.price) : null, // Assuming sale_price acts like price and price acts like compare
+        compare_at_price: prod.sale_price ? parseFloat(prod.price) : null,
         description: prod.short_description,
         image: pImages.length > 0 ? pImages[0] : null,
         image_url: pImages.length > 0 ? pImages[0] : null,
@@ -125,7 +126,7 @@ const getProductBySlug = async (req, res) => {
       `SELECT p.*, c.name as category_name, c.slug as category_slug 
        FROM products p 
        LEFT JOIN categories c ON p.category_id = c.category_id 
-       WHERE (p.slug = ? OR p.product_id = ?) AND p.status = 'Active'`,
+       WHERE (p.slug = ? OR p.product_id = ?) AND p.status = 'Live'`,
       [slug, slug]
     );
 
@@ -378,19 +379,19 @@ const getOrdersByEmail = async (req, res) => {
       `SELECT o.*, 
         (SELECT JSON_ARRAYAGG(
           JSON_OBJECT(
-            'id', oi.id, 
+            'id', oi.item_id,
             'product_id', oi.product_id, 
             'quantity', oi.quantity, 
-            'price', oi.price, 
-            'color', oi.color, 
-            'size', oi.size,
+            'price', oi.unit_price,
+            'color', oi.selected_color,
+            'size', oi.selected_size,
             'product_name', p.name
           )
-         ) FROM order_items oi LEFT JOIN products p ON oi.product_id = p.id WHERE oi.order_id = o.id) as items
+         ) FROM order_items oi LEFT JOIN products p ON oi.product_id = p.product_id WHERE oi.order_id = o.order_id) as items
        FROM orders o 
-       WHERE o.customer_email = ? 
+       WHERE o.recipient_name = ? OR o.user_id = (SELECT user_id FROM users WHERE email = ?)
        ORDER BY o.created_at DESC`,
-      [email]
+      [email, email]
     );
 
     res.status(200).json(orders);
@@ -461,10 +462,10 @@ const submitContactMessage = async (req, res) => {
   }
 };
 
-// 8. Fetch Active Special Offers (OffersPage.jsx)
-const getActiveOffers = async (req, res) => {
+// 8. Fetch Live Special Offers (OffersPage.jsx)
+const getLiveOffers = async (req, res) => {
   try {
-    const [rows] = await pool.query(`SELECT * FROM offers WHERE status = 'Active' ORDER BY created_at DESC`);
+    const [rows] = await pool.query(`SELECT * FROM offers WHERE status IN ('Live', 'Active') ORDER BY created_at DESC`);
     res.status(200).json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -474,7 +475,7 @@ const getActiveOffers = async (req, res) => {
 // 9. Fetch Store Locations (LocationDetailPage.jsx)
 const getStoreLocations = async (req, res) => {
   try {
-    const [rows] = await pool.query(`SELECT * FROM store_locations WHERE status = 'Active' ORDER BY city ASC`);
+    const [rows] = await pool.query(`SELECT * FROM store_locations WHERE status IN ('Live', 'Active') ORDER BY city ASC`);
     res.status(200).json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -528,7 +529,7 @@ const submitProductReview = async (req, res) => {
 const getHomepageSections = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT section_key, section_name FROM website_sections WHERE status = 'Active' ORDER BY display_order ASC`
+      `SELECT section_key, section_name FROM website_sections WHERE status IN ('Live', 'Active') ORDER BY display_order ASC`
     );
     res.status(200).json(rows);
   } catch (err) {
@@ -548,7 +549,7 @@ const getProductsByDisplaySection = async (req, res) => {
       JOIN product_display pd ON p.product_id = pd.product_id
       JOIN display_sections ds ON ds.display_section_id = pd.display_section_id
       LEFT JOIN categories c ON p.category_id = c.category_id
-      WHERE ds.slug = ? AND pd.status = 'Published'
+      WHERE ds.slug = ? AND pd.status = 'Published' AND p.status = 'Live'
       ORDER BY pd.sort_order ASC
     `, [slug]);
 
@@ -560,7 +561,7 @@ const getProductsByDisplaySection = async (req, res) => {
     let imagesMap = {}, variantsMap = {};
 
     if (productIds.length > 0) {
-      const [images] = await pool.query(`SELECT * FROM product_gallery WHERE product_id IN (?) ORDER BY display_order`, [productIds]);
+      const [images] = await pool.query(`SELECT * FROM product_images WHERE product_id IN (?) ORDER BY display_order`, [productIds]);
       images.forEach(img => {
         if(!imagesMap[img.product_id]) imagesMap[img.product_id] = [];
         imagesMap[img.product_id].push(img.image_url);
@@ -637,16 +638,22 @@ const loginUser = async (req, res) => {
 
     const user = users[0];
     
-    // Compare provided password with hashed password (or fallback to plaintext for legacy accounts if no bcrypt hash exists)
-    let isMatch = false;
-    if (user.password_hash && user.password_hash.startsWith('$2a$')) {
-      isMatch = await bcrypt.compare(password, user.password_hash);
-    } else {
-      isMatch = (password === user.password_hash);
-    }
+    // Compare provided password with hashed password
+    const isMatch = await bcrypt.compare(password, user.password_hash);
 
     if (!isMatch) return res.status(401).json({ error: 'Invalid email or password.' });
-    res.status(200).json({ message: 'Login successful', user: { id: user.user_id, full_name: user.full_name, email: user.email, address: user.address, city: user.city, phone: user.phone } });
+
+    const token = jwt.sign(
+      { id: user.user_id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      user: { id: user.user_id, full_name: user.full_name, email: user.email, address: user.address, city: user.city, phone: user.phone, role: user.role }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -674,7 +681,7 @@ const getWishlist = async (req, res) => {
         (SELECT c.name FROM product_variants pv JOIN colors c ON pv.color_id = c.color_id WHERE pv.product_id = p.product_id LIMIT 1) as color
        FROM wishlists w
        JOIN products p ON w.product_id = p.product_id
-       WHERE w.user_id = ?`,
+       WHERE w.user_id = ? AND p.status = 'Live'`,
       [userId]
     );
     // map stock > 0 to inStock for frontend compatibility
@@ -705,6 +712,68 @@ const removeFromWishlist = async (req, res) => {
   }
 };
 
+const getProductsByIds = async (req, res) => {
+  try {
+    const { ids } = req.query;
+    if (!ids) return res.status(200).json([]);
+    const idArray = ids.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+    if (idArray.length === 0) return res.status(200).json([]);
+
+    const [rows] = await pool.query(
+      `SELECT p.*, c.name as category_name, c.slug as category_slug
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.category_id
+       WHERE p.product_id IN (?) AND p.status = 'Live'`,
+      [idArray]
+    );
+
+    // Fetch related modular data
+    const productIds = rows.map(r => r.product_id);
+    let imagesMap = {}, variantsMap = {};
+
+    if (productIds.length > 0) {
+      const [images] = await pool.query(`SELECT * FROM product_images WHERE product_id IN (?) ORDER BY display_order`, [productIds]);
+      images.forEach(img => {
+        if(!imagesMap[img.product_id]) imagesMap[img.product_id] = [];
+        imagesMap[img.product_id].push(img.image_url);
+      });
+
+      const [variants] = await pool.query(`
+        SELECT pv.*, c.name as color_name, c.hex_code
+        FROM product_variants pv
+        JOIN colors c ON pv.color_id = c.color_id
+        WHERE pv.product_id IN (?)`, [productIds]);
+      variants.forEach(v => {
+        if(!variantsMap[v.product_id]) variantsMap[v.product_id] = [];
+        variantsMap[v.product_id].push({ name: v.color_name, hex: v.hex_code, stock: v.stock_quantity, sku: v.sku, image: v.image_url });
+      });
+    }
+
+    const formatted = rows.map(prod => {
+      const pImages = imagesMap[prod.product_id] || [];
+      const pVariants = variantsMap[prod.product_id] || [];
+      return {
+        id: prod.product_id,
+        name: prod.name,
+        slug: prod.slug,
+        category: prod.category_name,
+        price: parseFloat(prod.price),
+        sale_price: prod.sale_price ? parseFloat(prod.sale_price) : null,
+        image: pImages.length > 0 ? pImages[0] : null,
+        thumbnails: pImages,
+        badge: prod.is_new_arrival ? 'NEW IN' : (prod.is_featured ? 'FEATURED' : ''),
+        colorSwatches: pVariants,
+        stock: prod.stock
+      };
+    });
+
+    // Maintain the order of requested IDs if possible, or just return results
+    res.status(200).json(formatted);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = { 
   getProducts, 
   getProductBySlug, 
@@ -713,7 +782,7 @@ module.exports = {
   submitCustomOrder, 
   submitAffiliateApplication, 
   submitContactMessage, 
-  getActiveOffers, 
+  getLiveOffers,
   getStoreLocations, 
   getBlogs,
   getProductReviews,
@@ -727,5 +796,6 @@ module.exports = {
   updateUserAddress,
   getWishlist,
   addToWishlist,
-  removeFromWishlist
+  removeFromWishlist,
+  getProductsByIds
 };

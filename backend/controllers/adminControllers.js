@@ -1,4 +1,6 @@
 const { pool } = require('../config/db');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // ─── DASHBOARD STATS ──────────────────────────────────────────────────────────
 
@@ -40,7 +42,7 @@ const getDashboardStats = async (req, res) => {
         icon: 'offers',
         route: '/offers',
         modules: [
-          { name: 'Active Offers', table: 'offers', route: '/offers', statusField: true },
+          { name: 'Live Offers', table: 'offers', route: '/offers', statusField: true },
         ]
       },
       {
@@ -227,7 +229,11 @@ const TABLE_MAP = {
   'wishlists': { table: 'wishlists', key: 'wishlist_id' },
   'cart-perks': { table: 'cart_perks_promos', key: 'id' },
   'checkout-rules': { table: 'checkout_shipping_rules', key: 'id' },
-  'coupons': { table: 'coupons', key: 'id' }
+  'coupons': { table: 'coupons', key: 'id' },
+  'colors': { table: 'colors', key: 'color_id' },
+  'sizes': { table: 'sizes', key: 'size_id' },
+  'specifications': { table: 'specifications', key: 'spec_id' },
+  'specification-groups': { table: 'specification_groups', key: 'group_id' }
 };
 
 const getModuleItems = async (req, res) => {
@@ -246,35 +252,6 @@ const getModuleItems = async (req, res) => {
       return res.status(200).json(formatted);
     }
     
-    if (req.params.moduleName === 'locations') {
-      const formatted = rows.map(loc => {
-        let meta = {};
-        try {
-          if (loc.metadata) meta = typeof loc.metadata === 'string' ? JSON.parse(loc.metadata) : loc.metadata;
-        } catch(e) {}
-        return {
-          ...loc,
-          id: loc.location_id,
-          name: loc.store_name || loc.name || '',
-          store_name: loc.store_name || loc.name || '',
-          hours: loc.opening_hours || loc.hours || '',
-          opening_hours: loc.opening_hours || loc.hours || '',
-          image_url: loc.image_url || '',
-          status: (loc.status === 'Active' || loc.status === 'Live') ? 'Live' : 'Draft',
-          city_active: meta.city_active !== false,
-          name_active: meta.name_active !== false,
-          desc_active: meta.desc_active !== false,
-          address_active: meta.address_active !== false,
-          hours_active: meta.hours_active !== false,
-          phone_active: meta.phone_active !== false,
-          email_active: meta.email_active !== false,
-          map_active: meta.map_active !== false,
-          image_active: meta.image_active !== false
-        };
-      });
-      return res.status(200).json(formatted);
-    }
-
     res.status(200).json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -333,48 +310,6 @@ const updateModuleItem = async (req, res) => {
     }
   }
 
-  if (req.params.moduleName === 'locations') {
-    const cleanBody = {};
-    if ('name' in bodyData) cleanBody.store_name = bodyData.name;
-    if ('store_name' in bodyData) cleanBody.store_name = bodyData.store_name;
-    if ('city' in bodyData) cleanBody.city = bodyData.city;
-    if ('address' in bodyData) cleanBody.address = bodyData.address;
-    if ('phone' in bodyData) cleanBody.phone = bodyData.phone;
-    if ('email' in bodyData) cleanBody.email = bodyData.email;
-    if ('hours' in bodyData) cleanBody.opening_hours = bodyData.hours;
-    if ('opening_hours' in bodyData) cleanBody.opening_hours = bodyData.opening_hours;
-    if ('image_url' in bodyData) cleanBody.image_url = bodyData.image_url;
-    if ('map_url' in bodyData) cleanBody.map_url = bodyData.map_url;
-    if ('status' in bodyData) {
-      cleanBody.status = (bodyData.status === 'Live' || bodyData.status === 'Active') ? 'Active' : 'Inactive';
-    }
-
-    let existingMeta = {};
-    try {
-      const [locRow] = await pool.query(`SELECT metadata FROM store_locations WHERE location_id = ?`, [req.params.id]);
-      if (locRow.length > 0 && locRow[0].metadata) {
-        existingMeta = typeof locRow[0].metadata === 'string' ? JSON.parse(locRow[0].metadata) : locRow[0].metadata;
-      }
-    } catch(e) {}
-
-    const metaObj = {
-      ...existingMeta,
-      city_active: bodyData.city_active !== undefined ? bodyData.city_active : (existingMeta.city_active !== false),
-      name_active: bodyData.name_active !== undefined ? bodyData.name_active : (existingMeta.name_active !== false),
-      desc_active: bodyData.desc_active !== undefined ? bodyData.desc_active : (existingMeta.desc_active !== false),
-      address_active: bodyData.address_active !== undefined ? bodyData.address_active : (existingMeta.address_active !== false),
-      hours_active: bodyData.hours_active !== undefined ? bodyData.hours_active : (existingMeta.hours_active !== false),
-      phone_active: bodyData.phone_active !== undefined ? bodyData.phone_active : (existingMeta.phone_active !== false),
-      email_active: bodyData.email_active !== undefined ? bodyData.email_active : (existingMeta.email_active !== false),
-      map_active: bodyData.map_active !== undefined ? bodyData.map_active : (existingMeta.map_active !== false),
-      image_active: bodyData.image_active !== undefined ? bodyData.image_active : (existingMeta.image_active !== false),
-      description: bodyData.description !== undefined ? bodyData.description : existingMeta.description
-    };
-
-    cleanBody.metadata = JSON.stringify(metaObj);
-    bodyData = cleanBody;
-  }
-
   // Intercept Affiliate Approvals
   if (req.params.moduleName === 'affiliates' && bodyData.status === 'Approved') {
     try {
@@ -389,7 +324,8 @@ const updateModuleItem = async (req, res) => {
           const hashedPassword = await bcrypt.hash(tempPassword, salt);
           const affiliateCode = `LHAF-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
           
-          const affiliateLink = `http://localhost:5000/api/affiliate/ref/${affiliateCode}`;
+          const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+          const affiliateLink = `${baseUrl}/api/affiliate/ref/${affiliateCode}`;
           
           let user_id;
           const [userRes] = await pool.query(`SELECT * FROM users WHERE email = ?`, [app.email]);
@@ -440,16 +376,6 @@ const toggleModuleItemStatus = async (req, res) => {
   if (!config) return res.status(400).json({ error: 'Invalid module' });
   const { status } = req.body;
 
-  if (req.params.moduleName === 'locations') {
-    try {
-      const dbStatus = (status === 'Live' || status === 'Active') ? 'Active' : 'Inactive';
-      await pool.query(`UPDATE store_locations SET status = ? WHERE location_id = ?`, [dbStatus, req.params.id]);
-      return res.status(200).json({ message: 'Status updated' });
-    } catch (e) {
-      return res.status(500).json({ error: e.message });
-    }
-  }
-
   // Intercept Affiliate Approvals
   if (req.params.moduleName === 'affiliates' && status === 'Approved') {
     try {
@@ -466,7 +392,8 @@ const toggleModuleItemStatus = async (req, res) => {
           const hashedPassword = await bcrypt.hash(tempPassword, salt);
           const affiliateCode = `LHAF-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
           
-          const affiliateLink = `http://localhost:5000/api/affiliate/ref/${affiliateCode}`;
+          const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+          const affiliateLink = `${baseUrl}/api/affiliate/ref/${affiliateCode}`;
           
           let user_id;
           const [userRes] = await pool.query(`SELECT * FROM users WHERE email = ?`, [app.email]);
@@ -790,14 +717,14 @@ const getAdminProductDetails = async (req, res) => {
     const { id } = req.params;
     const [prod] = await pool.query(`SELECT * FROM products WHERE product_id = ?`, [id]);
     if (prod.length === 0) return res.status(404).json({ error: 'Product not found' });
-    
+
     const [images] = await pool.query(`SELECT image_url, is_main, display_order FROM product_images WHERE product_id = ? ORDER BY display_order`, [id]);
     const [variants] = await pool.query(`SELECT pv.color_id, pv.sku, pv.stock_quantity, pv.image_url, c.name as color_name, c.hex_code FROM product_variants pv JOIN colors c ON pv.color_id = c.color_id WHERE pv.product_id = ?`, [id]);
     const [sizes] = await pool.query(`SELECT size_id FROM product_sizes WHERE product_id = ?`, [id]);
     const [specs] = await pool.query(`SELECT spec_id, value FROM product_specifications WHERE product_id = ?`, [id]);
     const [customizations] = await pool.query(`SELECT customization_id FROM product_customizations WHERE product_id = ?`, [id]);
     const [sections] = await pool.query(`SELECT section_id, is_visible, display_order FROM product_section_mapping WHERE product_id = ? ORDER BY display_order ASC`, [id]);
-    
+
     // NEW: Gallery and Display Mapping
     const [gallery] = await pool.query(`
       SELECT pg.*, pvg.color_id as variant_id 
@@ -829,7 +756,7 @@ const addProduct = async (req, res) => {
   try {
     await connection.beginTransaction();
     const { 
-      name, slug, category_id, sku, price, sale_price, stock, 
+      name, slug, category_id, sku, price, sale_price, stock,
       short_description, long_description, care_instructions, fabric_details,
       is_featured, is_new_arrival, seo_title, meta_description, keywords, canonical_url, size_guide_id, bundle_attributes,
       images, variants, sizes, specifications, customizations, sections,
@@ -840,9 +767,9 @@ const addProduct = async (req, res) => {
 
     const [prodRes] = await connection.query(
       `INSERT INTO products 
-        (name, slug, category_id, sku, price, sale_price, stock, 
+        (name, slug, category_id, sku, price, sale_price, stock,
          short_description, long_description, care_instructions, fabric_details, 
-         is_featured, is_new_arrival, seo_title, meta_description, keywords, canonical_url, size_guide_id, status) 
+         is_featured, is_new_arrival, seo_title, meta_description, keywords, canonical_url, size_guide_id, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Live')`,
       [name, pSlug, category_id || null, sku || null, price || 0, sale_price || null, stock || 0,
        short_description || null, long_description || null, care_instructions || null, fabric_details || null,
@@ -867,7 +794,7 @@ const addProduct = async (req, res) => {
     } else if (images && images.length > 0) {
       // Legacy fallback
       for (let i = 0; i < images.length; i++) {
-        await connection.query(`INSERT INTO product_gallery (product_id, image_url, is_featured, display_order) VALUES (?, ?, ?, ?)`, 
+        await connection.query(`INSERT INTO product_gallery (product_id, image_url, is_featured, display_order) VALUES (?, ?, ?, ?)`,
           [pid, images[i].image_url, i === 0 ? 1 : 0, i]);
       }
     }
@@ -912,7 +839,7 @@ const addProduct = async (req, res) => {
       // If none provided, insert defaults
       const [allSections] = await connection.query(`SELECT section_id, default_display_order FROM product_sections`);
       for (let s of allSections) {
-         await connection.query(`INSERT INTO product_section_mapping (product_id, section_id, is_visible, display_order) VALUES (?, ?, 'Y', ?)`, 
+         await connection.query(`INSERT INTO product_section_mapping (product_id, section_id, is_visible, display_order) VALUES (?, ?, 'Y', ?)`,
            [pid, s.section_id, s.default_display_order]);
       }
     }
@@ -933,7 +860,7 @@ const updateProduct = async (req, res) => {
     await connection.beginTransaction();
     const pid = req.params.id;
     const { 
-      name, slug, category_id, sku, price, sale_price, stock, 
+      name, slug, category_id, sku, price, sale_price, stock,
       short_description, long_description, care_instructions, fabric_details,
       is_featured, is_new_arrival, seo_title, meta_description, keywords, canonical_url, size_guide_id, bundle_attributes,
       images, variants, sizes, specifications, customizations, sections,
@@ -944,7 +871,7 @@ const updateProduct = async (req, res) => {
 
     await connection.query(
       `UPDATE products SET 
-        name=?, slug=?, category_id=?, sku=?, price=?, sale_price=?, stock=?, 
+        name=?, slug=?, category_id=?, sku=?, price=?, sale_price=?, stock=?,
         short_description=?, long_description=?, care_instructions=?, fabric_details=?, 
         is_featured=?, is_new_arrival=?, seo_title=?, meta_description=?, keywords=?, canonical_url=?, size_guide_id=?, bundle_attributes=?
           WHERE product_id=?`,
@@ -972,7 +899,7 @@ const updateProduct = async (req, res) => {
       // Legacy fallback
       await connection.query(`DELETE FROM product_gallery WHERE product_id=?`, [pid]);
       for (let i = 0; i < images.length; i++) {
-        await connection.query(`INSERT INTO product_gallery (product_id, image_url, is_featured, display_order) VALUES (?, ?, ?, ?)`, 
+        await connection.query(`INSERT INTO product_gallery (product_id, image_url, is_featured, display_order) VALUES (?, ?, ?, ?)`,
           [pid, images[i].image_url, i === 0 ? 1 : 0, i]);
       }
     }
@@ -1041,8 +968,6 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-// ─── NEWSLETTER ───────────────────────────────────────────────────────────────
-
 const subscribeNewsletter = async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email required' });
@@ -1054,15 +979,46 @@ const subscribeNewsletter = async (req, res) => {
   }
 };
 
+const loginAdmin = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const [rows] = await pool.query(`SELECT * FROM admin_users WHERE email = ?`, [email]);
+    if (rows.length === 0) return res.status(401).json({ error: 'Invalid email or password' });
+
+    const admin = rows[0];
+    const isMatch = await bcrypt.compare(password, admin.password_hash);
+    if (!isMatch) return res.status(401).json({ error: 'Invalid email or password' });
+
+    const token = jwt.sign(
+      { id: admin.admin_id, email: admin.email, role: 'admin', staffRole: admin.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      admin: {
+        id: admin.admin_id,
+        full_name: admin.full_name,
+        email: admin.email,
+        role: admin.role
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const replyToCustomerMessage = async (req, res) => {
   const { messageId, to, from = 'info@lailahijabs.com', subject, body } = req.body;
   try {
     if (messageId) {
       await pool.query(`UPDATE contact_messages SET status = 'Replied' WHERE message_id = ?`, [messageId]);
     }
-    res.status(200).json({ 
-      success: true, 
-      message: `Email reply sent successfully to ${to} from info@lailahijabs.com!` 
+    res.status(200).json({
+      success: true,
+      message: `Email reply sent successfully to ${to} from info@lailahijabs.com!`
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1118,6 +1074,7 @@ module.exports = {
   addProduct,
   updateProduct,
   deleteProduct,
+  getAdminProductDetails,
   getProductSections,
   getDisplaySections,
   subscribeNewsletter,
@@ -1125,6 +1082,7 @@ module.exports = {
   getPayoutsSummary,
   processPayout,
   getAdminCustomerDetails,
+  loginAdmin,
   replyToCustomerMessage,
   uploadImage
 };

@@ -29,10 +29,7 @@ export default function AdminLogin() {
 
     try {
       await login(form.email, form.password);
-      
-      // Replace React Router's navigate() with a full browser jump to your admin server port:
-      window.location.href = "http://localhost:5174/dashboard"; 
-      
+      navigate("/dashboard");
     } catch (err) {
       const message = err?.response?.data?.message || err?.message || "Invalid email or password";
       setError(message);

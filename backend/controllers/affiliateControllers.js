@@ -190,10 +190,12 @@ exports.handleReferralClick = async (req, res) => {
         }
 
         // Redirect to homepage or intended landing page
-        res.redirect(302, 'http://localhost:3000/'); 
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000/';
+        res.redirect(302, frontendUrl);
     } catch (error) {
         console.error(error);
-        res.redirect(302, 'http://localhost:3000/');
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000/';
+        res.redirect(302, frontendUrl);
     }
 };
 

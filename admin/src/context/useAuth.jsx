@@ -6,13 +6,23 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem('adminToken') || null);
 
   const login = async (email, password) => {
-    if (email === 'admin@lailahijabs.com' && password === 'admin123') {
-      const mockToken = 'mock-jwt-token-laila-admin';
-      localStorage.setItem('adminToken', mockToken);
-      setToken(mockToken);
+    try {
+      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+
+      localStorage.setItem('adminToken', data.token);
+      setToken(data.token);
       return true;
+    } catch (err) {
+      console.error("Login error:", err);
+      throw err;
     }
-    throw new Error('Invalid email or password');
   };
 
   const logout = () => {

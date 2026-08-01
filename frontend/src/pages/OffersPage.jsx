@@ -6,6 +6,7 @@ import './OffersPage.css';
 
 const OffersPage = () => {
   const { getSectionContent } = useContent();
+  const [dbProducts, setDbProducts] = useState([]);
 
   const title = getSectionContent('offers_page_header', 'title', 'The Eid Edit Sale — up to 25% off');
   const subtitle = getSectionContent('offers_page_header', 'subtitle', '');
@@ -21,6 +22,36 @@ const OffersPage = () => {
   const sec1Title = getSectionContent('offers_bundles_page', 'title', 'Curated Modest Fashion Sets & Bundles');
   const bundlesRaw = getSectionContent('offers_bundles_page', 'bundles', []);
   const bundles = bundlesRaw.filter(b => b.status !== 'Draft');
+
+  useEffect(() => {
+    const ids = [
+      ...waysCards.map(c => c.product_id).filter(id => id),
+      ...bundles.map(b => b.product_id).filter(id => id)
+    ];
+
+    if (ids.length > 0) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/products/batch?ids=${[...new Set(ids)].join(',')}`)
+        .then(res => res.json())
+        .then(data => setDbProducts(data))
+        .catch(err => console.error("Failed to fetch offer products", err));
+    }
+  }, [JSON.stringify(waysCards), JSON.stringify(bundles)]);
+
+  const resolveProduct = (item) => {
+    if (item.product_id) {
+      const full = dbProducts.find(p => p.id === item.product_id);
+      if (full) return {
+        ...full,
+        title: item.title || full.name,
+        image_url: full.image,
+        badge: item.badge || full.badge,
+        original_price: full.compare_at_price || full.price,
+        bundle_price: full.price,
+        savings: item.savings || (full.compare_at_price ? `${Math.round((1 - full.price/full.compare_at_price)*100)}% OFF` : '')
+      };
+    }
+    return item; // Fallback to legacy
+  };
 
   // Timer Hook replacing static HTML Script
   const [time, setTime] = useState({ d: 3, h: 14, m: 52, s: 9 });
@@ -103,20 +134,23 @@ const OffersPage = () => {
               <h2>{waysTitle}</h2>
             </div>
             <div className="offer-grid">
-              {waysCards.map((wc, idx) => (
-                <Link key={idx} to={wc.slug ? `/Products/${wc.slug}` : '#'} className="offer-card-link" onClick={() => window.scrollTo(0, 0)}>
-                  <div className="offer-card">
-                    <div className="offer-card-img-wrapper">
-                      <img src={wc.image_url || '/hero2.png'} alt={wc.title} className="offer-card-hero-img" />
+              {waysCards.map((rawItem, idx) => {
+                const wc = resolveProduct(rawItem);
+                return (
+                  <Link key={idx} to={wc.slug ? `/Products/${wc.slug}` : '#'} className="offer-card-link" onClick={() => window.scrollTo(0, 0)}>
+                    <div className="offer-card">
+                      <div className="offer-card-img-wrapper">
+                        <img src={wc.image_url || '/hero2.png'} alt={wc.title} className="offer-card-hero-img" />
+                      </div>
+                      <div className="offer-card-content">
+                        <span className="offer-badge">{wc.badge}</span>
+                        <h3>{wc.title}</h3>
+                        <p>{wc.description}</p>
+                      </div>
                     </div>
-                    <div className="offer-card-content">
-                      <span className="offer-badge">{wc.badge}</span>
-                      <h3>{wc.title}</h3>
-                      <p>{wc.description}</p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}
@@ -139,20 +173,26 @@ const OffersPage = () => {
 
               <div className="prod-slider-container" ref={sliderRef}>
                 <div className="prod-slider-track">
-                  {bundles.map((b, idx) => (
-                    <Link to={b.slug ? `/Products/${b.slug}` : '#'} className="prod-card-link" key={idx}>
-                      <div className="prod-card">
-                        <div className="prod-frame">
-                          <span className="discount-tag">{b.savings}</span>
-                          <img src={b.image_url || '/hero1.png'} alt={b.title} />
+                  {bundles.map((rawItem, idx) => {
+                    const b = resolveProduct(rawItem);
+                    return (
+                      <Link to={b.slug ? `/Products/${b.slug}` : '#'} className="prod-card-link" key={idx}>
+                        <div className="prod-card">
+                          <div className="prod-frame">
+                            <span className="discount-tag">{b.savings}</span>
+                            <img src={b.image_url || '/hero1.png'} alt={b.title} />
+                          </div>
+                          <div className="prod-info">
+                            <div><h4 style={{ fontSize: '15px' }}>{b.title}</h4><span className="sizes">{b.items_included}</span></div>
+                            <div className="price">
+                               <span className="was">Rs. {parseFloat(b.original_price || 0).toLocaleString()}</span>
+                               <span className="now">Rs. {parseFloat(b.bundle_price || 0).toLocaleString()}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="prod-info">
-                          <div><h4 style={{ fontSize: '15px' }}>{b.title}</h4><span className="sizes">{b.items_included}</span></div>
-                          <div className="price"><span className="was">{b.original_price}</span><span className="now">{b.bundle_price}</span></div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>

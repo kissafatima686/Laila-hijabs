@@ -7,7 +7,7 @@ const {
   createOrder, 
   submitCustomOrder, 
   submitContactMessage, 
-  getActiveOffers, 
+  getLiveOffers,
   getStoreLocations, 
   getBlogs,
   getProductReviews,
@@ -21,7 +21,8 @@ const {
   updateUserAddress,
   getWishlist,
   addToWishlist,
-  removeFromWishlist
+  removeFromWishlist,
+  getProductsByIds
 } = require('../controllers/productController');
 
 // Homepage Sections
@@ -31,6 +32,7 @@ router.get('/homepage/sections', getHomepageSections);
 router.get('/categories', getCategories);
 router.get('/products', getProducts);
 router.get('/products/display/:slug', getProductsByDisplaySection);
+router.get('/products/batch', getProductsByIds);
 router.get('/products/:slug', getProductBySlug);
 
 // Customer Checkout Order
@@ -46,8 +48,8 @@ router.get('/custom-orders/:email', getCustomOrdersByEmail);
 // Contact Us Form (ContactUs.jsx)
 router.post('/contact', submitContactMessage);
 
-// Active Offers & Promos (OffersPage.jsx)
-router.get('/offers', getActiveOffers);
+// Live Offers & Promos (OffersPage.jsx)
+router.get('/offers', getLiveOffers);
 
 // Boutique Store Locations (LocationDetailPage.jsx)
 router.get('/locations', getStoreLocations);
