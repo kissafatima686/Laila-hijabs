@@ -437,14 +437,43 @@ const FooterManagerPage = ({ initialTab = 'links' }) => {
       {/* ── Tab: Copyright ───────────────────────────────────────────────────── */}
       {activeTab === 'copyright' && (
         <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8935B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#3E4930' }}>
-              Copyright Notice & Settings
-            </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8935B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#3E4930' }}>
+                Copyright Notice & Settings
+              </h3>
+            </div>
+
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button 
+                type="button" 
+                onClick={() => setSettingsForm(p => ({ ...p, copyright_active: p.copyright_active === false ? true : false }))} 
+                style={{
+                  padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                  backgroundColor: settingsForm.copyright_active !== false ? '#FEE2E2' : '#E0E7FF',
+                  color: settingsForm.copyright_active !== false ? '#DC2626' : '#3730A3',
+                  border: `1px solid ${settingsForm.copyright_active !== false ? '#FCA5A5' : '#A5B4FC'}`
+                }}
+              >
+                {settingsForm.copyright_active !== false ? 'Hide' : 'Show'}
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  const label = window.prompt("Enter new field label name:");
+                  if (label && label.trim()) {
+                    setSettingsForm(p => ({ ...p, extra_copyright_fields: [...(p.extra_copyright_fields || []), { label: label.trim(), value: '' }] }));
+                  }
+                }}
+                style={btnP}
+              >
+                + Add Field
+              </button>
+            </div>
           </div>
 
           <div style={{
@@ -461,24 +490,16 @@ const FooterManagerPage = ({ initialTab = 'links' }) => {
                 Copyright Line
               </label>
               
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setSettingsForm(p => ({ ...p, copyright_active: p.copyright_active === false ? true : false }))} 
-                  style={{
-                    height: '34px',
-                    padding: '0 14px',
-                    borderRadius: '6px',
-                    backgroundColor: settingsForm.copyright_active !== false ? '#3E4930' : '#FEE2E2',
-                    color: settingsForm.copyright_active !== false ? '#F6F1E3' : '#DC2626',
-                    border: 'none',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {settingsForm.copyright_active !== false ? 'Active' : 'Disabled'}
-                </button>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <span style={{
+                  fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: '700',
+                  color: settingsForm.copyright_active !== false ? '#15803D' : '#6B7280',
+                  backgroundColor: settingsForm.copyright_active !== false ? 'rgba(34,197,94,0.15)' : '#E7D9C9',
+                  border: `1px solid ${settingsForm.copyright_active !== false ? 'rgba(34,197,94,0.3)' : '#B8935B'}`
+                }}>
+                  {settingsForm.copyright_active !== false ? 'Live' : 'Hidden'}
+                </span>
+                <button type="button" onClick={() => setSettingsForm(p => ({ ...p, copyright: '' }))} style={{ ...btnD, padding: '4px 8px' }} title="Delete Line"><TrashIcon /></button>
               </div>
             </div>
 
@@ -488,6 +509,25 @@ const FooterManagerPage = ({ initialTab = 'links' }) => {
               style={{ ...iStyle, fontWeight: '500' }} 
               placeholder="2026 Laila Hijabs. All rights reserved." 
             />
+
+            {(settingsForm.extra_copyright_fields || []).map((f, idx) => (
+              <div key={idx} style={{ marginTop: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', color: '#3E4930' }}>{f.label}</label>
+                  <button type="button" onClick={() => setSettingsForm(p => ({ ...p, extra_copyright_fields: p.extra_copyright_fields.filter((_, i) => i !== idx) }))} style={{ ...btnD, padding: '2px 6px', fontSize: '10px' }}>Delete</button>
+                </div>
+                <input 
+                  value={f.value || ''} 
+                  onChange={e => {
+                    const updated = [...settingsForm.extra_copyright_fields];
+                    updated[idx].value = e.target.value;
+                    setSettingsForm(p => ({ ...p, extra_copyright_fields: updated }));
+                  }} 
+                  style={iStyle} 
+                  placeholder={`Enter ${f.label}...`}
+                />
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -495,9 +535,26 @@ const FooterManagerPage = ({ initialTab = 'links' }) => {
       {/* ── Tab: Get In Touch ───────────────────────────────────────────────── */}
       {activeTab === 'contact' && (
         <div style={card}>
-          <h3 style={{ margin: '0 0 18px 0', fontSize: '15px', fontWeight: '700', color: '#3E4930', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
-            Get In Touch — Footer Column 3
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#3E4930' }}>
+              Get In Touch — Footer Column 3
+            </h3>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button 
+                type="button" 
+                onClick={() => setSettingsForm(p => ({ ...p, contact_active: p.contact_active === false ? true : false }))} 
+                style={{
+                  padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                  backgroundColor: settingsForm.contact_active !== false ? '#FEE2E2' : '#E0E7FF',
+                  color: settingsForm.contact_active !== false ? '#DC2626' : '#3730A3',
+                  border: `1px solid ${settingsForm.contact_active !== false ? '#FCA5A5' : '#A5B4FC'}`
+                }}
+              >
+                {settingsForm.contact_active !== false ? 'Hide Column' : 'Show Column'}
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '560px' }}>
             <div><label style={lStyle}>Column Title</label><input value={settingsForm.get_in_touch_title} onChange={e => setSettingsForm(p => ({ ...p, get_in_touch_title: e.target.value }))} style={iStyle} /></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -508,26 +565,32 @@ const FooterManagerPage = ({ initialTab = 'links' }) => {
             </div>
             <div><label style={lStyle}>Email Address</label><input type="email" value={settingsForm.email_address} onChange={e => setSettingsForm(p => ({ ...p, email_address: e.target.value }))} style={iStyle} placeholder="info@lailahijabs.com" /></div>
           </div>
-          {/* Live Preview */}
-          <div style={{ marginTop: '20px', padding: '18px', borderRadius: '8px', backgroundColor: '#F6F1E3', border: '1px solid #E7D9C9' }}>
-            <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px', marginBottom: '10px' }}>LIVE PREVIEW</div>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#3E4930', marginBottom: '8px' }}>{settingsForm.get_in_touch_title}</div>
-            <div style={{ fontSize: '13px', color: '#3E4930', lineHeight: '1.7' }}>
-              <div>{settingsForm.whatsapp_label}</div>
-              <div style={{ color: '#B8935B', fontWeight: '600' }}>{settingsForm.whatsapp_number}</div>
-              <div style={{ marginTop: '6px' }}>{settingsForm.email_label}</div>
-              <div style={{ color: '#B8935B', fontWeight: '600' }}>{settingsForm.email_address}</div>
-            </div>
-          </div>
         </div>
       )}
 
       {/* ── Tab: Join Our Community ─────────────────────────────────────────── */}
       {activeTab === 'community' && (
         <div style={card}>
-          <h3 style={{ margin: '0 0 18px 0', fontSize: '15px', fontWeight: '700', color: '#3E4930', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
-            Join Our Community — Newsletter Column (Col 5)
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#3E4930' }}>
+              Join Our Community — Newsletter Column (Col 5)
+            </h3>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button 
+                type="button" 
+                onClick={() => setSettingsForm(p => ({ ...p, community_active: p.community_active === false ? true : false }))} 
+                style={{
+                  padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                  backgroundColor: settingsForm.community_active !== false ? '#FEE2E2' : '#E0E7FF',
+                  color: settingsForm.community_active !== false ? '#DC2626' : '#3730A3',
+                  border: `1px solid ${settingsForm.community_active !== false ? '#FCA5A5' : '#A5B4FC'}`
+                }}
+              >
+                {settingsForm.community_active !== false ? 'Hide Column' : 'Show Column'}
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '560px' }}>
             <div><label style={lStyle}>Column Title</label><input value={settingsForm.join_community_title} onChange={e => setSettingsForm(p => ({ ...p, join_community_title: e.target.value }))} style={iStyle} /></div>
             <div><label style={lStyle}>Newsletter Description Text</label><textarea rows={3} value={settingsForm.newsletter_text} onChange={e => setSettingsForm(p => ({ ...p, newsletter_text: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} /></div>
@@ -537,45 +600,66 @@ const FooterManagerPage = ({ initialTab = 'links' }) => {
             </div>
             <div><label style={lStyle}>"Follow Us" Section Title</label><input value={settingsForm.follow_title} onChange={e => setSettingsForm(p => ({ ...p, follow_title: e.target.value }))} style={iStyle} placeholder="FOLLOW US" /></div>
           </div>
-          {/* Preview */}
-          <div style={{ marginTop: '20px', padding: '18px', borderRadius: '8px', backgroundColor: '#F6F1E3', border: '1px solid #E7D9C9', maxWidth: '400px' }}>
-            <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px', marginBottom: '10px' }}>LIVE PREVIEW</div>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#3E4930', marginBottom: '8px' }}>{settingsForm.join_community_title}</div>
-            <div style={{ fontSize: '12px', color: '#3E4930', lineHeight: '1.6', marginBottom: '12px' }}>{settingsForm.newsletter_text}</div>
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
-              <div style={{ flex: 1, padding: '8px 12px', borderRadius: '4px', backgroundColor: '#FFFFFF', border: '1px solid #B8935B', fontSize: '11px', color: '#6B7280' }}>{settingsForm.newsletter_placeholder}</div>
-              <div style={{ padding: '8px 14px', borderRadius: '4px', backgroundColor: '#3E4930', fontSize: '11px', fontWeight: '700', color: '#F6F1E3' }}>{settingsForm.newsletter_button}</div>
-            </div>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#3E4930' }}>{settingsForm.follow_title}</div>
-          </div>
         </div>
       )}
 
       {/* ── Tab: Social Media ───────────────────────────────────────────────── */}
       {activeTab === 'social' && (
         <div style={card}>
-          <h3 style={{ margin: '0 0 18px 0', fontSize: '15px', fontWeight: '700', color: '#3E4930', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
-            Social Media Links — Footer Icons
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#3E4930' }}>
+              Social Media Links — Footer Icons
+            </h3>
+            <button 
+              type="button" 
+              onClick={() => {
+                const name = window.prompt("Enter new social platform name (e.g. Threads, Snapchat, LinkedIn):");
+                if (name && name.trim()) {
+                  const keyName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  setSettingsForm(p => ({ ...p, [`${keyName}_social`]: '' }));
+                }
+              }}
+              style={btnP}
+            >
+              + Add Social Link
+            </button>
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '540px' }}>
             {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => {
               const fieldKey = key === 'whatsapp' ? 'whatsapp_social' : key;
               const val = settingsForm[fieldKey] || '';
               const isSet = val.trim().length > 0;
+              const isHidden = settingsForm[`${fieldKey}_hidden`] === true;
+
               return (
-                <div key={key}>
+                <div key={key} style={{ opacity: isHidden ? 0.6 : 1, transition: 'opacity 0.2s' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                     <label style={lStyle}>{label}</label>
-                    <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: '700', color: isSet ? '#22c55e' : '#6B7280', backgroundColor: isSet ? 'rgba(34,197,94,0.15)' : '#E7D9C9', border: `1px solid ${isSet ? 'rgba(34,197,94,0.3)' : '#B8935B'}` }}>
-                      {isSet ? 'Active' : 'Not Set'}
-                    </span>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: '700', color: isHidden ? '#6B7280' : (isSet ? '#15803D' : '#6B7280'), backgroundColor: isHidden ? '#E7D9C9' : (isSet ? 'rgba(34,197,94,0.15)' : '#E7D9C9'), border: `1px solid ${isHidden ? '#B8935B' : (isSet ? 'rgba(34,197,94,0.3)' : '#B8935B')}` }}>
+                        {isHidden ? 'Hidden' : (isSet ? 'Live' : 'Not Set')}
+                      </span>
+
+                      <button 
+                        type="button" 
+                        onClick={() => setSettingsForm(p => ({ ...p, [`${fieldKey}_hidden`]: !isHidden }))} 
+                        style={{
+                          padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                          backgroundColor: isHidden ? '#E0E7FF' : '#FEE2E2',
+                          color: isHidden ? '#3730A3' : '#DC2626',
+                          border: `1px solid ${isHidden ? '#A5B4FC' : '#FCA5A5'}`
+                        }}
+                      >
+                        {isHidden ? 'Show' : 'Hide'}
+                      </button>
+
+                      {isSet && (
+                        <button type="button" onClick={() => setSettingsForm(p => ({ ...p, [fieldKey]: '' }))} style={{ ...btnD, padding: '4px 8px' }} title="Delete"><TrashIcon /></button>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input value={val} onChange={e => setSettingsForm(p => ({ ...p, [fieldKey]: e.target.value }))} style={iStyle} placeholder={placeholder} />
-                    {isSet && (
-                      <button onClick={() => setSettingsForm(p => ({ ...p, [fieldKey]: '' }))} style={{ ...btnD, flexShrink: 0, padding: '8px 12px' }} title="Remove"><TrashIcon /></button>
-                    )}
-                  </div>
+                  <input value={val} onChange={e => setSettingsForm(p => ({ ...p, [fieldKey]: e.target.value }))} style={iStyle} placeholder={placeholder} />
                 </div>
               );
             })}

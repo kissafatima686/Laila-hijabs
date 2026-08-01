@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
-const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#182012', border: '1px solid rgba(184,147,91,0.5)', color: '#F6F1E3', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
-const lStyle = { fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
-const cardStyle = { backgroundColor: '#222C1A', borderRadius: '14px', padding: '22px', border: '1px solid rgba(184,147,91,0.25)' };
-const btnP = { padding: '9px 18px', borderRadius: '8px', backgroundColor: '#B8935B', border: 'none', color: '#1A2010', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
-const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer' };
-const btnD = { padding: '7px 10px', borderRadius: '6px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', fontSize: '12px', cursor: 'pointer' };
+const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '6px', backgroundColor: '#F6F1E3', border: '1px solid #B8935B', color: '#3E4930', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
+const lStyle = { fontSize: '11px', fontWeight: '700', color: '#3E4930', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
+const cardStyle = { backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '22px', border: '1px solid #E7D9C9', boxShadow: '0 2px 8px rgba(62,73,48,0.04)' };
+const btnP = { padding: '9px 20px', borderRadius: '6px', backgroundColor: '#3E4930', border: 'none', color: '#F6F1E3', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
+const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#F6F1E3', border: '1px solid #B8935B', color: '#3E4930', fontSize: '12px', fontWeight: '600', cursor: 'pointer' };
+const btnD = { padding: '6px 10px', borderRadius: '6px', backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5', color: '#DC2626', fontSize: '11.5px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' };
 
 const EditIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -16,60 +16,140 @@ const EditIcon = () => (
 );
 
 const TrashIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
   </svg>
 );
 
 const FieldBox = ({ label, children, active = true, onToggle, onClear }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', opacity: active !== false ? 1 : 0.6, transition: 'opacity 0.2s' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <label style={lStyle}>{label}</label>
-      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+        <span style={{
+          fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: '700',
+          color: active !== false ? '#15803D' : '#6B7280',
+          backgroundColor: active !== false ? 'rgba(34,197,94,0.15)' : '#E7D9C9',
+          border: `1px solid ${active !== false ? 'rgba(34,197,94,0.3)' : '#B8935B'}`
+        }}>
+          {active !== false ? 'Live' : 'Hidden'}
+        </span>
+
         {onToggle && (
           <button
             type="button"
             onClick={onToggle}
             style={{
               padding: '3px 8px',
-              borderRadius: '6px',
-              backgroundColor: active !== false ? '#3E4930' : 'rgba(239,68,68,0.15)',
-              border: active !== false ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)',
-              color: active !== false ? '#F6F1E3' : '#EF4444',
-              fontSize: '10px',
+              borderRadius: '4px',
+              backgroundColor: active !== false ? '#FEE2E2' : '#E0E7FF',
+              border: active !== false ? '1px solid #FCA5A5' : '1px solid #A5B4FC',
+              color: active !== false ? '#DC2626' : '#3730A3',
+              fontSize: '11px',
               fontWeight: '700',
               cursor: 'pointer'
             }}
           >
-            {active !== false ? 'Active' : 'Inactive'}
+            {active !== false ? 'Hide' : 'Show'}
           </button>
         )}
         {onClear && (
           <button
             type="button"
             onClick={onClear}
-            style={{
-              padding: '3px 6px',
-              borderRadius: '6px',
-              backgroundColor: 'rgba(239,68,68,0.15)',
-              border: '1px solid rgba(239,68,68,0.35)',
-              color: '#EF4444',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center'
-            }}
-            title="Clear Field"
+            style={{ ...btnD, padding: '3px 6px' }}
+            title="Delete Content"
           >
             <TrashIcon />
           </button>
         )}
       </div>
     </div>
-    <div style={{ opacity: active !== false ? 1 : 0.5 }}>
+    <div>
       {children}
     </div>
   </div>
 );
+
+const ImageUploaderBox = ({ label, value, onChange, active = true, onToggle, onClear }) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      fetch(`${API}/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64 })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.imageUrl) {
+            onChange(data.imageUrl);
+          }
+        })
+        .catch(err => console.error("Upload failed", err))
+        .finally(() => setUploading(false));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <FieldBox label={label} active={active} onToggle={onToggle} onClear={onClear}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <input
+            value={value || ''}
+            onChange={e => onChange(e.target.value)}
+            style={{ ...iStyle, flex: 1 }}
+            placeholder="/hero1.png or image URL"
+          />
+          <label style={{
+            padding: '8px 14px',
+            borderRadius: '6px',
+            backgroundColor: '#3E4930',
+            color: '#F6F1E3',
+            fontSize: '12px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            {uploading ? 'Uploading...' : '📁 Upload Image'}
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+          </label>
+        </div>
+
+        {value && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: '#FFFFFF', padding: '8px 12px', borderRadius: '6px', border: '1px solid #E7D9C9' }}>
+            <img
+              src={value.startsWith('http') ? value : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${value.startsWith('/') ? '' : '/'}${value}`}
+              alt="Preview"
+              style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #E7D9C9' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {value}
+            </span>
+          </div>
+        )}
+      </div>
+    </FieldBox>
+  );
+};
 
 const VisitUsSliderManagerPage = () => {
   const [locations, setLocations] = useState([]);
@@ -78,13 +158,14 @@ const VisitUsSliderManagerPage = () => {
     subtitle: 'Our studio welcomes visits by appointment.',
     body_content: 'If you\'re not close by, our team is just as happy to guide you over WhatsApp or a call.',
     badge_text: 'VISIT US',
-    button_text: 'View Location Details'
+    button_text: 'View Location Details',
+    sec_active: true,
+    slider_sec_active: true
   });
   const [loading, setLoading] = useState(true);
   const [savingHeader, setSavingHeader] = useState(false);
   const [savedHeader, setSavedHeader] = useState(false);
   
-  // Modal state for adding/editing a controlled location slide
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [form, setForm] = useState({
@@ -100,23 +181,24 @@ const VisitUsSliderManagerPage = () => {
 
   const fetchSectionData = () => {
     setLoading(true);
-    // Fetch overall Section text
     fetch(`${API}/sections/location_visit_us_section`)
       .then(r => r.json())
       .then(data => {
         if (data && data.title) {
+          const meta = data.metadata || {};
           setSectionHeader({
             title: data.title || '',
             subtitle: data.subtitle || '',
             body_content: data.body_content || '',
             badge_text: data.badge_text || 'VISIT US',
-            button_text: data.button_text || 'View Location Details'
+            button_text: data.button_text || 'View Location Details',
+            sec_active: meta.sec_active !== false,
+            slider_sec_active: meta.slider_sec_active !== false
           });
         }
       })
       .catch(() => {});
 
-    // Fetch Controlled Location Slides
     fetch(`${API}/module/locations`)
       .then(r => r.json())
       .then(data => {
@@ -131,12 +213,22 @@ const VisitUsSliderManagerPage = () => {
   }, []);
 
   const handleSaveHeader = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSavingHeader(true);
     fetch(`${API}/sections/location_visit_us_section`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sectionHeader)
+      body: JSON.stringify({
+        title: sectionHeader.title,
+        subtitle: sectionHeader.subtitle,
+        body_content: sectionHeader.body_content,
+        badge_text: sectionHeader.badge_text,
+        button_text: sectionHeader.button_text,
+        metadata: {
+          sec_active: sectionHeader.sec_active,
+          slider_sec_active: sectionHeader.slider_sec_active
+        }
+      })
     })
       .then(() => {
         setSavedHeader(true);
@@ -196,7 +288,6 @@ const VisitUsSliderManagerPage = () => {
     const isCurrentlyActive = item.status === 'Live' || item.status === 'Active';
     const nextStatus = isCurrentlyActive ? 'Draft' : 'Live';
 
-    // Optimistically update UI immediately
     setLocations(prev => prev.map(l => {
       const lid = l.location_id || l.id;
       if (String(lid) === String(id)) {
@@ -221,34 +312,49 @@ const VisitUsSliderManagerPage = () => {
     fetch(`${API}/module/locations/${id}`, { method: 'DELETE' }).then(fetchSectionData);
   };
 
-  if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#E7D9C9' }}>Loading Visit Us Slider Manager...</div>;
+  if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#3E4930', fontWeight: '600' }}>Loading Visit Us Slider Manager...</div>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', paddingBottom: '60px' }}>
       
-      {/* Page Banner */}
-      <div style={{ background: 'linear-gradient(135deg, #3E4930 0%, #222C1A 100%)', borderRadius: '16px', padding: '24px 28px', border: '1px solid #B8935B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+      {/* Header Banner */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '20px 24px', border: '1px solid #E7D9C9', boxShadow: '0 2px 8px rgba(62,73,48,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1.5px', marginBottom: '5px' }}>ABOUT US PAGE</div>
-          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#F6F1E3' }}>Visit Us Gallery Slider Manager</h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#E7D9C9' }}>
-            Control section heading, description, and manage as many boutique location slides as you wish.
-          </p>
+          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1.5px' }}>STORE LOCATIONS & VISIT US</div>
+          <h2 style={{ margin: '2px 0 0 0', fontSize: '20px', fontWeight: '800', color: '#3E4930' }}>Visit Us Gallery Slider & Location Manager</h2>
         </div>
         <button onClick={openAddSlide} style={btnP}>+ Add New Location Slide</button>
       </div>
 
-      {/* ── Section Text Customizer ────────────────────────────────────────── */}
-      <div style={cardStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+      {/* Section Text Customizer */}
+      <div style={{ ...cardStyle, border: sectionHeader.sec_active !== false ? '1px solid #E7D9C9' : '1px solid #FCA5A5', opacity: sectionHeader.sec_active !== false ? 1 : 0.65 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
           <div>
             <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px' }}>SECTION TEXT CONTENT</span>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#F6F1E3' }}>Visit Us Section Headlines & CTA Button</h3>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#3E4930' }}>Visit Us Section Headlines & CTA Button</h3>
           </div>
-          {savedHeader && <span style={{ fontSize: '12px', color: '#22c55e', fontWeight: '600' }}>Saved!</span>}
-          <button onClick={handleSaveHeader} disabled={savingHeader} style={btnP}>
-            {savingHeader ? 'Saving...' : 'Save Section Content'}
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setSectionHeader(p => ({ ...p, sec_active: !p.sec_active }))}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                backgroundColor: sectionHeader.sec_active !== false ? '#FEE2E2' : '#E0E7FF',
+                color: sectionHeader.sec_active !== false ? '#DC2626' : '#3730A3',
+                border: sectionHeader.sec_active !== false ? '1px solid #FCA5A5' : '1px solid #A5B4FC',
+                fontSize: '11.5px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              {sectionHeader.sec_active !== false ? 'Hide Section' : 'Show Section'}
+            </button>
+            {savedHeader && <span style={{ fontSize: '12px', color: '#15803D', fontWeight: '600' }}>Saved!</span>}
+            <button onClick={handleSaveHeader} disabled={savingHeader} style={btnP}>
+              {savingHeader ? 'Saving...' : 'Save Section Content'}
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSaveHeader} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -272,18 +378,36 @@ const VisitUsSliderManagerPage = () => {
         </form>
       </div>
 
-      {/* ── Controlled Location Slider Cards ───────────────────────────────────── */}
-      <div style={cardStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+      {/* Controlled Location Slider Cards */}
+      <div style={{ ...cardStyle, border: sectionHeader.slider_sec_active !== false ? '1px solid #E7D9C9' : '1px solid #FCA5A5', opacity: sectionHeader.slider_sec_active !== false ? 1 : 0.65 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
           <div>
             <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1px' }}>CONTROLLED BOUTIQUE SLIDES ({locations.length})</span>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#F6F1E3' }}>Location Cards in the Visit Us Slider</h3>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#3E4930' }}>Location Cards in the Visit Us Slider</h3>
           </div>
-          <button onClick={openAddSlide} style={btnG}>+ Add Location Slide</button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setSectionHeader(p => ({ ...p, slider_sec_active: !p.slider_sec_active }))}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                backgroundColor: sectionHeader.slider_sec_active !== false ? '#FEE2E2' : '#E0E7FF',
+                color: sectionHeader.slider_sec_active !== false ? '#DC2626' : '#3730A3',
+                border: sectionHeader.slider_sec_active !== false ? '1px solid #FCA5A5' : '1px solid #A5B4FC',
+                fontSize: '11.5px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              {sectionHeader.slider_sec_active !== false ? 'Hide Section' : 'Show Section'}
+            </button>
+            <button onClick={openAddSlide} style={btnG}>+ Add Location Slide</button>
+          </div>
         </div>
 
         {locations.length === 0 ? (
-          <div style={{ padding: '30px', textAlign: 'center', color: '#B8A99A', fontSize: '13px' }}>
+          <div style={{ padding: '30px', textAlign: 'center', color: '#6B7280', fontSize: '13px' }}>
             No location cards added yet. Click "+ Add New Location Slide" above to create your first slider card.
           </div>
         ) : (
@@ -294,10 +418,10 @@ const VisitUsSliderManagerPage = () => {
                 <div
                   key={loc.location_id || idx}
                   style={{
-                    backgroundColor: '#182012',
-                    borderRadius: '12px',
+                    backgroundColor: '#F6F1E3',
+                    borderRadius: '8px',
                     padding: '18px',
-                    border: isLive ? '1px solid rgba(184,147,91,0.35)' : '1px solid rgba(239,68,68,0.3)',
+                    border: '1px solid #E7D9C9',
                     display: 'flex',
                     flexDirection: 'column',
                     justify: 'space-between',
@@ -307,42 +431,34 @@ const VisitUsSliderManagerPage = () => {
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <span style={{ fontSize: '11px', fontWeight: '800', color: '#B8935B', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                        //{loc.city || 'LOCATION SLIDE'}
+                        {loc.city || 'LOCATION SLIDE'}
                       </span>
                       <span style={{
                         fontSize: '10px',
                         padding: '2px 8px',
                         borderRadius: '8px',
                         fontWeight: '700',
-                        color: isLive ? '#22c55e' : '#EF4444',
-                        backgroundColor: isLive ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-                        border: `1px solid ${isLive ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`
+                        color: isLive ? '#15803D' : '#6B7280',
+                        backgroundColor: isLive ? 'rgba(34,197,94,0.15)' : '#E7D9C9'
                       }}>
-                        {isLive ? 'Active' : 'Inactive'}
+                        {isLive ? 'Live' : 'Hidden'}
                       </span>
                     </div>
 
-                    <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: '800', color: '#F6F1E3' }}>{loc.name}</h4>
-                    <div style={{ fontSize: '12px', color: '#E7D9C9', lineHeight: '1.5', marginBottom: '8px' }}>{loc.address}</div>
+                    <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: '800', color: '#3E4930' }}>{loc.name}</h4>
+                    <div style={{ fontSize: '12px', color: '#3E4930', lineHeight: '1.5', marginBottom: '8px' }}>{loc.address}</div>
                     
-                    {loc.hours && <div style={{ fontSize: '11px', color: '#B8A99A' }}><strong>Hours:</strong> {loc.hours}</div>}
+                    {loc.hours && <div style={{ fontSize: '11px', color: '#6B7280' }}><strong>Hours:</strong> {loc.hours}</div>}
                     {loc.phone && <div style={{ fontSize: '11px', color: '#B8935B', marginTop: '2px' }}><strong>Phone:</strong> {loc.phone}</div>}
                   </div>
 
-                  {/* Slider Connection CTA Button */}
-                  <div style={{ paddingTop: '10px', borderTop: '1px solid rgba(184,147,91,0.15)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '600' }}>
-                      🔗 Button link connects to: <span style={{ color: '#F6F1E3' }}>/sections/location_detail_page</span>
-                    </div>
-
-                    {/* Action Controls matching standard design */}
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                      <button onClick={() => handleToggleStatus(loc)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px' }}>
-                        {isLive ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button onClick={() => openEditSlide(loc)} style={{ ...btnG, padding: '6px 10px' }} title="Edit Slide Details"><EditIcon /></button>
-                      <button onClick={() => handleDeleteSlide(loc)} style={{ ...btnD, padding: '6px 10px' }} title="Delete Slide"><TrashIcon /></button>
-                    </div>
+                  {/* Action Controls matching standard design */}
+                  <div style={{ paddingTop: '10px', borderTop: '1px solid #E7D9C9', display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                    <button onClick={() => handleToggleStatus(loc)} style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: isLive ? '#FEE2E2' : '#E0E7FF', color: isLive ? '#DC2626' : '#3730A3', border: 'none', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                      {isLive ? 'Hide' : 'Show'}
+                    </button>
+                    <button onClick={() => openEditSlide(loc)} style={{ ...btnG, padding: '4px 8px' }} title="Edit Slide Details"><EditIcon /></button>
+                    <button onClick={() => handleDeleteSlide(loc)} style={{ ...btnD, padding: '4px 8px' }} title="Delete Slide"><TrashIcon /></button>
                   </div>
                 </div>
               );
@@ -351,49 +467,46 @@ const VisitUsSliderManagerPage = () => {
         )}
       </div>
 
-      {/* ── Modal to Add/Edit Controlled Slider Location Card ─────────────────── */}
+      {/* Modal to Add/Edit Controlled Slider Location Card */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: '#222C1A', borderRadius: '16px', padding: '26px', width: '90%', maxWidth: '520px', border: '1px solid #B8935B', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#F6F1E3' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '24px', width: '100%', maxWidth: '540px', border: '1px solid #E7D9C9', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>
                 {editItem ? 'Edit Location Slide Card' : 'Add New Location Slide Card'}
               </h3>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#E7D9C9', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>✕</button>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#3E4930', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>✕</button>
             </div>
 
             <form onSubmit={handleSaveSlide} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={lStyle}>City & Country *</label>
-                  <input required value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} style={iStyle} placeholder="e.g. Dubai, UAE" />
+                  <input required value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} style={iStyle} placeholder="e.g. Islamabad, Pakistan" />
                 </div>
                 <div>
                   <label style={lStyle}>Studio Name *</label>
-                  <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} style={iStyle} placeholder="e.g. Laila Hijabs Boutique" />
+                  <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} style={iStyle} placeholder="e.g. Laila Hijabs Studio" />
                 </div>
               </div>
 
               <div>
                 <label style={lStyle}>Full Address *</label>
-                <textarea rows={2} required value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="Business Village Block-B, Office 301, Dubai" />
+                <textarea rows={2} required value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="Office #22, 4th Floor, Pakland City Center, I-8 Markaz, Islamabad" />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={lStyle}>Opening Hours</label>
-                  <input value={form.hours} onChange={e => setForm(p => ({ ...p, hours: e.target.value }))} style={iStyle} placeholder="Mon–Sat: 10am–9pm" />
+                  <input value={form.hours} onChange={e => setForm(p => ({ ...p, hours: e.target.value }))} style={iStyle} placeholder="Mon–Sat: 11am–8pm" />
                 </div>
                 <div>
                   <label style={lStyle}>Phone Number</label>
-                  <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} style={iStyle} placeholder="+971 4 234 5678" />
+                  <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} style={iStyle} placeholder="+92 323 8399480" />
                 </div>
               </div>
 
-              <div>
-                <label style={lStyle}>Studio Image URL (Slide Photo)</label>
-                <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} style={iStyle} placeholder="https://... or /hero1.png" />
-              </div>
+              <ImageUploaderBox label="Studio Photo (Slide Image)" value={form.image_url} onChange={val => setForm(p => ({ ...p, image_url: val }))} />
 
               <div>
                 <label style={lStyle}>Status</label>
@@ -403,7 +516,7 @@ const VisitUsSliderManagerPage = () => {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', borderTop: '1px solid #E7D9C9', paddingTop: '14px' }}>
                 <button type="button" onClick={() => setShowModal(false)} style={btnG}>Cancel</button>
                 <button type="submit" style={btnP}>{editItem ? 'Update Slide' : 'Add Slide Card'}</button>
               </div>

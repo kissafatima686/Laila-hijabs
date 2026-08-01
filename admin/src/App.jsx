@@ -44,6 +44,7 @@ import BlogsPageManager from './pages/BlogsPageManager';
 import BlogDetailPageEditor from './pages/BlogDetailPageEditor';
 import CustomOrderPageManager from './pages/CustomOrderPageManager';
 import SocialMediaManagerPage from './pages/SocialMediaManagerPage';
+import ContactMessagesManagerPage from './pages/ContactMessagesManagerPage';
 import './App.css';
 
 const App = () => (
@@ -125,7 +126,7 @@ const App = () => (
           <Route path="/sections/affiliate_program_settings" element={<AffiliateProgramManagerPage />} />
 
           {/* ── CONTACT ───────────────────────────────────────────── */}
-          <Route path="/messages" element={<GenericModulePage moduleKey="messages" title="Contact Messages" description="Customer enquiries submitted from the Contact Us form." />} />
+          <Route path="/messages" element={<ContactMessagesManagerPage />} />
 
           {/* ── PAGES ─────────────────────────────────────────────── */}
           <Route path="/sections/account_page_settings" element={<SectionEditorPage sectionKey="account_page_settings" />} />

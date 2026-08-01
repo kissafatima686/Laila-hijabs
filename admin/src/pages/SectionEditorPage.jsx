@@ -444,14 +444,14 @@ const SectionEditorPage = ({ sectionKey: propSectionKey }) => {
     setSaving(true);
     setSaved(false);
     const activeState = customSectionActive !== null ? customSectionActive : sectionActive;
-    const currentMeta = customMetaForm || metaForm;
+    const currentMeta = customMetaForm ? { ...metaForm, ...customMetaForm } : metaForm;
 
     const builtMeta = {};
     (config?.metaKeys || []).forEach(mk => {
       if (mk.type === 'csv') {
-        builtMeta[mk.key] = currentMeta[mk.key] ? currentMeta[mk.key].split(',').map(s => s.trim()).filter(Boolean) : [];
+        builtMeta[mk.key] = currentMeta[mk.key] ? (typeof currentMeta[mk.key] === 'string' ? currentMeta[mk.key].split(',').map(s => s.trim()).filter(Boolean) : currentMeta[mk.key]) : [];
       } else {
-        builtMeta[mk.key] = currentMeta[mk.key] || (mk.type === 'array' ? [] : '');
+        builtMeta[mk.key] = currentMeta[mk.key] !== undefined ? currentMeta[mk.key] : (mk.type === 'array' ? [] : '');
       }
     });
 

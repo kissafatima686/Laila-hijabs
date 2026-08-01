@@ -2,74 +2,148 @@ import React, { useState, useEffect } from 'react';
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
 
-const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#182012', border: '1px solid rgba(184,147,91,0.5)', color: '#F6F1E3', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
-const lStyle = { fontSize: '11px', fontWeight: '700', color: '#B8935B', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
-const cardStyle = { backgroundColor: '#222C1A', borderRadius: '14px', padding: '22px', border: '1px solid rgba(184,147,91,0.25)' };
-const btnP = { padding: '9px 18px', borderRadius: '8px', backgroundColor: '#B8935B', border: 'none', color: '#1A2010', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
-const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#3E4930', border: '1px solid #B8935B', color: '#F6F1E3', fontSize: '12px', cursor: 'pointer' };
-const btnD = { padding: '7px 10px', borderRadius: '6px', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: '#EF4444', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' };
-
-const EditIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-  </svg>
-);
+const iStyle = { width: '100%', padding: '10px 14px', borderRadius: '6px', backgroundColor: '#F6F1E3', border: '1px solid #B8935B', color: '#3E4930', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
+const lStyle = { fontSize: '11px', fontWeight: '700', color: '#3E4930', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '5px' };
+const cardStyle = { backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '22px', border: '1px solid #E7D9C9', boxShadow: '0 2px 8px rgba(62,73,48,0.04)' };
+const btnP = { padding: '9px 20px', borderRadius: '6px', backgroundColor: '#3E4930', border: 'none', color: '#F6F1E3', fontSize: '13px', fontWeight: '700', cursor: 'pointer' };
+const btnG = { padding: '7px 12px', borderRadius: '6px', backgroundColor: '#F6F1E3', border: '1px solid #B8935B', color: '#3E4930', fontSize: '12px', fontWeight: '600', cursor: 'pointer' };
+const btnD = { padding: '6px 10px', borderRadius: '6px', backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5', color: '#DC2626', fontSize: '11.5px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' };
 
 const TrashIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
   </svg>
 );
 
 const FieldBox = ({ label, children, active = true, onToggle, onClear }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', opacity: active !== false ? 1 : 0.6, transition: 'opacity 0.2s' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <label style={lStyle}>{label}</label>
-      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+        <span style={{
+          fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: '700',
+          color: active !== false ? '#15803D' : '#6B7280',
+          backgroundColor: active !== false ? 'rgba(34,197,94,0.15)' : '#E7D9C9',
+          border: `1px solid ${active !== false ? 'rgba(34,197,94,0.3)' : '#B8935B'}`
+        }}>
+          {active !== false ? 'Live' : 'Hidden'}
+        </span>
+
         {onToggle && (
           <button
             type="button"
             onClick={onToggle}
             style={{
               padding: '3px 8px',
-              borderRadius: '6px',
-              backgroundColor: active !== false ? '#3E4930' : 'rgba(239,68,68,0.15)',
-              border: active !== false ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)',
-              color: active !== false ? '#F6F1E3' : '#EF4444',
-              fontSize: '10px',
+              borderRadius: '4px',
+              backgroundColor: active !== false ? '#FEE2E2' : '#E0E7FF',
+              border: active !== false ? '1px solid #FCA5A5' : '1px solid #A5B4FC',
+              color: active !== false ? '#DC2626' : '#3730A3',
+              fontSize: '11px',
               fontWeight: '700',
               cursor: 'pointer'
             }}
           >
-            {active !== false ? 'Active' : 'Inactive'}
+            {active !== false ? 'Hide' : 'Show'}
           </button>
         )}
         {onClear && (
           <button
             type="button"
             onClick={onClear}
-            style={{
-              padding: '3px 6px',
-              borderRadius: '6px',
-              backgroundColor: 'rgba(239,68,68,0.15)',
-              border: '1px solid rgba(239,68,68,0.35)',
-              color: '#EF4444',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center'
-            }}
-            title="Clear Field"
+            style={{ ...btnD, padding: '3px 6px' }}
+            title="Delete Content"
           >
             <TrashIcon />
           </button>
         )}
       </div>
     </div>
-    <div style={{ opacity: active !== false ? 1 : 0.5 }}>
+    <div>
       {children}
     </div>
   </div>
 );
+
+const ImageUploaderBox = ({ label, value, onChange, active = true, onToggle, onClear }) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64 })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.imageUrl) {
+            onChange(data.imageUrl);
+          }
+        })
+        .catch(err => console.error("Upload failed", err))
+        .finally(() => setUploading(false));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <FieldBox label={label} active={active} onToggle={onToggle} onClear={onClear}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <input
+            value={value || ''}
+            onChange={e => onChange(e.target.value)}
+            style={{ ...iStyle, flex: 1 }}
+            placeholder="/hero1.png or image URL"
+          />
+          <label style={{
+            padding: '8px 14px',
+            borderRadius: '6px',
+            backgroundColor: '#3E4930',
+            color: '#F6F1E3',
+            fontSize: '12px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            {uploading ? 'Uploading...' : '📁 Upload Image'}
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+          </label>
+        </div>
+
+        {value && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: '#FFFFFF', padding: '8px 12px', borderRadius: '6px', border: '1px solid #E7D9C9' }}>
+            <img
+              src={value.startsWith('http') ? value : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${value.startsWith('/') ? '' : '/'}${value}`}
+              alt="Preview"
+              style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #E7D9C9' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <span style={{ fontSize: '11px', color: '#B8935B', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {value}
+            </span>
+          </div>
+        )}
+      </div>
+    </FieldBox>
+  );
+};
 
 const AboutWhoWeAreManagerPage = () => {
   const [loading, setLoading] = useState(true);
@@ -79,43 +153,58 @@ const AboutWhoWeAreManagerPage = () => {
   const [form, setForm] = useState({
     // Section 1: Legacy & Who We Are
     badge_text: 'A Legacy of Modest Luxury',
+    badge_text_active: true,
     title: 'Who We Are',
-    body_content: 'Laila Hijabs is Pakistan\'s leading luxury modest fashion house. Founded in Lahore, we blend traditional craftsmanship with contemporary design to create pieces that celebrate both faith and fashion. Our team of expert designers and seamstresses pour their passion into every garment we produce.',
+    title_active: true,
+    body_content: 'Laila Hijabs is Pakistan\'s leading luxury modest fashion house. Founded in Lahore, we blend traditional craftsmanship with contemporary design to create pieces that celebrate both faith and fashion.',
+    body_content_active: true,
     image_url: '/hero1.png',
+    image_url_active: true,
     image_url_2: '/hero2.png',
+    image_url_2_active: true,
     sec1_active: true,
 
     // Section 2: Philosophy Quote
     sec2_title: 'Our Philosophy',
+    sec2_title_active: true,
     quote_text: '"She doesn\'t compete loudly. She attracts quietly."',
+    quote_text_active: true,
     quote_author: '— The Laila Hijab Studio',
+    quote_author_active: true,
     sec2_active: true,
 
     // Section 3: Values / What We Stand For
     sec3_title: 'What We Stand For',
+    sec3_title_active: true,
     sec3_subtitle: 'Grace, built on four values',
+    sec3_subtitle_active: true,
     values: [
-      { letter: 'E', title: 'Elegance', desc: 'Refined design over excess — every piece earns its place in the collection.' },
-      { letter: 'C', title: 'Comfort', desc: 'Fabrics chosen to move with you, not against you, across a full day.' },
-      { letter: 'I', title: 'Inclusivity', desc: 'Sizes XS through XXL, always — grace was never meant for one body type.' },
-      { letter: 'R', title: 'Respect', desc: 'For tradition, for modern taste, and for every woman\'s own idea of modesty.' }
+      { letter: 'E', title: 'Elegance', desc: 'Refined design over excess — every piece earns its place in the collection.', active: true },
+      { letter: 'C', title: 'Comfort', desc: 'Fabrics chosen to move with you, not against you, across a full day.', active: true },
+      { letter: 'I', title: 'Inclusivity', desc: 'Sizes XS through XXL, always — grace was never meant for one body type.', active: true },
+      { letter: 'R', title: 'Respect', desc: 'For tradition, for modern taste, and for every woman\'s own idea of modesty.', active: true }
     ],
     sec3_active: true,
 
     // Section 4: Roadmap / Where We're Headed
     sec4_title: 'Where We\'re Headed',
+    sec4_title_active: true,
     sec4_subtitle: 'A brand built in phases, not overnight',
+    sec4_subtitle_active: true,
     roadmap: [
-      { year: '2026', title: 'Laila Hijabs is born', desc: 'Launched from our studio in Lahore with the Everyday Grace Collection — chiffon and jersey hijabs designed for daily wear.' },
-      { year: 'Next', title: 'Premium & Abaya lines', desc: 'Expanding into silk premium hijabs and structured abayas sized XS–XXL, with a dedicated Eid edit each season.' },
-      { year: 'Later', title: 'Pakistan-wide, then the Gulf', desc: 'Growing city by city across Pakistan, before bringing Laila to Pakistani and South Asian women across the UAE.' }
+      { year: '2026', title: 'Laila Hijabs is born', desc: 'Launched from our studio in Lahore with the Everyday Grace Collection.', active: true },
+      { year: 'Next', title: 'Premium & Abaya lines', desc: 'Expanding into silk premium hijabs and structured abayas sized XS–XXL.', active: true },
+      { year: 'Later', title: 'Pakistan-wide, then the Gulf', desc: 'Growing city by city across Pakistan, before bringing Laila to the UAE.', active: true }
     ],
     sec4_active: true,
 
     // Section 5: Founder Quote & Signature
     founder_quote: '"Modesty and elegance were never meant to be a compromise. Laila is the brand I wanted to find and couldn\'t — so we made it."',
+    founder_quote_active: true,
     founder_title: 'Founder, Laila Hijabs',
+    founder_title_active: true,
     founder_logo: '/founder-logo.png',
+    founder_logo_active: true,
     sec5_active: true
   });
 
@@ -133,22 +222,41 @@ const AboutWhoWeAreManagerPage = () => {
             image_url: d.image_url || prev.image_url,
             image_url_2: d.image_url_2 || prev.image_url_2,
             badge_text: meta.badge_text || prev.badge_text,
+            badge_text_active: meta.badge_text_active !== false,
+            title_active: meta.title_active !== false,
+            body_content_active: meta.body_content_active !== false,
+            image_url_active: meta.image_url_active !== false,
+            image_url_2_active: meta.image_url_2_active !== false,
             sec1_active: meta.sec1_active !== false,
+
             sec2_title: meta.sec2_title || prev.sec2_title,
+            sec2_title_active: meta.sec2_title_active !== false,
             quote_text: meta.quote_text || prev.quote_text,
+            quote_text_active: meta.quote_text_active !== false,
             quote_author: meta.quote_author || prev.quote_author,
+            quote_author_active: meta.quote_author_active !== false,
             sec2_active: meta.sec2_active !== false,
+
             sec3_title: meta.sec3_title || prev.sec3_title,
+            sec3_title_active: meta.sec3_title_active !== false,
             sec3_subtitle: meta.sec3_subtitle || prev.sec3_subtitle,
+            sec3_subtitle_active: meta.sec3_subtitle_active !== false,
             values: meta.values || prev.values,
             sec3_active: meta.sec3_active !== false,
+
             sec4_title: meta.sec4_title || prev.sec4_title,
+            sec4_title_active: meta.sec4_title_active !== false,
             sec4_subtitle: meta.sec4_subtitle || prev.sec4_subtitle,
+            sec4_subtitle_active: meta.sec4_subtitle_active !== false,
             roadmap: meta.roadmap || prev.roadmap,
             sec4_active: meta.sec4_active !== false,
+
             founder_quote: meta.founder_quote || prev.founder_quote,
+            founder_quote_active: meta.founder_quote_active !== false,
             founder_title: meta.founder_title || prev.founder_title,
+            founder_title_active: meta.founder_title_active !== false,
             founder_logo: meta.founder_logo || prev.founder_logo,
+            founder_logo_active: meta.founder_logo_active !== false,
             sec5_active: meta.sec5_active !== false
           }));
         }
@@ -158,7 +266,7 @@ const AboutWhoWeAreManagerPage = () => {
   }, []);
 
   const handleSave = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSaving(true);
 
     fetch(`${API}/sections/about_who_we_are`, {
@@ -172,22 +280,41 @@ const AboutWhoWeAreManagerPage = () => {
         image_url_2: form.image_url_2,
         metadata: {
           badge_text: form.badge_text,
+          badge_text_active: form.badge_text_active,
+          title_active: form.title_active,
+          body_content_active: form.body_content_active,
+          image_url_active: form.image_url_active,
+          image_url_2_active: form.image_url_2_active,
           sec1_active: form.sec1_active,
+
           sec2_title: form.sec2_title,
+          sec2_title_active: form.sec2_title_active,
           quote_text: form.quote_text,
+          quote_text_active: form.quote_text_active,
           quote_author: form.quote_author,
+          quote_author_active: form.quote_author_active,
           sec2_active: form.sec2_active,
+
           sec3_title: form.sec3_title,
+          sec3_title_active: form.sec3_title_active,
           sec3_subtitle: form.sec3_subtitle,
+          sec3_subtitle_active: form.sec3_subtitle_active,
           values: form.values,
           sec3_active: form.sec3_active,
+
           sec4_title: form.sec4_title,
+          sec4_title_active: form.sec4_title_active,
           sec4_subtitle: form.sec4_subtitle,
+          sec4_subtitle_active: form.sec4_subtitle_active,
           roadmap: form.roadmap,
           sec4_active: form.sec4_active,
+
           founder_quote: form.founder_quote,
+          founder_quote_active: form.founder_quote_active,
           founder_title: form.founder_title,
+          founder_title_active: form.founder_title_active,
           founder_logo: form.founder_logo,
+          founder_logo_active: form.founder_logo_active,
           sec5_active: form.sec5_active
         }
       })
@@ -259,22 +386,19 @@ const AboutWhoWeAreManagerPage = () => {
     });
   };
 
-  if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#E7D9C9' }}>Loading Brand Overview & Story...</div>;
+  if (loading) return <div style={{ padding: '60px', textAlign: 'center', color: '#3E4930', fontWeight: '600' }}>Loading Brand Overview & Story...</div>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', paddingBottom: '60px' }}>
       
       {/* Header Banner */}
-      <div style={{ background: 'linear-gradient(135deg, #3E4930 0%, #222C1A 100%)', borderRadius: '16px', padding: '26px 30px', border: '1px solid #B8935B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '20px 24px', border: '1px solid #E7D9C9', boxShadow: '0 2px 8px rgba(62,73,48,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1.5px', marginBottom: '5px' }}>ABOUT OUR BRAND</div>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#F6F1E3' }}>Brand Overview & Story Manager</h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#E7D9C9' }}>
-            Manage all 5 core sections of the About Us page: Legacy, Philosophy, Core Values, Growth Roadmap, and Founder Statement.
-          </p>
+          <div style={{ fontSize: '11px', color: '#B8935B', fontWeight: '700', letterSpacing: '1.5px' }}>ABOUT OUR BRAND</div>
+          <h2 style={{ margin: '2px 0 0 0', fontSize: '20px', fontWeight: '800', color: '#3E4930' }}>Brand Overview & Story Manager</h2>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {saved && <span style={{ fontSize: '12px', color: '#22c55e', fontWeight: '600', padding: '7px 14px', borderRadius: '8px', backgroundColor: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}>Saved All 5 Sections!</span>}
+          {saved && <span style={{ fontSize: '12px', color: '#15803D', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', backgroundColor: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)' }}>Saved All Sections!</span>}
           <button onClick={handleSave} disabled={saving} style={btnP}>
             {saving ? 'Saving...' : 'Save All Brand Sections'}
           </button>
@@ -284,15 +408,15 @@ const AboutWhoWeAreManagerPage = () => {
       <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
         {/* ── SECTION 1: A Legacy of Modest Luxury — Who We Are ───────────────── */}
-        <div style={{ ...cardStyle, border: form.sec1_active ? '1px solid rgba(184,147,91,0.35)' : '1px solid rgba(239,68,68,0.35)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+        <div style={{ ...cardStyle, border: form.sec1_active ? '1px solid #E7D9C9' : '1px solid #FCA5A5', opacity: form.sec1_active ? 1 : 0.65 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
             <div>
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 1 OF 5</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>A Legacy of Modest Luxury & Who We Are</h3>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>A Legacy of Modest Luxury & Who We Are</h3>
             </div>
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <button type="button" onClick={() => setForm(p => ({ ...p, sec1_active: !p.sec1_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec1_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec1_active ? '#F6F1E3' : '#EF4444', border: form.sec1_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-                {form.sec1_active ? 'Deactivate Section' : 'Activate Section'}
+              <button type="button" onClick={() => setForm(p => ({ ...p, sec1_active: !p.sec1_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec1_active ? '#FEE2E2' : '#E0E7FF', color: form.sec1_active ? '#DC2626' : '#3730A3', border: form.sec1_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                {form.sec1_active ? 'Hide Section' : 'Show Section'}
               </button>
             </div>
           </div>
@@ -312,87 +436,79 @@ const AboutWhoWeAreManagerPage = () => {
             </FieldBox>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <FieldBox label="Primary Story Photo URL" active={form.image_url_active} onToggle={() => setForm(p => ({ ...p, image_url_active: p.image_url_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url: '' }))}>
-                <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} style={iStyle} placeholder="/hero1.png" />
-              </FieldBox>
-              <FieldBox label="Secondary Craftsmanship Photo URL" active={form.image_url_2_active} onToggle={() => setForm(p => ({ ...p, image_url_2_active: p.image_url_2_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url_2: '' }))}>
-                <input value={form.image_url_2} onChange={e => setForm(p => ({ ...p, image_url_2: e.target.value }))} style={iStyle} placeholder="/hero2.png" />
-              </FieldBox>
+              <ImageUploaderBox label="Primary Story Photo" value={form.image_url} onChange={val => setForm(p => ({ ...p, image_url: val }))} active={form.image_url_active} onToggle={() => setForm(p => ({ ...p, image_url_active: p.image_url_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url: '' }))} />
+              <ImageUploaderBox label="Secondary Craftsmanship Photo" value={form.image_url_2} onChange={val => setForm(p => ({ ...p, image_url_2: val }))} active={form.image_url_2_active} onToggle={() => setForm(p => ({ ...p, image_url_2_active: p.image_url_2_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, image_url_2: '' }))} />
             </div>
           </div>
         </div>
 
         {/* ── SECTION 2: Our Philosophy Quote ──────────────────────────────── */}
-        <div style={{ ...cardStyle, border: form.sec2_active ? '1px solid rgba(184,147,91,0.35)' : '1px solid rgba(239,68,68,0.35)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+        <div style={{ ...cardStyle, border: form.sec2_active ? '1px solid #E7D9C9' : '1px solid #FCA5A5', opacity: form.sec2_active ? 1 : 0.65 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
             <div>
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 2 OF 5</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>Our Philosophy Quote Banner</h3>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>Our Philosophy Quote Banner</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec2_active: !p.sec2_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec2_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec2_active ? '#F6F1E3' : '#EF4444', border: form.sec2_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-              {form.sec2_active ? 'Deactivate Section' : 'Activate Section'}
+            <button type="button" onClick={() => setForm(p => ({ ...p, sec2_active: !p.sec2_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec2_active ? '#FEE2E2' : '#E0E7FF', color: form.sec2_active ? '#DC2626' : '#3730A3', border: form.sec2_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+              {form.sec2_active ? 'Hide Section' : 'Show Section'}
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label style={lStyle}>Section Title</label>
+            <FieldBox label="Section Title" active={form.sec2_title_active} onToggle={() => setForm(p => ({ ...p, sec2_title_active: p.sec2_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec2_title: '' }))}>
               <input value={form.sec2_title} onChange={e => setForm(p => ({ ...p, sec2_title: e.target.value }))} style={iStyle} placeholder="Our Philosophy" />
-            </div>
-            <div>
-              <label style={lStyle}>Philosophy Quote *</label>
+            </FieldBox>
+            <FieldBox label="Philosophy Quote *" active={form.quote_text_active} onToggle={() => setForm(p => ({ ...p, quote_text_active: p.quote_text_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, quote_text: '' }))}>
               <textarea rows={2} value={form.quote_text} onChange={e => setForm(p => ({ ...p, quote_text: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder="She does not compete loudly. She attracts quietly." />
-            </div>
-            <div>
-              <label style={lStyle}>Quote Attribution Author</label>
+            </FieldBox>
+            <FieldBox label="Quote Attribution Author" active={form.quote_author_active} onToggle={() => setForm(p => ({ ...p, quote_author_active: p.quote_author_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, quote_author: '' }))}>
               <input value={form.quote_author} onChange={e => setForm(p => ({ ...p, quote_author: e.target.value }))} style={iStyle} placeholder="— The Laila Hijab Studio" />
-            </div>
+            </FieldBox>
           </div>
         </div>
 
         {/* ── SECTION 3: What We Stand For — 4 Values ────────────────────────── */}
-        <div style={{ ...cardStyle, border: form.sec3_active ? '1px solid rgba(184,147,91,0.35)' : '1px solid rgba(239,68,68,0.35)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+        <div style={{ ...cardStyle, border: form.sec3_active ? '1px solid #E7D9C9' : '1px solid #FCA5A5', opacity: form.sec3_active ? 1 : 0.65 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
             <div>
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 3 OF 5</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>What We Stand For — Core Values</h3>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>What We Stand For — Core Values</h3>
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button type="button" onClick={handleAddValue} style={btnG}>+ Add Value</button>
-              <button type="button" onClick={() => setForm(p => ({ ...p, sec3_active: !p.sec3_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec3_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec3_active ? '#F6F1E3' : '#EF4444', border: form.sec3_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-                {form.sec3_active ? 'Deactivate Section' : 'Activate Section'}
+              <button type="button" onClick={() => setForm(p => ({ ...p, sec3_active: !p.sec3_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec3_active ? '#FEE2E2' : '#E0E7FF', color: form.sec3_active ? '#DC2626' : '#3730A3', border: form.sec3_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                {form.sec3_active ? 'Hide Section' : 'Show Section'}
               </button>
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={lStyle}>Section Title</label>
+              <FieldBox label="Section Title" active={form.sec3_title_active} onToggle={() => setForm(p => ({ ...p, sec3_title_active: p.sec3_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec3_title: '' }))}>
                 <input value={form.sec3_title} onChange={e => setForm(p => ({ ...p, sec3_title: e.target.value }))} style={iStyle} placeholder="What We Stand For" />
-              </div>
-              <div>
-                <label style={lStyle}>Subtitle Tagline</label>
+              </FieldBox>
+              <FieldBox label="Subtitle Tagline" active={form.sec3_subtitle_active} onToggle={() => setForm(p => ({ ...p, sec3_subtitle_active: p.sec3_subtitle_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec3_subtitle: '' }))}>
                 <input value={form.sec3_subtitle} onChange={e => setForm(p => ({ ...p, sec3_subtitle: e.target.value }))} style={iStyle} placeholder="Grace, built on four values" />
-              </div>
+              </FieldBox>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               {form.values.map((v, idx) => {
                 const isActive = v.active !== false;
                 return (
-                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65 }}>
+                  <div key={idx} style={{ backgroundColor: '#F6F1E3', borderRadius: '8px', padding: '16px', border: '1px solid #E7D9C9', opacity: isActive ? 1 : 0.65 }}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                      <input value={v.letter} onChange={e => handleValueChange(idx, 'letter', e.target.value)} style={{ ...iStyle, width: '45px', textAlign: 'center', fontWeight: '800', color: '#B8935B' }} maxLength={2} />
-                      <input value={v.title} onChange={e => handleValueChange(idx, 'title', e.target.value)} style={{ ...iStyle, flex: 1, fontWeight: '700' }} placeholder="Value Title" />
+                      <input value={v.letter} onChange={e => handleValueChange(idx, 'letter', e.target.value)} style={{ ...iStyle, width: '45px', textAlign: 'center', fontWeight: '800', color: '#B8935B', backgroundColor: '#FFFFFF' }} maxLength={2} />
+                      <input value={v.title} onChange={e => handleValueChange(idx, 'title', e.target.value)} style={{ ...iStyle, flex: 1, fontWeight: '700', backgroundColor: '#FFFFFF' }} placeholder="Value Title" />
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button type="button" onClick={() => handleToggleValueActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
-                          {isActive ? 'Deactivate' : 'Activate'}
+                        <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: '700', color: isActive ? '#15803D' : '#6B7280', backgroundColor: isActive ? 'rgba(34,197,94,0.15)' : '#E7D9C9' }}>{isActive ? 'Live' : 'Hidden'}</span>
+                        <button type="button" onClick={() => handleToggleValueActive(idx)} style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: isActive ? '#FEE2E2' : '#E0E7FF', color: isActive ? '#DC2626' : '#3730A3', border: 'none', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                          {isActive ? 'Hide' : 'Show'}
                         </button>
-                        <button type="button" onClick={() => handleDeleteValue(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
+                        <button type="button" onClick={() => handleDeleteValue(idx)} style={{ ...btnD, padding: '4px 8px' }} title="Delete"><TrashIcon /></button>
                       </div>
                     </div>
-                    <textarea rows={2} value={v.desc} onChange={e => handleValueChange(idx, 'desc', e.target.value)} style={{ ...iStyle, resize: 'vertical' }} placeholder="Value description..." />
+                    <textarea rows={2} value={v.desc} onChange={e => handleValueChange(idx, 'desc', e.target.value)} style={{ ...iStyle, resize: 'vertical', backgroundColor: '#FFFFFF' }} placeholder="Value description..." />
                   </div>
                 );
               })}
@@ -401,45 +517,44 @@ const AboutWhoWeAreManagerPage = () => {
         </div>
 
         {/* ── SECTION 4: Where We're Headed — Roadmap ───────────────────────── */}
-        <div style={{ ...cardStyle, border: form.sec4_active ? '1px solid rgba(184,147,91,0.35)' : '1px solid rgba(239,68,68,0.35)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+        <div style={{ ...cardStyle, border: form.sec4_active ? '1px solid #E7D9C9' : '1px solid #FCA5A5', opacity: form.sec4_active ? 1 : 0.65 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
             <div>
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 4 OF 5</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>Where We're Headed — Brand Roadmap</h3>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>Where We're Headed — Brand Roadmap</h3>
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button type="button" onClick={handleAddRoadmap} style={btnG}>+ Add Phase</button>
-              <button type="button" onClick={() => setForm(p => ({ ...p, sec4_active: !p.sec4_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec4_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec4_active ? '#F6F1E3' : '#EF4444', border: form.sec4_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-                {form.sec4_active ? 'Deactivate Section' : 'Activate Section'}
+              <button type="button" onClick={() => setForm(p => ({ ...p, sec4_active: !p.sec4_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec4_active ? '#FEE2E2' : '#E0E7FF', color: form.sec4_active ? '#DC2626' : '#3730A3', border: form.sec4_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                {form.sec4_active ? 'Hide Section' : 'Show Section'}
               </button>
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={lStyle}>Section Title</label>
+              <FieldBox label="Section Title" active={form.sec4_title_active} onToggle={() => setForm(p => ({ ...p, sec4_title_active: p.sec4_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec4_title: '' }))}>
                 <input value={form.sec4_title} onChange={e => setForm(p => ({ ...p, sec4_title: e.target.value }))} style={iStyle} placeholder="Where We're Headed" />
-              </div>
-              <div>
-                <label style={lStyle}>Subtitle Tagline</label>
+              </FieldBox>
+              <FieldBox label="Subtitle Tagline" active={form.sec4_subtitle_active} onToggle={() => setForm(p => ({ ...p, sec4_subtitle_active: p.sec4_subtitle_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, sec4_subtitle: '' }))}>
                 <input value={form.sec4_subtitle} onChange={e => setForm(p => ({ ...p, sec4_subtitle: e.target.value }))} style={iStyle} placeholder="A brand built in phases, not overnight" />
-              </div>
+              </FieldBox>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {form.roadmap.map((step, idx) => {
                 const isActive = step.active !== false;
                 return (
-                  <div key={idx} style={{ backgroundColor: '#182012', borderRadius: '12px', padding: '16px', border: isActive ? '1px solid rgba(184,147,91,0.3)' : '1px solid rgba(239,68,68,0.3)', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '120px 1fr 2fr auto', gap: '12px', alignItems: 'center' }}>
-                    <input value={step.year} onChange={e => handleRoadmapChange(idx, 'year', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B' }} placeholder="Phase / Year" />
-                    <input value={step.title} onChange={e => handleRoadmapChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700' }} placeholder="Phase Title" />
-                    <input value={step.desc} onChange={e => handleRoadmapChange(idx, 'desc', e.target.value)} style={iStyle} placeholder="Phase Details" />
+                  <div key={idx} style={{ backgroundColor: '#F6F1E3', borderRadius: '8px', padding: '16px', border: '1px solid #E7D9C9', opacity: isActive ? 1 : 0.65, display: 'grid', gridTemplateColumns: '120px 1fr 2fr auto', gap: '12px', alignItems: 'center' }}>
+                    <input value={step.year} onChange={e => handleRoadmapChange(idx, 'year', e.target.value)} style={{ ...iStyle, fontWeight: '800', color: '#B8935B', backgroundColor: '#FFFFFF' }} placeholder="Phase / Year" />
+                    <input value={step.title} onChange={e => handleRoadmapChange(idx, 'title', e.target.value)} style={{ ...iStyle, fontWeight: '700', backgroundColor: '#FFFFFF' }} placeholder="Phase Title" />
+                    <input value={step.desc} onChange={e => handleRoadmapChange(idx, 'desc', e.target.value)} style={{ ...iStyle, backgroundColor: '#FFFFFF' }} placeholder="Phase Details" />
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <button type="button" onClick={() => handleToggleRoadmapActive(idx)} style={{ ...btnG, padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}>
-                        {isActive ? 'Deactivate' : 'Activate'}
+                      <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: '700', color: isActive ? '#15803D' : '#6B7280', backgroundColor: isActive ? 'rgba(34,197,94,0.15)' : '#E7D9C9' }}>{isActive ? 'Live' : 'Hidden'}</span>
+                      <button type="button" onClick={() => handleToggleRoadmapActive(idx)} style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: isActive ? '#FEE2E2' : '#E0E7FF', color: isActive ? '#DC2626' : '#3730A3', border: 'none', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                        {isActive ? 'Hide' : 'Show'}
                       </button>
-                      <button type="button" onClick={() => handleDeleteRoadmap(idx)} style={{ ...btnD, padding: '6px 10px', borderRadius: '8px' }} title="Delete"><TrashIcon /></button>
+                      <button type="button" onClick={() => handleDeleteRoadmap(idx)} style={{ ...btnD, padding: '4px 8px' }} title="Delete"><TrashIcon /></button>
                     </div>
                   </div>
                 );
@@ -449,32 +564,27 @@ const AboutWhoWeAreManagerPage = () => {
         </div>
 
         {/* ── SECTION 5: Founder Quote & Logo ─────────────────────────────────── */}
-        <div style={{ ...cardStyle, border: form.sec5_active ? '1px solid rgba(184,147,91,0.35)' : '1px solid rgba(239,68,68,0.35)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(184,147,91,0.2)', paddingBottom: '12px' }}>
+        <div style={{ ...cardStyle, border: form.sec5_active ? '1px solid #E7D9C9' : '1px solid #FCA5A5', opacity: form.sec5_active ? 1 : 0.65 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E7D9C9', paddingBottom: '12px' }}>
             <div>
               <span style={{ fontSize: '10px', color: '#B8935B', fontWeight: '800', letterSpacing: '1.5px' }}>SECTION 5 OF 5</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '800', color: '#F6F1E3' }}>Founder Statement & Logo</h3>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#3E4930' }}>Founder Statement & Logo</h3>
             </div>
-            <button type="button" onClick={() => setForm(p => ({ ...p, sec5_active: !p.sec5_active }))} style={{ height: '32px', padding: '0 14px', borderRadius: '8px', backgroundColor: form.sec5_active ? '#182012' : 'rgba(239,68,68,0.15)', color: form.sec5_active ? '#F6F1E3' : '#EF4444', border: form.sec5_active ? '1px solid #B8935B' : '1px solid rgba(239,68,68,0.4)', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-              {form.sec5_active ? 'Deactivate Section' : 'Activate Section'}
+            <button type="button" onClick={() => setForm(p => ({ ...p, sec5_active: !p.sec5_active }))} style={{ padding: '6px 14px', borderRadius: '6px', backgroundColor: form.sec5_active ? '#FEE2E2' : '#E0E7FF', color: form.sec5_active ? '#DC2626' : '#3730A3', border: form.sec5_active ? '1px solid #FCA5A5' : '1px solid #A5B4FC', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+              {form.sec5_active ? 'Hide Section' : 'Show Section'}
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label style={lStyle}>Founder Quote Statement *</label>
+            <FieldBox label="Founder Quote Statement *" active={form.founder_quote_active} onToggle={() => setForm(p => ({ ...p, founder_quote_active: p.founder_quote_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, founder_quote: '' }))}>
               <textarea rows={3} required value={form.founder_quote} onChange={e => setForm(p => ({ ...p, founder_quote: e.target.value }))} style={{ ...iStyle, resize: 'vertical' }} placeholder='"Modesty and elegance were never meant to be a compromise..."' />
-            </div>
+            </FieldBox>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={lStyle}>Founder Title & Name</label>
+              <FieldBox label="Founder Title & Name" active={form.founder_title_active} onToggle={() => setForm(p => ({ ...p, founder_title_active: p.founder_title_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, founder_title: '' }))}>
                 <input value={form.founder_title} onChange={e => setForm(p => ({ ...p, founder_title: e.target.value }))} style={iStyle} placeholder="Founder, Laila Hijabs" />
-              </div>
-              <div>
-                <label style={lStyle}>Founder Logo / Signature Image URL</label>
-                <input value={form.founder_logo} onChange={e => setForm(p => ({ ...p, founder_logo: e.target.value }))} style={iStyle} placeholder="/founder-logo.png" />
-              </div>
+              </FieldBox>
+              <ImageUploaderBox label="Founder Logo / Signature Image" value={form.founder_logo} onChange={val => setForm(p => ({ ...p, founder_logo: val }))} active={form.founder_logo_active} onToggle={() => setForm(p => ({ ...p, founder_logo_active: p.founder_logo_active === false ? true : false }))} onClear={() => setForm(p => ({ ...p, founder_logo: '' }))} />
             </div>
           </div>
         </div>

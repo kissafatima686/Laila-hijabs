@@ -6,12 +6,42 @@ import { FaWhatsapp, FaEnvelope, FaMapMarkerAlt, FaFacebookF, FaInstagram, FaTik
 
 const ContactUs = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
   const { getSectionContent, loading } = useContent();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    const fullName = `${firstName} ${lastName}`.trim() || 'Valued Customer';
+    
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/module/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: fullName,
+        email: email,
+        phone: phone,
+        message: message,
+        subject: 'Contact Form Enquiry',
+        status: 'New'
+      })
+    })
+      .then(() => {
+        setSubmitted(true);
+        setFirstName('');
+        setLastName('');
+        setPhone('');
+        setEmail('');
+        setMessage('');
+        setTimeout(() => setSubmitted(false), 5000);
+      })
+      .catch((err) => {
+        console.error("Failed to submit message:", err);
+        setSubmitted(true);
+      });
   };
 
   const getVal = (key, defaultVal) => {
@@ -89,24 +119,44 @@ const ContactUs = () => {
           ) : (
             <form onSubmit={handleSubmit}>
               <div className="form-row">
-                {getVal('first_name_placeholder', 'First Name *') && (
-                  <input type="text" placeholder={getVal('first_name_placeholder', 'First Name *')} required />
-                )}
-                {getVal('last_name_placeholder', 'Last Name *') && (
-                  <input type="text" placeholder={getVal('last_name_placeholder', 'Last Name *')} required />
-                )}
+                <input 
+                  type="text" 
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  placeholder={getVal('first_name_placeholder', 'First Name *')} 
+                  required 
+                />
+                <input 
+                  type="text" 
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  placeholder={getVal('last_name_placeholder', 'Last Name *')} 
+                  required 
+                />
               </div>
               <div className="form-row">
-                {getVal('phone_placeholder', 'Phone Number *') && (
-                  <input type="tel" placeholder={getVal('phone_placeholder', 'Phone Number *')} required />
-                )}
-                {getVal('email_placeholder', 'Email *') && (
-                  <input type="email" placeholder={getVal('email_placeholder', 'Email *')} required />
-                )}
+                <input 
+                  type="tel" 
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder={getVal('phone_placeholder', 'Phone Number *')} 
+                  required 
+                />
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder={getVal('email_placeholder', 'Email *')} 
+                  required 
+                />
               </div>
-              {getVal('message_placeholder', 'Write Your Message *') && (
-                <textarea placeholder={getVal('message_placeholder', 'Write Your Message *')} rows="5" required></textarea>
-              )}
+              <textarea 
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                placeholder={getVal('message_placeholder', 'Write Your Message *')} 
+                rows="5" 
+                required
+              ></textarea>
               <button type="submit" className="submit-btn">{getVal('submit_btn_text', 'Submit Now')}</button>
             </form>
           )}

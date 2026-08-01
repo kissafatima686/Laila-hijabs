@@ -24,8 +24,13 @@ const {
   getAdminAffiliateDetails,
   getPayoutsSummary,
   processPayout,
-  getAdminCustomerDetails
+  getAdminCustomerDetails,
+  replyToCustomerMessage,
+  uploadImage
 } = require('../controllers/adminControllers');
+
+router.post('/messages/reply', replyToCustomerMessage);
+router.post('/upload', uploadImage);
 
 // Dashboard
 router.get('/stats', getDashboardStats);

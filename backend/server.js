@@ -8,11 +8,15 @@ const affiliateRoutes = require("./routes/affiliateRoutes");
 const affiliateControllers = require("./controllers/affiliateControllers");
 const { getSectionByKey, getAllSections, subscribeNewsletter } = require("./controllers/adminControllers");
 
+const path = require("path");
+
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // API Routes
 app.use("/api/admin", adminRoutes);

@@ -1,15 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { IoLogoWhatsapp, IoChevronBackOutline, IoChevronForwardOutline } from 'react-icons/io5';
+import { IoChevronBackOutline, IoChevronForwardOutline } from 'react-icons/io5';
 import { useContent } from '../context/useContent';
 import './AboutUsPage.css';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const DEFAULT_FALLBACK_IMG = '/hero2.png';
+
+const formatImgSrc = (url) => {
+  if (!url || typeof url !== 'string' || url.trim() === '') return DEFAULT_FALLBACK_IMG;
+  const cleanUrl = url.trim();
+  if (cleanUrl.startsWith('/uploads/')) return `${API_BASE}${cleanUrl}`;
+  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) return cleanUrl;
+  return cleanUrl;
+};
 
 const AboutUsPage = () => {
   const { getSectionContent } = useContent();
 
-  const title = getSectionContent('about_who_we_are', 'title', 'Composed beauty, from Lahore outward.');
-  const subtitle = getSectionContent('about_who_we_are', 'subtitle', 'Our Story');
-  const body = getSectionContent('about_who_we_are', 'body_content', 'Laila Hijabs began with one belief — that modesty and modern style were never opposites. We design for the woman who moves through her day with quiet confidence: to campus, to work, to Eid morning.');
+  const title = getSectionContent('about_who_we_are', 'title', 'Who We Are');
+  const body = getSectionContent('about_who_we_are', 'body_content', 'Laila Hijabs is Pakistan\'s leading luxury modest fashion house. Founded in Lahore, we blend traditional craftsmanship with contemporary design to create pieces that celebrate both faith and fashion.');
+  const imageUrl = getSectionContent('about_who_we_are', 'image_url', '/hero2.png');
+  const imageUrl2 = getSectionContent('about_who_we_are', 'image_url_2', '/hero2.png');
+
+  // Metadata
+  const badgeText = getSectionContent('about_who_we_are', 'badge_text', 'A Legacy of Modest Luxury');
+  const badgeTextActive = getSectionContent('about_who_we_are', 'badge_text_active', true);
+  const titleActive = getSectionContent('about_who_we_are', 'title_active', true);
+  const bodyContentActive = getSectionContent('about_who_we_are', 'body_content_active', true);
+  const imageUrlActive = getSectionContent('about_who_we_are', 'image_url_active', true);
+  const imageUrl2Active = getSectionContent('about_who_we_are', 'image_url_2_active', true);
+  const sec1Active = getSectionContent('about_who_we_are', 'sec1_active', true);
+
+  // Section 2
+  const sec2Title = getSectionContent('about_who_we_are', 'sec2_title', 'Our Philosophy');
+  const sec2TitleActive = getSectionContent('about_who_we_are', 'sec2_title_active', true);
+  const quoteText = getSectionContent('about_who_we_are', 'quote_text', '"She doesn\'t compete loudly. She attracts quietly."');
+  const quoteTextActive = getSectionContent('about_who_we_are', 'quote_text_active', true);
+  const quoteAuthor = getSectionContent('about_who_we_are', 'quote_author', '— The Laila Hijab Studio');
+  const quoteAuthorActive = getSectionContent('about_who_we_are', 'quote_author_active', true);
+  const sec2Active = getSectionContent('about_who_we_are', 'sec2_active', true);
+
+  // Section 3
+  const sec3Title = getSectionContent('about_who_we_are', 'sec3_title', 'What We Stand For');
+  const sec3TitleActive = getSectionContent('about_who_we_are', 'sec3_title_active', true);
+  const sec3Subtitle = getSectionContent('about_who_we_are', 'sec3_subtitle', 'Grace, built on four values');
+  const sec3SubtitleActive = getSectionContent('about_who_we_are', 'sec3_subtitle_active', true);
+  const rawValues = getSectionContent('about_who_we_are', 'values', [
+    { letter: 'E', title: 'Elegance', desc: 'Refined design over excess — every piece earns its place in the collection.', active: true },
+    { letter: 'C', title: 'Comfort', desc: 'Fabrics chosen to move with you, not against you, across a full day.', active: true },
+    { letter: 'I', title: 'Inclusivity', desc: 'Sizes XS through XXL, always — grace was never meant for one body type.', active: true },
+    { letter: 'R', title: 'Respect', desc: 'For tradition, for modern taste, and for every woman\'s own idea of modesty.', active: true }
+  ]);
+  const sec3Active = getSectionContent('about_who_we_are', 'sec3_active', true);
+
+  // Section 4
+  const sec4Title = getSectionContent('about_who_we_are', 'sec4_title', 'Where We\'re Headed');
+  const sec4TitleActive = getSectionContent('about_who_we_are', 'sec4_title_active', true);
+  const sec4Subtitle = getSectionContent('about_who_we_are', 'sec4_subtitle', 'A brand built in phases, not overnight');
+  const sec4SubtitleActive = getSectionContent('about_who_we_are', 'sec4_subtitle_active', true);
+  const rawRoadmap = getSectionContent('about_who_we_are', 'roadmap', [
+    { year: '2026', title: 'Laila Hijabs is born', desc: 'Launched from our studio in Lahore with the Everyday Grace Collection.', active: true },
+    { year: 'Next', title: 'Premium & Abaya lines', desc: 'Expanding into silk premium hijabs and structured abayas sized XS–XXL.', active: true },
+    { year: 'Later', title: 'Pakistan-wide, then the Gulf', desc: 'Growing city by city across Pakistan, before bringing Laila to the UAE.', active: true }
+  ]);
+  const sec4Active = getSectionContent('about_who_we_are', 'sec4_active', true);
+
+  // Section 5
+  const founderQuote = getSectionContent('about_who_we_are', 'founder_quote', '"Modesty and elegance were never meant to be a compromise. Laila is the brand I wanted to find and couldn\'t — so we made it."');
+  const founderQuoteActive = getSectionContent('about_who_we_are', 'founder_quote_active', true);
+  const founderTitle = getSectionContent('about_who_we_are', 'founder_title', 'Founder, Laila Hijabs');
+  const founderTitleActive = getSectionContent('about_who_we_are', 'founder_title_active', true);
+  const founderLogo = getSectionContent('about_who_we_are', 'founder_logo', '/hero2.png');
+  const founderLogoActive = getSectionContent('about_who_we_are', 'founder_logo_active', true);
+  const sec5Active = getSectionContent('about_who_we_are', 'sec5_active', true);
+
+  // Filtered lists
+  const activeValues = (Array.isArray(rawValues) ? rawValues : []).filter(v => v.active !== false && v.status !== 'Hidden');
+  const activeRoadmap = (Array.isArray(rawRoadmap) ? rawRoadmap : []).filter(r => r.active !== false && r.status !== 'Hidden');
 
   const studioImages = [
     { id: 1, src: '/hero2.png', alt: 'Laila Hijabs Studio 1' },
@@ -47,174 +115,202 @@ const AboutUsPage = () => {
     }
   };
 
-  // Brand values mapped from your original structure
-  const values = [
-    { icon: "E", title: "Elegance", desc: "Refined design over excess — every piece earns its place in the collection." },
-    { icon: "C", title: "Comfort", desc: "Fabrics chosen to move with you, not against you, across a full day." },
-    { icon: "I", title: "Inclusivity", desc: "Sizes XS through XXL, always — grace was never meant for one body type." },
-    { icon: "R", title: "Respect", desc: "For tradition, for modern taste, and for every woman's own idea of modesty." }
-  ];
+  const showV2 = imageUrl2Active !== false && imageUrl2 && imageUrl2.trim() !== '';
 
-  // Journey milestones mapped from your original timeline
-  const timelineMilestones = [
-    { period: "2026", title: "Laila Hijabs is born", desc: "Launched from our studio in Lahore with the Everyday Grace Collection — chiffon and jersey hijabs designed for daily wear." },
-    { period: "Next", title: "Premium & Abaya lines", desc: "Expanding into silk premium hijabs and structured abayas sized XS–XXL, with a dedicated Eid edit each season." },
-    { period: "Later", title: "Pakistan-wide, then the Gulf", desc: "Growing city by city across Pakistan, before bringing Laila to Pakistani and South Asian women across the UAE." }
-  ];
+  // Visit Us Section Metadata
+  const visitUsSecActive = getSectionContent('location_visit_us_section', 'sec_active', true);
 
   return (
     <div className="about-page-wrapper">
       <div className="wrap">
-        {/* Clickable Breadcrumb[cite: 6] */}
         <div className="crumb">
           <Link to="/">Home</Link><span>/</span> About Us
         </div>
       </div>
 
-      {/* Hero Section[cite: 6] */}
-      <section className="about-hero" style={{ paddingBottom: 0 }}>
-        <div className="about-hero-grid">
-          <div className="about-hero-copy">
-            <span className="eyebrow">{subtitle}</span>
-            <h1 dangerouslySetInnerHTML={{ __html: title.replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\n/g, '<br/>') }}></h1>
-            <p>{body}</p>
+      {/* Section 1: Hero Section */}
+      {sec1Active !== false && (
+        <section className="about-hero" style={{ paddingBottom: 0 }}>
+          <div className="about-hero-grid">
+            <div className="about-hero-copy">
+              {badgeTextActive !== false && badgeText && <span className="eyebrow">{badgeText}</span>}
+              {titleActive !== false && title && <h1>{title}</h1>}
+              {bodyContentActive !== false && body && <p>{body}</p>}
+            </div>
+            
+            <div className="about-hero-img">
+              {imageUrlActive !== false && (
+                <div className={`v1 ${!showV2 ? 'full-width' : ''}`}>
+                  <img 
+                    src={formatImgSrc(imageUrl)} 
+                    alt="Laila Hijab studio" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_FALLBACK_IMG; }}
+                  />
+                </div>
+              )}
+              {showV2 && (
+                <div className="v2">
+                  <img 
+                    src={formatImgSrc(imageUrl2)} 
+                    alt="Fabric detail" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_FALLBACK_IMG; }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
-          <div className="about-hero-img">
-            <div className="v1"><img src="/hero2.png" alt="Laila Hijab studio" /></div>
-            <div className="v2"><img src="/hero2.png" alt="Fabric detail" /></div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Philosophy Quote Band[cite: 6] */}
-      <section className="story-band">
-        <div className="wrap">
-          <span className="eyebrow" style={{ color: '#D9BD8E' }}>Our Philosophy</span>
-          <blockquote style={{ marginTop: '18px' }}>"She doesn't compete loudly. She attracts quietly."</blockquote>
-          <div className="sign">â€” The Laila Hijab Studio</div>
-        </div>
-      </section>
-
-      {/* Brand Values Grid[cite: 6] */}
-      <section>
-        <div className="wrap">
-          <div className="section-head">
-            <span className="eyebrow">What We Stand For</span>
-            <h2>Grace, built on four values</h2>
+      {/* Section 2: Philosophy Quote Band */}
+      {sec2Active !== false && (
+        <section className="story-band">
+          <div className="wrap">
+            {sec2TitleActive !== false && sec2Title && <span className="eyebrow" style={{ color: '#D9BD8E' }}>{sec2Title}</span>}
+            {quoteTextActive !== false && quoteText && <blockquote style={{ marginTop: '18px' }}>{quoteText}</blockquote>}
+            {quoteAuthorActive !== false && quoteAuthor && <div className="sign">{quoteAuthor}</div>}
           </div>
-          <div className="values-grid">
-            {values.map((val, idx) => (
-              <div className="value-card" key={idx}>
-                <div className="value-icon">{val.icon}</div>
-                <h4>{val.title}</h4>
-                <p>{val.desc}</p>
+        </section>
+      )}
+
+      {/* Section 3: Brand Values Grid */}
+      {sec3Active !== false && activeValues.length > 0 && (
+        <section>
+          <div className="wrap">
+            {(sec3TitleActive !== false || sec3SubtitleActive !== false) && (
+              <div className="section-head">
+                {sec3TitleActive !== false && sec3Title && <span className="eyebrow">{sec3Title}</span>}
+                {sec3SubtitleActive !== false && sec3Subtitle && <h2>{sec3Subtitle}</h2>}
               </div>
-            ))}
+            )}
+            <div className="values-grid">
+              {activeValues.map((val, idx) => (
+                <div className="value-card" key={idx}>
+                  <div className="value-icon">{val.letter || val.icon || 'V'}</div>
+                  <h4>{val.title}</h4>
+                  <p>{val.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Journey Timeline[cite: 6] */}
-      <section style={{ background: '#EFE4CC' }}>
-        <div className="wrap">
-          <div className="section-head">
-            <span className="eyebrow">Where We're Headed</span>
-            <h2>A brand built in phases, not overnight</h2>
-          </div>
-          <div className="timeline">
-            {timelineMilestones.map((item, idx) => (
-              <div className="t-item" key={idx}>
-                <span className="eyebrow">{item.period}</span>
-                <h4>{item.title}</h4>
-                <p>{item.desc}</p>
+      {/* Section 4: Journey Timeline */}
+      {sec4Active !== false && activeRoadmap.length > 0 && (
+        <section style={{ background: '#EFE4CC' }}>
+          <div className="wrap">
+            {(sec4TitleActive !== false || sec4SubtitleActive !== false) && (
+              <div className="section-head">
+                {sec4TitleActive !== false && sec4Title && <span className="eyebrow">{sec4Title}</span>}
+                {sec4SubtitleActive !== false && sec4Subtitle && <h2>{sec4Subtitle}</h2>}
               </div>
-            ))}
+            )}
+            <div className="timeline">
+              {activeRoadmap.map((item, idx) => (
+                <div className="t-item" key={idx}>
+                  <span className="eyebrow">{item.year || item.period}</span>
+                  <h4>{item.title}</h4>
+                  <p>{item.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Founder Note[cite: 6] */}
-      <section>
-        <div className="wrap founder">
-          <div className="founder-photo"><img src="/hero2.png" alt="Founder" /></div>
-          <p>"Modesty and elegance were never meant to be a compromise. Laila is the brand I wanted to find and couldn't â€” so we made it."</p>
-          <div className="name">Founder, Laila Hijabs</div>
-        </div>
-      </section>
+      {/* Section 5: Founder Note */}
+      {sec5Active !== false && (
+        <section>
+          <div className="wrap founder">
+            {founderLogoActive !== false && founderLogo && (
+              <div className="founder-photo">
+                <img 
+                  src={formatImgSrc(founderLogo)} 
+                  alt="Founder" 
+                  onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_FALLBACK_IMG; }}
+                />
+              </div>
+            )}
+            {founderQuoteActive !== false && founderQuote && <p>{founderQuote}</p>}
+            {founderTitleActive !== false && founderTitle && <div className="name">{founderTitle}</div>}
+          </div>
+        </section>
+      )}
 
-      {/* Studio Visit & Contact Band[cite: 6] */}
-      <section className="shop-band">
-        <div className="wrap shop-grid">
-          <div className="shop-slider-container">
-            <div className="popup-slider-wrapper">
-              <div className="popup-slider-track">
-                {studioImages.map((img, index) => {
-                  let position = 'hidden';
-                  const total = studioImages.length;
-                  const diff = (index - currentSlideIndex + total) % total;
+      {/* Studio Visit & Contact Band */}
+      {visitUsSecActive !== false && (
+        <section className="shop-band">
+          <div className="wrap shop-grid">
+            <div className="shop-slider-container">
+              <div className="popup-slider-wrapper">
+                <div className="popup-slider-track">
+                  {studioImages.map((img, index) => {
+                    let position = 'hidden';
+                    const total = studioImages.length;
+                    const diff = (index - currentSlideIndex + total) % total;
 
-                  if (diff === 0) {
-                    position = 'active';
-                  } else if (diff === 1 || (currentSlideIndex === total - 1 && index === 0)) {
-                    position = 'next';
-                  } else if (diff === total - 1 || (currentSlideIndex === 0 && index === total - 1)) {
-                    position = 'prev';
-                  }
+                    if (diff === 0) {
+                      position = 'active';
+                    } else if (diff === 1 || (currentSlideIndex === total - 1 && index === 0)) {
+                      position = 'next';
+                    } else if (diff === total - 1 || (currentSlideIndex === 0 && index === total - 1)) {
+                      position = 'prev';
+                    }
 
-                  return (
-                    <div 
-                      key={img.id} 
-                      className={`popup-slide ${position}`}
-                      onClick={() => handleSlideClick(index, img.id)}
-                    >
-                      <img src={img.src} alt={img.alt} />
-                      {position === 'active' && (
-                        <div className="slide-badge-overlay">
-                          View Location Details 
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    return (
+                      <div 
+                        key={img.id} 
+                        className={`popup-slide ${position}`}
+                        onClick={() => handleSlideClick(index, img.id)}
+                      >
+                        <img src={img.src} alt={img.alt} />
+                        {position === 'active' && (
+                          <div className="slide-badge-overlay">
+                            View Location Details 
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="slider-controls">
+                <button 
+                  type="button" 
+                  className="slider-arrow prev-arrow" 
+                  onClick={handlePrevSlide}
+                  aria-label="Previous slide"
+                >
+                  <IoChevronBackOutline size={18} />
+                </button>
+                <button 
+                  type="button" 
+                  className="slider-arrow next-arrow" 
+                  onClick={handleNextSlide}
+                  aria-label="Next slide"
+                >
+                  <IoChevronForwardOutline size={18} />
+                </button>
               </div>
             </div>
-
-            <div className="slider-controls">
-              <button 
-                type="button" 
-                className="slider-arrow prev-arrow" 
-                onClick={handlePrevSlide}
-                aria-label="Previous slide"
-              >
-                <IoChevronBackOutline size={18} />
-              </button>
-              <button 
-                type="button" 
-                className="slider-arrow next-arrow" 
-                onClick={handleNextSlide}
-                aria-label="Next slide"
-              >
-                <IoChevronForwardOutline size={18} />
-              </button>
+            <div className="shop-copy">
+              <span className="eyebrow">Visit Us</span>
+              <h2 style={{ marginTop: '12px' }}>Prefer to see the fabric in person?</h2>
+              <p>Our studio welcomes visits by appointment. If you're not close by, our team is just as happy to guide you over WhatsApp or a call — sharing fabric details, sizing, and photos before you decide.</p>
+              <div className="shop-info">
+                <div><b>Location:</b> Office #22, 4th Floor, Pakland City Center, I-8 Markaz, Islamabad</div>
+                <div><b>Hours:</b> Mon–Sat, 11am – 8pm</div>
+                <div><b>Reach us:</b> WhatsApp or call for full product details</div>
+              </div>
+              <div className="shop-actions">
+                <a href="tel:+923238399480" className="btn-ghost">Call the Studio</a>
+              </div>
             </div>
           </div>
-          <div className="shop-copy">
-            <span className="eyebrow">Visit Us</span>
-            <h2 style={{ marginTop: '12px' }}>Prefer to see the fabric in person?</h2>
-            <p>Our studio welcomes visits by appointment. If you're not close by, our team is just as happy to guide you over WhatsApp or a call â€” sharing fabric details, sizing, and photos before you decide.</p>
-            <div className="shop-info">
-              <div><b>Location:</b> [Studio address â€” city, area]</div>
-              <div><b>Hours:</b> [Monâ€“Sat, 11am â€“ 8pm]</div>
-              <div><b>Reach us:</b> WhatsApp or call for full product details</div>
-            </div>
-            <div className="shop-actions">
-              <a href="tel:+923238399480" className="btn-ghost">Call the Studio</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Floating WhatsApp Action Button */}
+        </section>
+      )}
     </div>
   );
 };

@@ -973,6 +973,52 @@ const subscribeNewsletter = async (req, res) => {
   }
 };
 
+const replyToCustomerMessage = async (req, res) => {
+  const { messageId, to, from = 'info@lailahijabs.com', subject, body } = req.body;
+  try {
+    if (messageId) {
+      await pool.query(`UPDATE contact_messages SET status = 'Replied' WHERE message_id = ?`, [messageId]);
+    }
+    res.status(200).json({ 
+      success: true, 
+      message: `Email reply sent successfully to ${to} from info@lailahijabs.com!` 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const uploadImage = async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) return res.status(400).json({ error: 'No image data provided' });
+
+    const fs = require('fs');
+    const path = require('path');
+    const uploadsDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const matches = image.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'Invalid base64 image data' });
+    }
+
+    const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+    const base64Data = matches[2];
+    const fileName = `img_${Date.now()}_${Math.floor(Math.random() * 1000)}.${ext}`;
+    const filePath = path.join(uploadsDir, fileName);
+
+    fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+    const imageUrl = `/uploads/${fileName}`;
+    res.status(200).json({ success: true, imageUrl, url: imageUrl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllSections,
@@ -991,12 +1037,13 @@ module.exports = {
   addProduct,
   updateProduct,
   deleteProduct,
-  getAdminProductDetails,
   getProductSections,
   getDisplaySections,
   subscribeNewsletter,
   getAdminAffiliateDetails,
   getPayoutsSummary,
   processPayout,
-  getAdminCustomerDetails
+  getAdminCustomerDetails,
+  replyToCustomerMessage,
+  uploadImage
 };
